@@ -15,16 +15,80 @@ Map<String, dynamic> profilePayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class UserProfile extends _$UserProfile {
+  late final IProfileRepository _profileRepository;
+
   @override
   FutureOr<UserProfileModel?> build() async {
-    final repository = ref.watch(profileRepositoryProvider);
-    final result = await repository.getUser();
+    _profileRepository = ref.watch(profileRepositoryProvider);
+    final result = await _profileRepository.getUser();
 
     return result.fold(
       (success) => success.data,
       (failure) {
         ref.showExceptionMessage(failure);
         return null;
+      },
+    );
+  }
+
+  Future<void> changePassword(String newPassword) async {
+    state = const AsyncLoading();
+
+    final oldPassword = await ref
+        .read(secureCacheProvider)
+        .get<String?>(CacheKeys.password);
+
+    final payload = <String, dynamic>{
+      'old_password': oldPassword,
+      'new_password': newPassword,
+    };
+
+    final result = await _profileRepository.changePassword(payload: payload);
+
+    await result.fold(
+      (success) async {
+        unawaited(
+          ref
+              .read(secureCacheProvider)
+              .save(key: CacheKeys.password, value: newPassword),
+        );
+        ref.read(appRouterProvider).popUntilRoot();
+        state = const AsyncData(null);
+      },
+      (failure) {
+        ref.showExceptionMessage(failure);
+        state = const AsyncData(null);
+      },
+    );
+  }
+
+  Future<void> changePin(String newPin, String confirmedPin) async {
+    state = const AsyncLoading();
+
+    final currentPin = await ref
+        .read(secureCacheProvider)
+        .get<String?>(CacheKeys.transactionPin);
+
+    final Map<String, dynamic> payload = {
+      'new_pin': newPin,
+      'current_pin': currentPin,
+      'confirm_pin': confirmedPin,
+    };
+
+    final result = await _profileRepository.setPin(payload: payload);
+    await result.fold(
+      (success) async {
+        unawaited(
+          ref
+              .read(secureCacheProvider)
+              .save(key: CacheKeys.transactionPin, value: confirmedPin),
+        );
+        ref.read(appRouterProvider).popUntilRoot();
+        state = const AsyncData(null);
+      },
+      (failure) {
+        ref.showExceptionMessage(failure);
+        state = const AsyncData(null);
       },
     );
   }
@@ -46,7 +110,7 @@ class RiderProfile extends _$RiderProfile {
       'confirm_pin': confirmedPin,
     };
 
-    final result = await _profileRepository.setTransactionPin(payload);
+    final result = await _profileRepository.setPin(payload: payload);
     await result.fold(
       (success) async {
         unawaited(

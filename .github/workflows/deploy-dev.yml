@@ -63,9 +63,9 @@ jobs:
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
-      - name: Build APK — dev
+      - name: Build App Bundle — dev
         run: |
-          flutter build apk \
+          flutter build appbundle \
             --flavor dev \
             --target lib/main_dev.dart \
             --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }} \
@@ -87,6 +87,11 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: firebase-credentials.json
           FIREBASE_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+
+      - name: Deploy to Play Store — Internal Testing track
+        run: bundle exec fastlane android deploy_playstore_internal
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
   ios-dev:

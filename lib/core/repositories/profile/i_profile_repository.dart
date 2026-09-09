@@ -6,10 +6,6 @@ import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 
 abstract interface class IProfileRepository {
-  FutureApiResultOf<void> setTransactionPin(
-    Map<String, dynamic> payload,
-  );
-
   FutureResultOf<ApiResponse<UserProfileModel>> getUser();
 
   FutureResultOf<dynamic> getDriverProfile();
@@ -21,6 +17,18 @@ abstract interface class IProfileRepository {
   FutureApiResultOf<DriverProfileModel> updateDriverProfile(
     Map<String, dynamic> payload,
   );
+
+  FutureApiResultOf<void> setPin({
+    required Map<String, dynamic> payload,
+  });
+
+  FutureApiResultOf<void> changePin({
+    required Map<String, dynamic> payload,
+  });
+
+  FutureApiResultOf<void> changePassword({
+    required Map<String, dynamic> payload,
+  });
 
   FutureResultOf<ApiResponse<DriverProfileModel>> uploadDocument({
     required File file,

@@ -44,6 +44,8 @@ abstract class AppException implements Exception {
                 : const ServerException.internalServerError(),
           DioExceptionType.connectionError =>
             const ServerException.noInternetConnection(),
+          DioExceptionType.transformTimeout =>
+            const ServerException.transformTimeout(),
           DioExceptionType.unknown =>
             const ServerException.serviceUnavailable(),
         },
@@ -126,6 +128,8 @@ abstract class AppException implements Exception {
             'Request is taking too long to send. Please try again.',
         receiveTimeout: (_) =>
             'Server is taking too long to respond. Please try again later.',
+        transformTimeout: (_) =>
+            'This is taking longer than expected to process. Please try again.',
         badRequest: (e) =>
             e.reason ??
             'Invalid request. Please check your input and try again.',

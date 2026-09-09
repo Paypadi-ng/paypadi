@@ -83,7 +83,7 @@ class AppKeypad extends ConsumerWidget {
           'x' => AppAssets.icons.icBackspace.svg(),
           '.' =>
             showBiometric
-                ? AppAssets.icons.icFingerprint.svg()
+                ? const Icon(Icons.fingerprint, size: Values.v36)
                 : const SizedBox.shrink(),
           _ => Text(
             key,

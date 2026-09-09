@@ -15,7 +15,8 @@ import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
 class CreatePasswordScreen extends HookConsumerWidget {
-  const CreatePasswordScreen({super.key});
+  const CreatePasswordScreen({this.isUpdating = false, super.key});
+  final bool isUpdating;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +47,10 @@ class CreatePasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: passwordController,
-            onSubmit: (value) => onSubmit(ref, value),
+            onSubmit: (value) {
+              onSubmit(ref, value);
+              passwordController.clear();
+            },
           ),
           const Spacer(),
         ],
@@ -58,7 +62,9 @@ class CreatePasswordScreen extends HookConsumerWidget {
     unawaited(
       ref
           .read(appRouterProvider)
-          .push(ConfirmPasswordRoute(password: password)),
+          .push(
+            ConfirmPasswordRoute(password: password, isUpdating: isUpdating),
+          ),
     );
   }
 }

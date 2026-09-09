@@ -11,7 +11,7 @@ sealed class TransactionModel with _$TransactionModel {
     required String reference,
     required String recipient,
     @JsonKey(name: 'recipient_name') required String recipientAccount,
-    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'payment_type') required String paymentType,
     @JsonKey(
       name: 'transaction_type',
@@ -39,7 +39,7 @@ sealed class TransactionHistoryModel with _$TransactionHistoryModel {
       unknownEnumValue: TransactionType.unknown,
     )
     required TransactionType type,
-    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'sender_name') required String senderName,
     @JsonKey(name: 'recipient_name') required String recipientName,
     @JsonKey(name: 'fee_amount') required String transactionFee,

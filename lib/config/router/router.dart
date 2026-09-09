@@ -106,8 +106,8 @@ class AppRouter extends RootStackRouter {
       guards: [AuthenticationGuard(ref)],
     ),
     AutoRoute(
-      path: '/enter-transaction-pin',
-      page: EnterPinRoute.page,
+      path: '/authenticate-transfer',
+      page: AuthenticateTransferRoute.page,
       guards: [AuthenticationGuard(ref)],
     ),
     AutoRoute(
@@ -152,16 +152,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       path: '/referral',
       page: ReferralRoute.page,
-      guards: [AuthenticationGuard(ref)],
-    ),
-    AutoRoute(
-      path: '/support',
-      page: SupportRoute.page,
-      guards: [AuthenticationGuard(ref)],
-    ),
-    AutoRoute(
-      path: '/legal',
-      page: LegalRoute.page,
       guards: [AuthenticationGuard(ref)],
     ),
     AutoRoute(

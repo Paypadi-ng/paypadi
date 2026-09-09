@@ -14,9 +14,9 @@ sealed class BeneficiaryModel with _$BeneficiaryModel {
     @JsonKey(name: 'bank_code') String? bankCode,
     @JsonKey(name: 'is_saved') bool? isSaved,
     @JsonKey(name: 'is_verified') bool? isVerified,
-    @JsonKey(name: 'created_at') String? createdAt,
-    @JsonKey(name: 'updated_at') String? updatedAt,
-    @JsonKey(name: 'last_transaction_at') String? lastTransaction,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'last_transaction_at') DateTime? lastTransaction,
   }) = _BeneficiaryModel;
 
   factory BeneficiaryModel.fromJson(Map<String, dynamic> json) =>

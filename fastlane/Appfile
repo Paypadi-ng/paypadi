@@ -12,6 +12,14 @@ for_lane :deploy_firebase do
 end
 
 # ───────────────────────────────────────────────────────────────────────────
+# DEV FLAVOR — GOOGLE PLAY INTERNAL TESTING (Triggered during deploy_playstore_internal)
+# ───────────────────────────────────────────────────────────────────────────
+for_lane :deploy_playstore_internal do
+  json_key_file(ENV["PLAY_STORE_JSON_KEY"])
+  package_name("com.paypadi.dev")
+end
+
+# ───────────────────────────────────────────────────────────────────────────
 # PROD FLAVOR CONFIGURATION (Triggered during the deploy_prod lane)
 # ───────────────────────────────────────────────────────────────────────────
 for_lane :deploy_prod do

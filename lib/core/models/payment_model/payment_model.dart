@@ -11,7 +11,7 @@ sealed class PaymentModel with _$PaymentModel {
     @JsonKey(name: 'transaction_reference') required String reference,
     @JsonKey(name: 'authorization_url') required String authorizationUrl,
     @JsonKey(name: 'transaction_id') required String transactionId,
-    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(
       name: 'payment_type',
       unknownEnumValue: TransactionType.unknown,

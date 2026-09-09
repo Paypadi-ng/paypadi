@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/gen/colors.gen.dart';
-import 'package:paypadi/core/utils/constants.dart' show kDemoProfilePic, Values;
+import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_avatar.dart' show AppAvatar;
@@ -34,7 +34,7 @@ class ProfileScreen extends HookConsumerWidget {
       child: Column(
         children: [
           Values.v24.verticalSpace,
-          const AppAvatar(radius: 80, imageUrl: kDemoProfilePic),
+          const AppAvatar(radius: 80, imageUrl: appUserProfilePic),
           Values.v8.verticalSpace,
           GestureDetector(
             onTap: () {},

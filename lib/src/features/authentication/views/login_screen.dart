@@ -30,8 +30,14 @@ class LoginScreen extends HookConsumerWidget {
 
     ref.listen(authenticationControllerProvider, (previous, current) {
       current.when(
-        data: (_) => ref.dismissLoading(),
-        error: (e, st) => ref.dismissLoading(),
+        data: (_) {
+          passwordController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          passwordController.clear();
+          ref.dismissLoading();
+        },
         loading: () => ref.showLoading(),
       );
     });
@@ -39,9 +45,9 @@ class LoginScreen extends HookConsumerWidget {
     // useMemoized ensures we only trigger this read once when the widget mounts.
     final cacheFuture = useMemoized(
       () => Future.wait([
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.email),
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.firstName),
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.phoneNumber),
+        ref.read(secureCacheProvider).get<String>(CacheKeys.email),
+        ref.read(secureCacheProvider).get<String>(CacheKeys.firstName),
+        ref.read(secureCacheProvider).get<String>(CacheKeys.phoneNumber),
       ]),
     );
 
@@ -68,7 +74,7 @@ class LoginScreen extends HookConsumerWidget {
       padding: const EdgeInsets.only(top: Values.v24),
       child: Column(
         children: [
-          const AppAvatar(radius: Values.v84, imageUrl: kDemoProfilePic),
+          const AppAvatar(radius: Values.v84, imageUrl: appUserProfilePic),
           Values.v16.verticalSpace,
           Text(
             'Good ${getDayTime()}, $firstName',

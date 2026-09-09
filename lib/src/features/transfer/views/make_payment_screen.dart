@@ -100,7 +100,9 @@ class MakePaymentScreen extends HookConsumerWidget {
       ..['recipient_account_number'] = recipient.accountNumber
       ..['recipient_bank_code'] = recipient.bankCode;
 
-    unawaited(ref.read(appRouterProvider).push(const EnterPinRoute()));
+    unawaited(
+      ref.read(appRouterProvider).push(const AuthenticateTransferRoute()),
+    );
   }
 }
 
@@ -127,23 +129,23 @@ class _BankAccountInformation extends StatelessWidget {
       child: Row(
         spacing: Values.v20,
         children: [
-          Skeletonizer(
-            enabled: isLoading,
-            child: Container(
-              width: Values.v64,
-              height: Values.v64,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Values.v24),
-                image: DecorationImage(
-                  image: NetworkImage(
-                    recipient?.profilePicUrl ?? kDemoProfilePic,
+          if (recipient?.profilePicUrl != null)
+            Skeletonizer(
+              enabled: isLoading,
+              child: Container(
+                width: Values.v64,
+                height: Values.v64,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Values.v24),
+                  image: DecorationImage(
+                    image: NetworkImage(recipient!.profilePicUrl!),
+                    fit: BoxFit.fill,
                   ),
-                  fit: BoxFit.fill,
                 ),
               ),
-            ),
-          ),
-
+            )
+          else
+            Values.v4.horizontalSpace,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

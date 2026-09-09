@@ -9,7 +9,6 @@ import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
-import 'package:paypadi/src/shared/widgets/app_card.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
@@ -19,13 +18,18 @@ class ReferralScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider);
+    final color = ref.watch(appPrimaryColorProvider);
 
     return AppScaffold(
       title: 'Referrals',
-      // topPadding: Values.v24,
-      child: AppCard(
-        cardColor: AppColors.referralCardColor,
+      child: Container(
+        width: context.screenWidth,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
         padding: const EdgeInsets.all(Values.v16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .25),
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

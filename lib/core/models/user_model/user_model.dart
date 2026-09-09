@@ -13,7 +13,7 @@ sealed class UserModel with _$UserModel {
     @JsonKey(name: 'last_name') required String lastName,
     @JsonKey(name: 'is_active') required bool isActive,
     @JsonKey(name: 'verified_phone') required bool phoneVerified,
-    @JsonKey(name: 'date_joined') required String dateJoined,
+    @JsonKey(name: 'date_joined') required DateTime dateJoined,
     String? email,
     @JsonKey(name: 'is_driver') bool? isDriver,
     @JsonKey(name: 'driver_id') String? driverId,

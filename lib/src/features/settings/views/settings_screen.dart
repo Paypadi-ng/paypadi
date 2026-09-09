@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -85,7 +87,7 @@ class SettingsScreen extends HookConsumerWidget {
                 children: [
                   SettingTile.switchTile(
                     name: 'Enable Biometrics',
-                    icon: AppAssets.icons.icBiometrics.svg(),
+                    icon: const Icon(Icons.fingerprint),
                     switchValue: state.biometricsIsEnabled,
                     onChanged: (value) async {
                       await ref
@@ -93,30 +95,32 @@ class SettingsScreen extends HookConsumerWidget {
                           .enableBiometrics(biometrics: value);
                     },
                   ),
-                  SettingTile.switchTile(
-                    name: 'Dark Mode',
-                    icon: AppAssets.icons.icDarkMode.svg(),
-                    switchValue: state.darkModeIsEnabled,
-                    onChanged: (value) async {
-                      await ref
-                          .read(settingsControllerProvider.notifier)
-                          .enableDarkMode(darkMode: value);
-                    },
-                  ),
+                  // SettingTile.switchTile(
+                  //   name: 'Dark Mode',
+                  //   icon: AppAssets.icons.icDarkMode.svg(),
+                  //   switchValue: state.darkModeIsEnabled,
+                  //   onChanged: (value) async {
+                  //     await ref
+                  //         .read(settingsControllerProvider.notifier)
+                  //         .enableDarkMode(darkMode: value);
+                  //   },
+                  // ),
                 ],
               );
             },
             orElse: SizedBox.shrink,
           ),
           SettingTile(
-            name: 'Help & Support',
+            name: 'FAQs',
             icon: AppAssets.icons.icHelpAndSupport.svg(),
-            onTap: () => ref.read(appRouterProvider).push(const SupportRoute()),
+            onTap: () async =>
+                ref.read(urlLauncherProvider).launchWebUrl(appSupportAndFaqs),
           ),
           SettingTile(
             name: 'Legal & Policies',
             icon: AppAssets.icons.icLegalAndPolicies.svg(),
-            onTap: () => ref.read(appRouterProvider).push(LegalRoute()),
+            onTap: () async =>
+                ref.read(urlLauncherProvider).launchWebUrl(appPrivacyPolicy),
           ),
           SettingTile(
             name: 'Log out',
@@ -138,3 +142,9 @@ class SettingsScreen extends HookConsumerWidget {
     );
   }
 }
+
+// final token = await ref
+//     .read(notificationsServiceProvider)
+//     .getToken();
+
+// token.printLog();

@@ -138,13 +138,10 @@ String getTransactionDirectionLabel(TransactionType type) {
   };
 }
 
-String getTransactionDate(String? date) {
-  if (date == null || date.trim().isEmpty) return '';
+String getTransactionDate(DateTime? date) {
+  if (date == null) return '';
 
-  final parsedDate = DateTime.tryParse(date);
-  if (parsedDate == null) return date;
-
-  final localDate = parsedDate.toLocal();
+  final localDate = date.toLocal();
   final months = <String>[
     'Jan',
     'Feb',

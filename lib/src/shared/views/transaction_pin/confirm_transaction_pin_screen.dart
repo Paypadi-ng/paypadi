@@ -13,14 +13,35 @@ import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
 class ConfirmTransactionPinScreen extends HookConsumerWidget {
-  const ConfirmTransactionPinScreen({required this.pin, super.key});
+  const ConfirmTransactionPinScreen({
+    required this.pin,
+    this.isUpdating = false,
+    super.key,
+  });
+
   final String pin;
+  final bool isUpdating;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final confirmPinController = useTextEditingController();
 
     ref.listen(riderProfileProvider, (previous, current) {
+      current.when(
+        data: (d) {
+          confirmPinController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          confirmPinController.clear();
+          ref.dismissLoading();
+          ref.showExceptionMessage(e, st);
+        },
+        loading: () => ref.showLoading(),
+      );
+    });
+
+    ref.listen(userProfileProvider, (previous, current) {
       current.when(
         data: (d) {
           confirmPinController.clear();
@@ -58,7 +79,13 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: confirmPinController,
-            onSubmit: (confirmedPin) => submitPin(ref, pin, confirmedPin),
+            onSubmit: (confirmedPin) async {
+              if (isUpdating) {
+                await changePin(ref, pin, confirmedPin);
+                return;
+              }
+              await submitPin(ref, pin, confirmedPin);
+            },
           ),
           const Spacer(),
         ],
@@ -71,6 +98,18 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
       await ref
           .read(riderProfileProvider.notifier)
           .setTransactionPin(pin, confirmedPin);
+    }
+  }
+
+  Future<void> changePin(
+    WidgetRef ref,
+    String newPin,
+    String confirmedPin,
+  ) async {
+    if (newPin == confirmedPin) {
+      await ref
+          .read(userProfileProvider.notifier)
+          .changePin(newPin, confirmedPin);
     }
   }
 }

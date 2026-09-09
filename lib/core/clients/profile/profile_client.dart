@@ -48,7 +48,13 @@ abstract class ProfileClient implements IProfileClient {
 
   @override
   @POST('$_basePath/pin/set/')
-  Future<ApiResponse<void>> setTransactionPin({
+  Future<ApiResponse<void>> setPin({
+    @Body() required Map<String, dynamic> payload,
+  });
+
+  @override
+  @POST('$_basePath/pin/set/')
+  Future<ApiResponse<void>> changePin({
     @Body() required Map<String, dynamic> payload,
   });
 

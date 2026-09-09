@@ -14,8 +14,8 @@ sealed class AccountPayoutModel with _$AccountPayoutModel {
     @JsonKey(name: 'bank_code') required String bankCode,
     @JsonKey(name: 'is_primary') required bool isPrimary,
     @JsonKey(name: 'is_verified') required bool isVerified,
-    @JsonKey(name: 'created_at') required String createdAt,
-    @JsonKey(name: 'updated_at') required String updatedAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
   }) = _AccountPayoutModel;
 
   factory AccountPayoutModel.fromJson(Map<String, dynamic> json) =>

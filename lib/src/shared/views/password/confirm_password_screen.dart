@@ -7,20 +7,42 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
+import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
 class ConfirmPasswordScreen extends HookConsumerWidget {
-  const ConfirmPasswordScreen({required this.password, super.key});
+  const ConfirmPasswordScreen({
+    required this.password,
+    this.isUpdating = false,
+    super.key,
+  });
+
   final String password;
+  final bool isUpdating;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final confirmPasswordController = useTextEditingController();
 
     ref.listen(authenticationControllerProvider, (previous, current) {
+      current.when(
+        data: (d) {
+          confirmPasswordController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          confirmPasswordController.clear();
+          ref.dismissLoading();
+          ref.showExceptionMessage(e, st);
+        },
+        loading: () => ref.showLoading(),
+      );
+    });
+
+    ref.listen(userProfileProvider, (previous, current) {
       current.when(
         data: (d) {
           confirmPasswordController.clear();
@@ -60,8 +82,14 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: confirmPasswordController,
-            onSubmit: (confirmedPassword) =>
-                createAccount(ref, password, confirmedPassword),
+            onSubmit: (confirmedPassword) async {
+              if (isUpdating) {
+                await changePassword(ref, password);
+                return;
+              }
+              await createAccount(ref, password, confirmedPassword);
+              confirmPasswordController.clear();
+            },
           ),
           const Spacer(),
         ],
@@ -78,5 +106,9 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
       ref.read(authenticationPayloadProvider)['password'] = password;
       await ref.read(authenticationControllerProvider.notifier).register();
     }
+  }
+
+  Future<void> changePassword(WidgetRef ref, String password) async {
+    await ref.read(userProfileProvider.notifier).changePassword(password);
   }
 }
