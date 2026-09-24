@@ -2,45 +2,63 @@
 
 ## Branches, environments and releases
 
-Trunk-based development with a staging promotion branch:
+Changes flow one way: **feature → `dev` → `staging` → `main`**. `main` is
+production.
 
 ```
-feature branch ──PR (squash)──▶ main ──PR (merge commit)──▶ staging ──tag vX.Y.Z──▶ prod
-                                 │                            │                      │
-                            deploy-dev.yml             deploy-staging.yml      deploy-prod.yml
-                        dev flavor → Firebase     prod flavor + staging backend  prod flavor → Play internal
-                        + Play internal (.dev)    → Firebase (qa-testers)        + TestFlight, after approval
+feature/* ──PR (squash)──▶ dev ──PR (merge)──▶ staging ──PR (merge)──▶ main ──tag vX.Y.Z──▶ stores
+    │                        │                    │                       │               │
+ PR preview             deploy-dev.yml     deploy-staging.yml       build-prod.yml   deploy-prod.yml
+ (approval)            dev → Firebase     staging → Play internal   signed prod      Play production (10%)
+                                                  + TestFlight       candidate        + App Store review
 ```
 
-| Branch / ref | Purpose | Updated by | Deploys to (GitHub environment) |
+| Branch / ref | Flavor (app ID) | What happens | GitHub environment |
 | --- | --- | --- | --- |
-| `main` | Integration. Always releasable. | Squash-merged PRs from short-lived branches | `dev` |
-| `staging` | Release candidates for QA | Promotion PRs from `main` (merge commit), or hotfix PRs | `staging` |
-| `vX.Y.Z` tag | Production release | Maintainers only, on a commit already on `staging` | `prod` (needs approval) |
+| PR into `dev` | dev (`com.paypadi.dev`) | Unsigned build check; after a maintainer approves, a signed build goes to Firebase (`dev-testers`) | `dev-preview` (required reviewer) |
+| `dev` | dev (`com.paypadi.dev`) | Signed build to Firebase App Distribution (`dev-testers`) | `dev` (dev branch only) |
+| `staging` | staging (`com.paypadi.staging`) | Play Store internal track + TestFlight | `staging` (staging branch only) |
+| `main` | prod (`com.paypadi`) | Signed release candidate kept as a build artifact (90 days); nothing distributed | `prod-build` (main branch only, signing secrets only) |
+| `vX.Y.Z` tag on `main` | prod (`com.paypadi`) | Play production track as a 10% staged rollout + App Store submission for review | `prod` (`v*` tags only, required reviewer) |
 
-Each GitHub environment only accepts deployments from its own ref, so a
-workflow run from any other branch can't read its secrets.
+The **Promotion policy** check enforces the order: PRs into `staging` must
+come from `dev` (or `hotfix/*`), and PRs into `main` from `staging` (or
+`hotfix/*`).
+
+### Approving PR previews
+
+A PR's workflows run the PR's own copy of `.github/`, so the `dev-preview`
+approval is what keeps dev credentials away from unreviewed code. Before
+approving a preview, check the PR doesn't modify `.github/`, `fastlane/` or
+`android/`/`ios/` build files in a way you haven't reviewed.
 
 ### Cutting a release
 
-1. Bump `version:` in `pubspec.yaml` on `main` (PR as usual).
-2. Open a PR **`main` → `staging`** titled `release: vX.Y.Z` and merge it with
-   **"Create a merge commit"** (the only method allowed on `staging`; never
-   squash a promotion, or `main` and `staging` diverge).
-3. QA the staging build from Firebase App Distribution.
-4. A maintainer tags the staging commit and pushes the tag:
+1. Bump `version:` in `pubspec.yaml` in a PR into `dev`.
+2. Promote: PR **`dev` → `staging`**, merge with **"Create a merge commit"**.
+   QA the staging app from Play internal testing / TestFlight.
+3. Promote: PR **`staging` → `main`**, merge with **"Create a merge commit"**.
+   `build-prod.yml` produces the signed release candidate.
+4. A maintainer tags `main` and pushes the tag:
    ```bash
-   git fetch origin && git tag -s vX.Y.Z origin/staging && git push origin vX.Y.Z
+   git fetch origin && git tag -s vX.Y.Z origin/main && git push origin vX.Y.Z
    ```
-   `deploy-prod.yml` checks the tag matches `pubspec.yaml` and is on
-   `staging`, builds, and waits for a reviewer to approve the `prod`
-   deployment.
+   `deploy-prod.yml` checks the tag matches `pubspec.yaml` and is on `main`,
+   waits for a reviewer to approve the `prod` deployment, then:
+   - **Play:** releases to 10% of users (`PLAY_ROLLOUT` repo variable). Raise
+     the rollout in the Play Console as crash-free rates allow.
+   - **App Store:** submits for review with manual release. Release it in
+     App Store Connect once approved.
+
+Never squash a promotion PR (`dev` → `staging`, `staging` → `main`): the
+branches would diverge and every later promotion would conflict.
 
 ### Hotfixes
 
-Fix on `main` first and promote as above. If `main` has unreleased work that
-must not ship, branch `hotfix/…` from `staging`, PR it into `staging`, release,
-then open a PR with the same fix into `main` so it isn't lost.
+1. Branch `hotfix/<name>` from `main`, bump the patch version, and open a PR
+   into **`main`** (merge commit). Tag the release as above.
+2. Open PRs with the same branch into **`staging`** and **`dev`** so the fix
+   isn't lost on the next promotion.
 
 ## Branch naming
 
@@ -59,12 +77,12 @@ fix(auth): correct JWT refresh race condition
 chore(deps): bump riverpod to 3.x
 ```
 
-PRs into `main` are squash-merged, so **the PR title becomes the commit on
-`main`** — make it a good Conventional Commit.
+PRs into `dev` are squash-merged, so **the PR title becomes the commit on
+`dev`** — make it a good Conventional Commit.
 
 ## Opening a PR
 
-1. Branch off `main`.
+1. Branch off `dev` (the default branch).
 2. Keep PRs scoped to one thing — a feature, a fix, or a refactor.
 3. Fill out the PR template, including screenshots for UI changes (redact any
    personal or financial data — this repo is public).
@@ -80,14 +98,16 @@ PRs into `main` are squash-merged, so **the PR title becomes the commit on
 
 Enforced by repository rulesets (no one can bypass them, admins included):
 
-- A PR is required; direct pushes, force pushes and deletions of `main` /
-  `staging` are blocked.
+- A PR is required; direct pushes, force pushes and deletions of `dev`,
+  `staging` and `main` are blocked.
 - 1 approval from someone other than the author, and the **latest push must be
   approved** — pushing after approval requires re-approval.
 - Required checks: **Analyze & Test**, **Dependency review**,
-  **Workflow audit (zizmor)**. The branch must be up to date with its base.
+  **Workflow audit (zizmor)** and **Promotion policy**. Feature branches must
+  be up to date with `dev` before merging.
 - All review conversations must be resolved.
-- `main`: squash merge only, linear history. `staging`: merge commits only.
+- `dev`: squash merge only, linear history. `staging` and `main`: merge
+  commits only (promotions keep their ancestry).
 
 Reviews are delta-focused: when you push a follow-up addressing feedback, say
 what changed so reviewers only re-check the new bits. Keep feedback concise
@@ -119,10 +139,11 @@ Enforced by lint/CI where possible; call them out in review regardless:
 
 ## Building locally
 
-Two flavors, two entry points:
+Three flavors, three entry points:
 
 ```bash
 flutter run -t lib/main_dev.dart --flavor dev --dart-define=API_BASE_URL=<dev api url>
+flutter run -t lib/main_staging.dart --flavor staging --dart-define=API_BASE_URL=<staging api url>
 flutter run -t lib/main_prod.dart --flavor prod --dart-define=API_BASE_URL=<api url>
 ```
 
@@ -134,8 +155,9 @@ Store uploads are always App Bundles (`flutter build appbundle`), built by CI.
   files, service-account JSON, API tokens or real customer data. They're
   gitignored, and GitHub push protection will block most secrets — if it
   blocks your push, remove the secret; don't bypass the block.
-- CI secrets live in the `dev`, `staging` and `prod` GitHub environments,
-  never at repository level (except `CODECOV_TOKEN`).
+- CI secrets live in the `dev`, `dev-preview`, `staging`, `prod-build` and
+  `prod` GitHub environments, never at repository level (except
+  `CODECOV_TOKEN`). Each flavor has its own Android upload key.
 - Firebase client config (`google-services.json`, `GoogleService-Info.plist`,
   `firebase_options*.dart`) *is* committed. It's public by design; the API
   keys in it are restricted to our app IDs in Google Cloud. Don't add
@@ -145,16 +167,16 @@ Store uploads are always App Bundles (`flutter build appbundle`), built by CI.
 
 ## Maintainers
 
-Maintainers own releases (`v*` tags), approve `prod` deployments and own the
+Maintainers own releases (`v*` tags), approve `prod` deployments and PR previews and own the
 paths in `.github/CODEOWNERS`. Current maintainers: @laolu-dev.
 
 When a second maintainer is added:
 
 1. Add them to `.github/CODEOWNERS` alongside @laolu-dev.
-2. Turn on **Require review from Code Owners** in the `main` and `staging`
-   rulesets.
-3. Add them as a required reviewer on the `prod` environment and turn on
-   **Prevent self-review**.
+2. Turn on **Require review from Code Owners** in the `dev`, `staging` and
+   `main` rulesets.
+3. Add them as a required reviewer on the `prod` and `dev-preview`
+   environments and turn on **Prevent self-review**.
 
 Break-glass: if a ruleset blocks an urgent fix, an org owner may temporarily
 disable the specific rule, merge, and re-enable it immediately. Every change to

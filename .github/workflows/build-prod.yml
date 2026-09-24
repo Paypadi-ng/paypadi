@@ -1,12 +1,14 @@
-name: Paypadi Deploy — Staging
+name: Paypadi Build — Prod
 
-# Staging flavor (com.paypadi.staging) → Play Store internal track + TestFlight.
-# `staging` is only updated by promotion PRs from `dev` (or hotfix/* PRs), and
-# the `staging` environment only accepts deployments from the staging branch.
+# Every merge into main (production) builds the signed prod app
+# (com.paypadi) and keeps it as a release candidate. Nothing is distributed:
+# releasing is done by tagging main (see deploy-prod.yml).
+# The `prod-build` environment only accepts the main branch and holds
+# signing credentials only — no store upload credentials.
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
   workflow_dispatch:
     inputs:
       platform:
@@ -20,7 +22,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-staging
+  group: build-prod
   cancel-in-progress: false
 
 env:
@@ -34,11 +36,11 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # ─── Android ────────────────────────────────────────────────────────────────
-  android-staging:
-    name: Android — Staging → Play internal
+  android-prod:
+    name: Android — Prod build
     needs: validate
     runs-on: ubuntu-latest
-    environment: staging
+    environment: prod-build
     if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android'
 
     steps:
@@ -47,12 +49,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # No dependency caches for prod builds (cache-poisoning protection).
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
           java-version: ${{ env.JAVA_VERSION }}
           setup-java: "true"
-          setup-ruby: "true"
+          cache: "false"
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
@@ -60,50 +63,39 @@ jobs:
       - name: Configure upload signing
         uses: ./.github/actions/android-signing
         with:
-          flavor: staging
+          flavor: prod
           keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Build App Bundle — staging
+      - name: Build App Bundle — prod
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build appbundle \
-            --flavor staging \
-            --target lib/main_staging.dart \
+            --flavor prod \
+            --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
+            --build-number="$GITHUB_RUN_NUMBER" \
             --release
-
-      - name: Upload debug symbols to Sentry
-        run: dart run sentry_dart_plugin
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: paypadi-staging-r${{ github.run_number }}.aab
-          path: build/app/outputs/bundle/stagingRelease/app-staging-release.aab
-          retention-days: 30
-
-      - name: Upload to Play Store — internal track
-        run: bundle exec fastlane android deploy_staging
-        env:
-          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          name: paypadi-prod-candidate-${{ github.sha }}.aab
+          path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          retention-days: 90
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
   # Disabled until IOS_DEPLOY_ENABLED is 'true' (see deploy-dev.yml).
-  ios-staging:
-    name: iOS — Staging → TestFlight
+  ios-prod:
+    name: iOS — Prod build
     needs: validate
     runs-on: macos-15
-    environment: staging
+    environment: prod-build
     if: >-
       vars.IOS_DEPLOY_ENABLED == 'true' &&
       (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
@@ -118,12 +110,13 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           setup-ruby: "true"
+          cache: "false"
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Sync App Store certificates via Match
-        run: bundle exec fastlane ios sync_appstore_certs flavor:staging
+        run: bundle exec fastlane ios sync_appstore_certs flavor:prod
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
@@ -132,36 +125,23 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
 
-      - name: Build IPA — staging
+      - name: Build IPA — prod
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build ipa \
-            --flavor staging \
-            --target lib/main_staging.dart \
+            --flavor prod \
+            --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
+            --build-number="$GITHUB_RUN_NUMBER" \
             --release \
-            --export-options-plist=ios/ExportOptionsStaging.plist
-
-      - name: Upload debug symbols to Sentry
-        run: dart run sentry_dart_plugin
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+            --export-options-plist=ios/ExportOptionsProd.plist
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: paypadi-staging-r${{ github.run_number }}.ipa
+          name: paypadi-prod-candidate-${{ github.sha }}.ipa
           path: build/ios/ipa/*.ipa
-          retention-days: 30
-
-      - name: Upload to TestFlight
-        run: bundle exec fastlane ios deploy_staging
-        env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          retention-days: 90

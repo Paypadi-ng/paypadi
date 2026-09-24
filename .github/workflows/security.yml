@@ -2,9 +2,9 @@ name: Security checks
 
 on:
   pull_request:
-    branches: [main, staging]
+    branches: [dev, staging, main]
   push:
-    branches: [main]
+    branches: [dev]
     paths: [".github/**"]
 
 permissions:
@@ -15,9 +15,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Enforces the promotion order feature → dev → staging → main.
+  # Hotfixes branch from main as hotfix/* and may target staging or main.
+  promotion-policy:
+    # Required status check in the branch rulesets — keep the name stable.
+    name: Promotion policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch is allowed for this target
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          case "$BASE" in
+            staging) allowed='^(dev|hotfix/.+)$';     from='dev or hotfix/*' ;;
+            main)    allowed='^(staging|hotfix/.+)$'; from='staging or hotfix/*' ;;
+            *)       echo "PRs into $BASE may come from any branch."; exit 0 ;;
+          esac
+          if [[ ! "$HEAD" =~ $allowed ]]; then
+            echo "::error::PRs into '$BASE' must come from $from (got '$HEAD'). Promote through dev → staging → main."
+            exit 1
+          fi
+          echo "'$HEAD' → '$BASE' is an allowed promotion."
+
   # Blocks PRs that add or upgrade a dependency with a known vulnerability.
-  # Reads pubspec.lock, Gemfile.lock and workflow action refs via the
-  # dependency graph.
   dependency-review:
     # Required status check in the branch rulesets — keep the name stable.
     name: Dependency review

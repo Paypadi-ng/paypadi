@@ -2,8 +2,8 @@ name: Validate PR
 
 on:
   pull_request:
-    branches: [main, staging]
-  workflow_call: # Called by the deploy-* workflows
+    branches: [dev, staging, main]
+  workflow_call: # Called by the build/deploy workflows
     secrets:
       CODECOV_TOKEN:
         required: false

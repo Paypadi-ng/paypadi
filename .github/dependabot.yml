@@ -4,6 +4,7 @@ updates:
   # Flutter/Dart packages
   - package-ecosystem: "pub"
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -22,6 +23,7 @@ updates:
   # GitHub Actions (workflows + local composite actions). Actions are pinned
   # by commit SHA; Dependabot bumps the SHA and the version comment together.
   - package-ecosystem: "github-actions"
+    target-branch: "dev"
     directories:
       - "/"
       - "/.github/actions/*"
@@ -40,6 +42,7 @@ updates:
   # Fastlane and its plugins
   - package-ecosystem: "bundler"
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
       day: "monday"

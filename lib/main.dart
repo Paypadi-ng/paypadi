@@ -53,7 +53,7 @@ Future<void> initializeApp({
       (options) {
         options.debug = kDebugMode;
         options.dsn = AppEnvironment.sentryDsn;
-        options.environment = AppEnvironment.deployEnvironment;
+        options.environment = AppEnvironment.flavor;
         options.sendDefaultPii = true;
         // options.enableLogs = true;
         options.tracesSampleRate = 1.0;

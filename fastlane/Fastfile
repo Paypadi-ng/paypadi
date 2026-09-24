@@ -1,5 +1,13 @@
 default_platform(:android)
 
+# App identifiers per flavor. Lanes pass these explicitly so a lane can never
+# upload to the wrong app.
+APP_IDS = {
+  dev: "com.paypadi.dev",
+  staging: "com.paypadi.staging",
+  prod: "com.paypadi",
+}.freeze
+
 # Play Store credentials are passed as raw JSON (PLAY_STORE_JSON_KEY) by CI,
 # so they're never written to disk.
 def play_store_json_key
@@ -17,38 +25,40 @@ end
 # ANDROID LANES
 # ───────────────────────────────────────────────────────────────────────────
 platform :android do
-  desc "Distribute a build via Firebase App Distribution"
-  desc "Env: FIREBASE_APP_ID, FIREBASE_GROUPS, RELEASE_NOTES, ARTIFACT_PATH"
+  desc "Dev: distribute the dev APK via Firebase App Distribution"
+  desc "Env: FIREBASE_APP_ID, FIREBASE_GROUPS, RELEASE_NOTES"
   lane :deploy_firebase do
     firebase_app_distribution(
       app: ENV.fetch("FIREBASE_APP_ID"),
       release_notes: ENV.fetch("RELEASE_NOTES", "Automated build via GitHub Actions"),
       groups: ENV.fetch("FIREBASE_GROUPS", "dev-testers"),
-      android_artifact_type: "AAB",
-      android_artifact_path: ENV.fetch(
-        "ARTIFACT_PATH",
-        "build/app/outputs/bundle/devRelease/app-dev-release.aab"
-      )
+      android_artifact_type: "APK",
+      android_artifact_path: "build/app/outputs/flutter-apk/app-dev-release.apk"
     )
   end
 
-  desc "Deploy Dev Build to Google Play Internal Testing track"
-  lane :deploy_playstore_internal do
+  desc "Staging: upload the staging app to the Play Store internal testing track"
+  lane :deploy_staging do
     upload_to_play_store(
       json_key_data: play_store_json_key,
-      track: 'internal',
+      package_name: APP_IDS[:staging],
+      track: "internal",
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      aab: "build/app/outputs/bundle/devRelease/app-dev-release.aab"
+      aab: "build/app/outputs/bundle/stagingRelease/app-staging-release.aab"
     )
   end
 
-  desc "Deploy Production Build to Google Play Store Internal Track"
+  desc "Prod: release to the Play Store production track as a staged rollout"
+  desc "Env: PLAY_ROLLOUT (fraction of users, default 0.1)"
   lane :deploy_prod do
     upload_to_play_store(
       json_key_data: play_store_json_key,
-      track: 'internal',
+      package_name: APP_IDS[:prod],
+      track: "production",
+      release_status: "inProgress",
+      rollout: ENV.fetch("PLAY_ROLLOUT", "0.1"),
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
@@ -61,19 +71,24 @@ end
 # iOS LANES
 # ───────────────────────────────────────────────────────────────────────────
 platform :ios do
-  desc "Sync Development Certificates and Profiles"
+  desc "Dev: sync development certificates and profiles"
   lane :sync_dev_certs do
-    setup_ci_api_key # Authenticates via App Store Connect API keys passed from CI
-    match(type: "development", readonly: is_ci)
-  end
-
-  desc "Sync Production App Store Certificates"
-  lane :sync_prod_certs do
     setup_ci_api_key
-    match(type: "appstore", readonly: is_ci)
+    match(type: "development", app_identifier: [APP_IDS[:dev]], readonly: is_ci)
   end
 
-  desc "Distribute a build via Firebase App Distribution"
+  desc "Staging/Prod: sync App Store certificates and profiles"
+  desc "Options: flavor (staging | prod)"
+  lane :sync_appstore_certs do |options|
+    setup_ci_api_key
+    match(
+      type: "appstore",
+      app_identifier: [APP_IDS.fetch(options.fetch(:flavor).to_sym)],
+      readonly: is_ci
+    )
+  end
+
+  desc "Dev: distribute the dev IPA via Firebase App Distribution"
   desc "Env: FIREBASE_APP_ID, FIREBASE_GROUPS, RELEASE_NOTES"
   lane :deploy_firebase do
     firebase_app_distribution(
@@ -84,13 +99,31 @@ platform :ios do
     )
   end
 
-  desc "Upload Production Build to TestFlight"
-  lane :deploy_prod do
+  desc "Staging: upload the staging app to TestFlight"
+  lane :deploy_staging do
     setup_ci_api_key
     upload_to_testflight(
+      app_identifier: APP_IDS[:staging],
+      ipa: built_ipa_path,
       skip_waiting_for_build_processing: true,
-      skip_submission: true,
-      ipa: built_ipa_path
+      skip_submission: true
+    )
+  end
+
+  desc "Prod: upload to App Store Connect and submit for review"
+  desc "Release stays manual: publish from App Store Connect once Apple approves."
+  lane :deploy_prod do
+    setup_ci_api_key
+    upload_to_app_store(
+      app_identifier: APP_IDS[:prod],
+      ipa: built_ipa_path,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true, # no interactive HTML preview in CI
+      skip_metadata: true,
+      skip_screenshots: true,
+      run_precheck_before_submit: false,
+      submission_information: { add_id_info_uses_idfa: false }
     )
   end
 end

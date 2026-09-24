@@ -28,6 +28,10 @@ val devKeyProperties =
     loadKeyProperties("key-dev.properties")
         ?: loadKeyProperties("key.properties")
 
+val stagingKeyProperties =
+    loadKeyProperties("key-staging.properties")
+        ?: loadKeyProperties("key.properties")
+
 val prodKeyProperties =
     loadKeyProperties("key-prod.properties")
         ?: loadKeyProperties("key.properties")
@@ -54,6 +58,17 @@ android {
 
         create("devUpload") {
             devKeyProperties?.let {
+                keyAlias = it["keyAlias"] as String?
+                keyPassword = it["keyPassword"] as String?
+                storePassword = it["storePassword"] as String?
+                storeFile =
+                    (it["storeFile"] as String?)
+                        ?.let(::file)
+            }
+        }
+
+        create("stagingUpload") {
+            stagingKeyProperties?.let {
                 keyAlias = it["keyAlias"] as String?
                 keyPassword = it["keyPassword"] as String?
                 storePassword = it["storePassword"] as String?
@@ -115,6 +130,23 @@ android {
             signingConfig =
                 if (devKeyProperties != null)
                     signingConfigs.getByName("devUpload")
+                else null
+        }
+
+        create("staging") {
+            dimension = "flavor-type"
+
+            applicationIdSuffix = ".staging"
+
+            resValue(
+                "string",
+                "app_name",
+                "Paypadi staging",
+            )
+
+            signingConfig =
+                if (stagingKeyProperties != null)
+                    signingConfigs.getByName("stagingUpload")
                 else null
         }
 

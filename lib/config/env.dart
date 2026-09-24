@@ -8,18 +8,15 @@ class AppEnvironment {
   );
   static String sentryDsn = const String.fromEnvironment('SENTRY_DSN');
 
-  /// Where this build is deployed (dev / staging / prod). Staging builds use
-  /// the prod flavor, so this is what keeps their Sentry events separate.
-  static String? deployEnvironment = const bool.hasEnvironment('DEPLOY_ENV')
-      ? const String.fromEnvironment('DEPLOY_ENV')
-      : flavor;
-
   static bool get isProd => flavor == 'prod';
+
+  static bool get isStaging => flavor == 'staging';
 
   static bool get isDev => flavor == 'dev';
 
   static Color get color => switch (flavor) {
     'dev' => Colors.red,
+    'staging' => Colors.orange,
     'prod' => Colors.transparent,
     _ => const Color(0xA0B71C1C),
   };

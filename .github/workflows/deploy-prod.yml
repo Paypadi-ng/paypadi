@@ -1,9 +1,12 @@
-name: Paypadi Deploy — Prod
+name: Paypadi Release — Prod
 
-# Production releases are cut by pushing a `vX.Y.Z` tag on a commit that is
-# already on `staging` (i.e. a QA'd release candidate). Only maintainers can
-# create `v*` tags (tag ruleset), the `prod` environment only accepts tag
-# refs, and each deployment waits for a required reviewer.
+# Production release: push a `vX.Y.Z` tag on a commit that is on main.
+# • Only repo admins can create `v*` tags (tag ruleset).
+# • The `prod` environment only accepts `v*` tags and waits for a reviewer.
+# • Android goes to the Play production track as a staged rollout
+#   (PLAY_ROLLOUT, default 10%); raise it in the Play Console.
+# • iOS is submitted for App Store review; release it manually in App Store
+#   Connect once Apple approves.
 
 on:
   push:
@@ -48,11 +51,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Check tag matches pubspec and was released from staging
+      - name: Check tag matches pubspec and is on main
         id: version
         run: |
           if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
-            echo "::error::Prod deploys must run from a v* tag (got $GITHUB_REF)"
+            echo "::error::Prod releases must run from a v* tag (got $GITHUB_REF)"
             exit 1
           fi
 
@@ -63,8 +66,8 @@ jobs:
             exit 1
           fi
 
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/staging; then
-            echo "::error::Tagged commit $GITHUB_SHA is not on the staging branch. Promote it to staging and QA it first."
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tagged commit $GITHUB_SHA is not on main. Promote it dev → staging → main first."
             exit 1
           fi
 
@@ -72,7 +75,7 @@ jobs:
 
   # ─── Android ────────────────────────────────────────────────────────────────
   android-prod:
-    name: Android — Prod
+    name: Android — Prod → Play production (staged rollout)
     needs: [validate, version]
     runs-on: ubuntu-latest
     environment: prod
@@ -96,35 +99,28 @@ jobs:
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Write signing config
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload-keystore.jks"
-          {
-            printf 'storeFile=%s\n' "$RUNNER_TEMP/upload-keystore.jks"
-            printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_PASSWORD"
-            printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS"
-            printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD"
-          } > android/key-prod.properties
+      - name: Configure upload signing
+        uses: ./.github/actions/android-signing
+        with:
+          flavor: prod
+          keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Build App Bundle — prod
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          BUILD_NUMBER: ${{ github.run_number }}
           BUILD_NAME: ${{ needs.version.outputs.version }}
+          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build appbundle \
             --flavor prod \
             --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --dart-define=DEPLOY_ENV=prod \
-            --build-number="$BUILD_NUMBER" \
+            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
             --build-name="$BUILD_NAME" \
             --release
 
@@ -138,17 +134,18 @@ jobs:
         with:
           name: paypadi-prod-r${{ github.run_number }}.aab
           path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
-          retention-days: 30
+          retention-days: 90
 
-      - name: Deploy to Play Store — internal track
+      - name: Release to Play Store — production (staged rollout)
         run: bundle exec fastlane android deploy_prod
         env:
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          PLAY_ROLLOUT: ${{ vars.PLAY_ROLLOUT || '0.1' }}
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
   # Disabled until IOS_DEPLOY_ENABLED is 'true' (see deploy-dev.yml).
   ios-prod:
-    name: iOS — Prod
+    name: iOS — Prod → App Store review
     needs: [validate, version]
     runs-on: macos-15
     environment: prod
@@ -171,8 +168,8 @@ jobs:
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Sync prod certificates via Match
-        run: bundle exec fastlane ios sync_prod_certs
+      - name: Sync App Store certificates via Match
+        run: bundle exec fastlane ios sync_appstore_certs flavor:prod
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
@@ -185,16 +182,15 @@ jobs:
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          BUILD_NUMBER: ${{ github.run_number }}
           BUILD_NAME: ${{ needs.version.outputs.version }}
+          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build ipa \
             --flavor prod \
             --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --dart-define=DEPLOY_ENV=prod \
-            --build-number="$BUILD_NUMBER" \
+            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
             --build-name="$BUILD_NAME" \
             --release \
             --export-options-plist=ios/ExportOptionsProd.plist
@@ -209,9 +205,9 @@ jobs:
         with:
           name: paypadi-prod-r${{ github.run_number }}.ipa
           path: build/ios/ipa/*.ipa
-          retention-days: 30
+          retention-days: 90
 
-      - name: Upload to TestFlight
+      - name: Submit to App Store review
         run: bundle exec fastlane ios deploy_prod
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -219,10 +215,10 @@ jobs:
           APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
 
   # ─── Release ────────────────────────────────────────────────────────────────
-  # Kept in this file intentionally: actions/download-artifact only has access
-  # to artifacts from the current workflow run.
+  # Kept in this file: actions/download-artifact only reads artifacts from the
+  # current run.
   release:
-    name: Create Release
+    name: Create GitHub Release
     needs: [android-prod, ios-prod]
     # ios-prod is skipped while iOS is disabled; still release if Android shipped.
     if: >-
