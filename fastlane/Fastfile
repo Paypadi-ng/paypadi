@@ -1,23 +1,53 @@
 default_platform(:android)
 
+# Play Store credentials are passed as raw JSON (PLAY_STORE_JSON_KEY) by CI,
+# so they're never written to disk.
+def play_store_json_key
+  ENV.fetch("PLAY_STORE_JSON_KEY")
+end
+
+# Fastfile code runs from ./fastlane while actions run from the project root,
+# so resolve the IPA to an absolute path.
+def built_ipa_path
+  Dir[File.expand_path("../build/ios/ipa/*.ipa", __dir__)].first ||
+    UI.user_error!("No IPA found in build/ios/ipa")
+end
+
 # ───────────────────────────────────────────────────────────────────────────
 # ANDROID LANES
 # ───────────────────────────────────────────────────────────────────────────
 platform :android do
-  desc "Deploy Dev Build to Firebase App Distribution"
+  desc "Distribute a build via Firebase App Distribution"
+  desc "Env: FIREBASE_APP_ID, FIREBASE_GROUPS, RELEASE_NOTES, ARTIFACT_PATH"
   lane :deploy_firebase do
     firebase_app_distribution(
-      app: ENV["FIREBASE_APP_ID"],
-      release_notes: "Automated Dev Build via GitHub Actions",
-      groups: "dev-testers",
-      android_artifact_type: "APK",
-      android_artifact_path: "build/app/outputs/flutter-apk/app-dev-release.apk"
+      app: ENV.fetch("FIREBASE_APP_ID"),
+      release_notes: ENV.fetch("RELEASE_NOTES", "Automated build via GitHub Actions"),
+      groups: ENV.fetch("FIREBASE_GROUPS", "dev-testers"),
+      android_artifact_type: "AAB",
+      android_artifact_path: ENV.fetch(
+        "ARTIFACT_PATH",
+        "build/app/outputs/bundle/devRelease/app-dev-release.aab"
+      )
+    )
+  end
+
+  desc "Deploy Dev Build to Google Play Internal Testing track"
+  lane :deploy_playstore_internal do
+    upload_to_play_store(
+      json_key_data: play_store_json_key,
+      track: 'internal',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      aab: "build/app/outputs/bundle/devRelease/app-dev-release.aab"
     )
   end
 
   desc "Deploy Production Build to Google Play Store Internal Track"
   lane :deploy_prod do
     upload_to_play_store(
+      json_key_data: play_store_json_key,
       track: 'internal',
       skip_upload_metadata: true,
       skip_upload_images: true,
@@ -43,13 +73,14 @@ platform :ios do
     match(type: "appstore", readonly: is_ci)
   end
 
-  desc "Deploy Dev Build to Firebase App Distribution"
+  desc "Distribute a build via Firebase App Distribution"
+  desc "Env: FIREBASE_APP_ID, FIREBASE_GROUPS, RELEASE_NOTES"
   lane :deploy_firebase do
     firebase_app_distribution(
-      app: ENV["FIREBASE_APP_ID"],
-      release_notes: "Automated Dev Build via GitHub Actions",
-      groups: "dev-testers",
-      ipa_path: "build/ios/ipa/paypadi-dev-*.ipa"
+      app: ENV.fetch("FIREBASE_APP_ID"),
+      release_notes: ENV.fetch("RELEASE_NOTES", "Automated build via GitHub Actions"),
+      groups: ENV.fetch("FIREBASE_GROUPS", "dev-testers"),
+      ipa_path: built_ipa_path
     )
   end
 
@@ -59,7 +90,7 @@ platform :ios do
     upload_to_testflight(
       skip_waiting_for_build_processing: true,
       skip_submission: true,
-      ipa: "build/ios/ipa/paypadi-prod-*.ipa"
+      ipa: built_ipa_path
     )
   end
 end

@@ -1,0 +1,41 @@
+# CODEOWNERS for PayPadi
+#
+# Owners are auto-requested as reviewers when a PR touches their paths.
+# The LAST matching rule wins, so broad rules go first and the most
+# sensitive paths go last.
+#
+# Code-owner review is NOT yet required by the branch ruleset: with a single
+# maintainer, the maintainer's own PRs could never satisfy it. Turn on
+# "Require review from Code Owners" once a second maintainer is added here
+# (see CONTRIBUTING.md → Maintainers).
+
+# ---- Default owner ---------------------------------------------------------
+*                               @laolu-dev
+
+# ---- Feature areas ---------------------------------------------------------
+# Assign feature owners here as the team grows, e.g.
+# /lib/features/transfer/       @some-dev @laolu-dev
+
+# ---- Foundational code: DI, networking, storage, security -------------------
+/lib/config/                    @laolu-dev
+/lib/core/                      @laolu-dev
+/lib/app/                       @laolu-dev
+/lib/data/                      @laolu-dev
+/lib/main*.dart                 @laolu-dev
+/lib/firebase_options*.dart     @laolu-dev
+
+# ---- Build, release and platform config -------------------------------------
+/pubspec.yaml                   @laolu-dev
+/pubspec.lock                   @laolu-dev
+/analysis_options.yaml          @laolu-dev
+/build.yaml                     @laolu-dev
+/android/                       @laolu-dev
+/ios/                           @laolu-dev
+/fastlane/                      @laolu-dev
+/Gemfile                        @laolu-dev
+/Gemfile.lock                   @laolu-dev
+
+# ---- CI/CD and repo governance (keep last so nothing overrides it) ----------
+/.github/                       @laolu-dev
+/SECURITY.md                    @laolu-dev
+/.github/CODEOWNERS             @laolu-dev

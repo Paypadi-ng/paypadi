@@ -2,36 +2,41 @@ name: Validate PR
 
 on:
   pull_request:
-    branches: [master, develop]
-  workflow_call: # Called by deploy-dev.yml and deploy-prod.yml
+    branches: [main, staging]
+  workflow_call: # Called by the deploy-* workflows
+    secrets:
+      CODECOV_TOKEN:
+        required: false
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 # Concurrency applies to direct runs only (workflow_call ignores it).
 concurrency:
   group: validate-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FLUTTER_VERSION: "any"
-
 jobs:
   validate:
+    # This job name is a required status check in the branch rulesets.
+    # Renaming it means updating the rulesets too.
     name: Analyze & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Environment
         uses: ./.github/actions/setup-env
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze
         run: flutter analyze --no-pub --fatal-infos
@@ -40,7 +45,7 @@ jobs:
         run: flutter test --coverage --reporter github
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}

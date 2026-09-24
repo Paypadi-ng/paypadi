@@ -1,22 +1,22 @@
 # Global iOS Configuration
-apple_id("tokiolaoluwa01.dev@gmail.com") 
+apple_id("tokiolaoluwa01.dev@gmail.com")
 itc_team_id("123456789") # Remember to replace with your actual App Store Connect Team ID
 team_id("ABCDE12345")    # Remember to replace with your actual Apple Developer Portal Team ID
 
+# Play Store credentials are passed per-lane via json_key_data (see Fastfile),
+# not configured here.
+
 # ───────────────────────────────────────────────────────────────────────────
-# DEV FLAVOR CONFIGURATION (Triggered during the deploy_firebase lane)
+# DEV FLAVOR — GOOGLE PLAY INTERNAL TESTING (Triggered during deploy_playstore_internal)
 # ───────────────────────────────────────────────────────────────────────────
-for_lane :deploy_firebase do
-  package_name("com.paypadi.dev")   # Android Dev
-  app_identifier("com.paypadi.dev") # iOS Dev
+for_lane :deploy_playstore_internal do
+  package_name("com.paypadi.dev")
 end
 
 # ───────────────────────────────────────────────────────────────────────────
 # PROD FLAVOR CONFIGURATION (Triggered during the deploy_prod lane)
 # ───────────────────────────────────────────────────────────────────────────
 for_lane :deploy_prod do
-  json_key_file(ENV["PLAY_STORE_JSON_KEY"]) # Only needed for Prod Play Store upload
-  
   package_name("com.paypadi")   # Android Prod
   app_identifier("com.paypadi") # iOS Prod
 end

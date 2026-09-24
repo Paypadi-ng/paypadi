@@ -1,14 +1,15 @@
-name: Paypadi Deploy — Prod
+name: Paypadi Deploy — Staging
 
-# Production releases are cut by pushing a `vX.Y.Z` tag on a commit that is
-# already on `staging` (i.e. a QA'd release candidate). Only maintainers can
-# create `v*` tags (tag ruleset), the `prod` environment only accepts tag
-# refs, and each deployment waits for a required reviewer.
+# Release candidates. `staging` is updated only by promotion PRs from `main`
+# (or a hotfix PR). Each push builds the *prod* flavor — the same app ID and
+# code path that ships — against the staging environment's backend and
+# distributes it to QA via Firebase App Distribution.
+# The `staging` environment only accepts deployments from `staging`.
 
 on:
   push:
-    tags: ["v*"]
-  workflow_dispatch: # Re-run a platform for an existing tag (select the tag as the ref)
+    branches: [staging]
+  workflow_dispatch:
     inputs:
       platform:
         description: "Target platform"
@@ -21,7 +22,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-prod-${{ github.ref }}
+  group: deploy-staging
   cancel-in-progress: false
 
 env:
@@ -34,48 +35,12 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # ─── Version ────────────────────────────────────────────────────────────────
-  version:
-    name: Verify release tag
+  # ─── Android ────────────────────────────────────────────────────────────────
+  android-staging:
+    name: Android — Staging
     needs: validate
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Check tag matches pubspec and was released from staging
-        id: version
-        run: |
-          if [[ "$GITHUB_REF" != refs/tags/v* ]]; then
-            echo "::error::Prod deploys must run from a v* tag (got $GITHUB_REF)"
-            exit 1
-          fi
-
-          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
-          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
-          if [[ "$TAG_VERSION" != "$PUBSPEC_VERSION" ]]; then
-            echo "::error::Tag v$TAG_VERSION does not match pubspec.yaml version $PUBSPEC_VERSION"
-            exit 1
-          fi
-
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/staging; then
-            echo "::error::Tagged commit $GITHUB_SHA is not on the staging branch. Promote it to staging and QA it first."
-            exit 1
-          fi
-
-          echo "version=$PUBSPEC_VERSION" >> "$GITHUB_OUTPUT"
-
-  # ─── Android ────────────────────────────────────────────────────────────────
-  android-prod:
-    name: Android — Prod
-    needs: [validate, version]
-    runs-on: ubuntu-latest
-    environment: prod
+    environment: staging
     if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android'
 
     steps:
@@ -84,14 +49,12 @@ jobs:
         with:
           persist-credentials: false
 
-      # No dependency caches in release builds (cache-poisoning protection).
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
           java-version: ${{ env.JAVA_VERSION }}
           setup-java: "true"
           setup-ruby: "true"
-          cache: "false"
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
@@ -111,21 +74,19 @@ jobs:
             printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD"
           } > android/key-prod.properties
 
-      - name: Build App Bundle — prod
+      - name: Build App Bundle — staging
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           BUILD_NUMBER: ${{ github.run_number }}
-          BUILD_NAME: ${{ needs.version.outputs.version }}
         run: |
           flutter build appbundle \
             --flavor prod \
             --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --dart-define=DEPLOY_ENV=prod \
+            --dart-define=DEPLOY_ENV=staging \
             --build-number="$BUILD_NUMBER" \
-            --build-name="$BUILD_NAME" \
             --release
 
       - name: Upload debug symbols to Sentry
@@ -136,22 +97,31 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: paypadi-prod-r${{ github.run_number }}.aab
+          name: paypadi-staging-r${{ github.run_number }}.aab
           path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
-          retention-days: 30
+          retention-days: 14
 
-      - name: Deploy to Play Store — internal track
-        run: bundle exec fastlane android deploy_prod
+      - name: Write Firebase credentials
         env:
-          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-credentials.json"
+
+      - name: Deploy to Firebase App Distribution
+        run: bundle exec fastlane android deploy_firebase
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-credentials.json
+          FIREBASE_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_GROUPS: qa-testers
+          RELEASE_NOTES: "Staging build r${{ github.run_number }} (${{ github.sha }})"
+          ARTIFACT_PATH: build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
   # Disabled until IOS_DEPLOY_ENABLED is 'true' (see deploy-dev.yml).
-  ios-prod:
-    name: iOS — Prod
-    needs: [validate, version]
+  ios-staging:
+    name: iOS — Staging
+    needs: validate
     runs-on: macos-15
-    environment: prod
+    environment: staging
     if: >-
       vars.IOS_DEPLOY_ENABLED == 'true' &&
       (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
@@ -166,13 +136,15 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           setup-ruby: "true"
-          cache: "false"
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Sync prod certificates via Match
-        run: bundle exec fastlane ios sync_prod_certs
+      # Match's development profiles cover com.paypadi as well as
+      # com.paypadi.dev (see fastlane/Matchfile), which is what Firebase
+      # App Distribution needs for registered QA devices.
+      - name: Sync certificates via Match
+        run: bundle exec fastlane ios sync_dev_certs
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
@@ -181,23 +153,21 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
 
-      - name: Build IPA — prod
+      - name: Build IPA — staging
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           BUILD_NUMBER: ${{ github.run_number }}
-          BUILD_NAME: ${{ needs.version.outputs.version }}
         run: |
           flutter build ipa \
             --flavor prod \
             --target lib/main_prod.dart \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --dart-define=DEPLOY_ENV=prod \
+            --dart-define=DEPLOY_ENV=staging \
             --build-number="$BUILD_NUMBER" \
-            --build-name="$BUILD_NAME" \
             --release \
-            --export-options-plist=ios/ExportOptionsProd.plist
+            --export-options-plist=ios/ExportOptionsStaging.plist
 
       - name: Upload debug symbols to Sentry
         run: dart run sentry_dart_plugin
@@ -207,41 +177,19 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: paypadi-prod-r${{ github.run_number }}.ipa
+          name: paypadi-staging-r${{ github.run_number }}.ipa
           path: build/ios/ipa/*.ipa
-          retention-days: 30
+          retention-days: 14
 
-      - name: Upload to TestFlight
-        run: bundle exec fastlane ios deploy_prod
+      - name: Write Firebase credentials
         env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-credentials.json"
 
-  # ─── Release ────────────────────────────────────────────────────────────────
-  # Kept in this file intentionally: actions/download-artifact only has access
-  # to artifacts from the current workflow run.
-  release:
-    name: Create Release
-    needs: [android-prod, ios-prod]
-    # ios-prod is skipped while iOS is disabled; still release if Android shipped.
-    if: >-
-      always() && github.event_name == 'push' &&
-      needs.android-prod.result == 'success' &&
-      (needs.ios-prod.result == 'success' || needs.ios-prod.result == 'skipped')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: ./artifacts
-
-      - name: Create Release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          files: ./artifacts/**/*
-          generate_release_notes: true
-          prerelease: false
+      - name: Deploy to Firebase App Distribution
+        run: bundle exec fastlane ios deploy_firebase
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-credentials.json
+          FIREBASE_APP_ID: ${{ vars.FIREBASE_IOS_APP_ID }}
+          FIREBASE_GROUPS: qa-testers
+          RELEASE_NOTES: "Staging build r${{ github.run_number }} (${{ github.sha }})"
