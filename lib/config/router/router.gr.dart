@@ -884,18 +884,51 @@ class TransactionHistoryRoute extends _i39.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i37.TransferScreen]
-class TransferRoute extends _i39.PageRouteInfo<void> {
-  const TransferRoute({List<_i39.PageRouteInfo>? children})
-    : super(TransferRoute.name, initialChildren: children);
+class TransferRoute extends _i39.PageRouteInfo<TransferRouteArgs> {
+  TransferRoute({
+    _i40.Key? key,
+    String? number,
+    List<_i39.PageRouteInfo>? children,
+  }) : super(
+         TransferRoute.name,
+         args: TransferRouteArgs(key: key, number: number),
+         initialChildren: children,
+       );
 
   static const String name = 'TransferRoute';
 
   static _i39.PageInfo page = _i39.PageInfo(
     name,
     builder: (data) {
-      return const _i37.TransferScreen();
+      final args = data.argsAs<TransferRouteArgs>(
+        orElse: () => const TransferRouteArgs(),
+      );
+      return _i37.TransferScreen(key: args.key, number: args.number);
     },
   );
+}
+
+class TransferRouteArgs {
+  const TransferRouteArgs({this.key, this.number});
+
+  final _i40.Key? key;
+
+  final String? number;
+
+  @override
+  String toString() {
+    return 'TransferRouteArgs{key: $key, number: $number}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! TransferRouteArgs) return false;
+    return key == other.key && number == other.number;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ number.hashCode;
 }
 
 /// generated route for

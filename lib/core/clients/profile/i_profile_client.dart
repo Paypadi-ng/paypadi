@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
-import 'package:paypadi/core/models/driver_profile_model/driver_profile_model.dart';
 import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
 
 abstract interface class IProfileClient {
@@ -22,7 +21,7 @@ abstract interface class IProfileClient {
     required Map<String, dynamic> payload,
   });
 
-  Future<ApiResponse<UserProfileModel>> getAccountInfo();
+  Future<ApiResponse<UserProfileModel>> getUser();
 
   Future<ApiResponse<void>> setTransactionPin({
     required Map<String, dynamic> payload,

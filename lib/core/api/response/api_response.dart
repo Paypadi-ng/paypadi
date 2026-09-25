@@ -52,6 +52,8 @@ sealed class RegisterResponse with _$RegisterResponse {
   const factory RegisterResponse({
     @JsonKey(name: 'access') required String accessToken,
     @JsonKey(name: 'refresh') required String refreshToken,
+    @JsonKey(name: 'access_expires') required int accessTokenExpiry,
+    @JsonKey(name: 'refresh_expires') required int refreshTokenExpiry,
     required UserModel user,
   }) = _RegisterResponse;
 
@@ -64,6 +66,8 @@ sealed class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     @JsonKey(name: 'access') required String accessToken,
     @JsonKey(name: 'refresh') required String refreshToken,
+    @JsonKey(name: 'access_expires') required int accessTokenExpiry,
+    @JsonKey(name: 'refresh_expires') required int refreshTokenExpiry,
     required UserModel user,
   }) = _LoginResponse;
 
@@ -76,6 +80,8 @@ sealed class SessionResponse with _$SessionResponse {
   const factory SessionResponse({
     @JsonKey(name: 'access') required String accessToken,
     @JsonKey(name: 'refresh') required String refreshToken,
+    @JsonKey(name: 'access_expires') required int accessTokenExpiry,
+    @JsonKey(name: 'refresh_expires') required int refreshTokenExpiry,
   }) = _SessionResponse;
 
   factory SessionResponse.fromJson(Map<String, Object?> json) =>

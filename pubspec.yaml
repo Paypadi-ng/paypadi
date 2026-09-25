@@ -52,6 +52,7 @@ dependencies:
   sentry_dio: ^9.21.0
   firebase_core: ^4.10.0
   firebase_messaging: ^16.3.0
+  
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   flutter_test:

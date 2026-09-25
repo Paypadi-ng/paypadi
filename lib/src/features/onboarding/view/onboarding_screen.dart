@@ -45,8 +45,6 @@ class OnboardingScreen extends HookConsumerWidget {
 
     return AppScaffold(
       showAppBar: false,
-      topPadding: kTopPadding,
-      bottomPadding: kBottomPadding,
       child: Column(
         spacing: Values.v12,
         children: [
@@ -81,7 +79,7 @@ class OnboardingScreen extends HookConsumerWidget {
               ),
             ),
           ),
-          Values.v24.verticalSpace,
+          Values.v12.verticalSpace,
           FilledButton(
             onPressed: () =>
                 ref.read(appRouterProvider).replace(const CreateAccountRoute()),

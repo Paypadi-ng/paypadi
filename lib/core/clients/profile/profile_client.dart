@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/clients/profile/i_profile_client.dart';
-import 'package:paypadi/core/models/driver_profile_model/driver_profile_model.dart';
 import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -45,7 +44,7 @@ abstract class ProfileClient implements IProfileClient {
 
   @override
   @GET('$_basePath/me/')
-  Future<ApiResponse<UserProfileModel>> getAccountInfo();
+  Future<ApiResponse<UserProfileModel>> getUser();
 
   @override
   @POST('$_basePath/pin/set/')

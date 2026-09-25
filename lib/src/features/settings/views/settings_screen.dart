@@ -26,8 +26,9 @@ class SettingsScreen extends HookConsumerWidget {
 
     return AppScaffold(
       showAppBar: false,
-      leftPadding: Values.zero,
-      rightPadding: Values.zero,
+      makeScrollable: true,
+      onRefresh: () => Future.delayed(Durations.medium4),
+      padding: EdgeInsets.zero,
       appBar: AppBar(
         centerTitle: false,
         automaticallyImplyLeading: false,
@@ -43,10 +44,7 @@ class SettingsScreen extends HookConsumerWidget {
           SettingTile(
             name: 'Profile',
             icon: AppAssets.icons.icProfile.svg(),
-            onTap: () {
-              // ref.read(userProfileProvider);
-              // ref.read(appRouterProvider).push(const ProfileRoute());
-            },
+            onTap: () => ref.read(appRouterProvider).push(const ProfileRoute()),
           ),
           SettingTile(
             name: 'Notification Preferences',
@@ -89,13 +87,21 @@ class SettingsScreen extends HookConsumerWidget {
                     name: 'Enable Biometrics',
                     icon: AppAssets.icons.icBiometrics.svg(),
                     switchValue: state.biometricsIsEnabled,
-                    onChanged: (value) {},
+                    onChanged: (value) async {
+                      await ref
+                          .read(settingsControllerProvider.notifier)
+                          .enableBiometrics(biometrics: value);
+                    },
                   ),
                   SettingTile.switchTile(
                     name: 'Dark Mode',
                     icon: AppAssets.icons.icDarkMode.svg(),
                     switchValue: state.darkModeIsEnabled,
-                    onChanged: (value) {},
+                    onChanged: (value) async {
+                      await ref
+                          .read(settingsControllerProvider.notifier)
+                          .enableDarkMode(darkMode: value);
+                    },
                   ),
                 ],
               );
@@ -119,7 +125,7 @@ class SettingsScreen extends HookConsumerWidget {
             onTap: () =>
                 ref.read(authenticationControllerProvider.notifier).logout(),
           ),
-          const Spacer(),
+
           Text(
             'App Version: ${appVersion.value?.version}',
             style: context.textTheme.bodySmall?.copyWith(

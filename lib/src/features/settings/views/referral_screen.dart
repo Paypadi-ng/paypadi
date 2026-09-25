@@ -22,7 +22,7 @@ class ReferralScreen extends HookConsumerWidget {
 
     return AppScaffold(
       title: 'Referrals',
-      topPadding: Values.v24,
+      // topPadding: Values.v24,
       child: AppCard(
         cardColor: AppColors.referralCardColor,
         padding: const EdgeInsets.all(Values.v16),

@@ -44,10 +44,6 @@ const double kZeroLetterSpacing = 0.0;
 
 const double kVeryTightLetterSpacing = -0.43;
 
-const double kTopPadding = 40.0;
-
-const double kBottomPadding = 40.0;
-
 const Size appDesignSize = Size(393, 852);
 
 final Size kButtonSize = Size(362.w, 48.h);
@@ -180,8 +176,13 @@ class CacheKeys {
 
   static const String accessToken = 'session_access_token';
   static const String refreshToken = 'session_refresh_token';
+  static const String refreshTokenExpiry =
+      'session_refresh_token_expiry_duration';
+  static const String accessTokenExpiry =
+      'session_access_token_expiry_duration';
 
-  static const String user = 'user';
+  static const String firstName = 'user_first_name';
+  static const String email = 'user_email';
   static const String password = 'user_password';
   static const String phoneNumber = 'user_phone_number';
   static const String transactionPin = 'user_transaction_pin';

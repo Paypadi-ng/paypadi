@@ -18,22 +18,11 @@ class ProfileScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final firstName = useTextEditingController();
-    final lastName = useTextEditingController();
-    final email = useTextEditingController();
+    final user = ref.watch(userProfileProvider);
+    final firstName = useTextEditingController(text: user.value?.firstName);
+    final lastName = useTextEditingController(text: user.value?.lastName);
+    final phoneNumber = useTextEditingController(text: user.value?.phoneNumber);
 
-    ref.listen(userProfileProvider, (previous, current) {
-      current.when(
-        data: (d) {
-          ref.dismissLoading();
-          firstName.text = d?.firstName ?? '';
-          lastName.text = d?.lastName ?? '';
-          email.text = d?.email ?? '';
-        },
-        error: (e, st) => ref.dismissLoading(),
-        loading: ref.showLoading,
-      );
-    });
     final style = context.textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w400,
     );
@@ -41,7 +30,7 @@ class ProfileScreen extends HookConsumerWidget {
     return AppScaffold(
       title: 'Profile',
       makeScrollable: true,
-      bottomPadding: Values.v24,
+      // bottomPadding: Values.v24,
       child: Column(
         children: [
           Values.v24.verticalSpace,
@@ -60,18 +49,19 @@ class ProfileScreen extends HookConsumerWidget {
           Values.v20.verticalSpace,
           AppTextformfield(
             title: 'First Name',
-            titleStyle: style,
             controller: firstName,
+            titleStyle: style,
           ),
           AppTextformfield(
             title: 'Last Name',
-            titleStyle: style,
             controller: lastName,
+            titleStyle: style,
           ),
           AppTextformfield(
-            title: 'Email',
+            isEnabled: false,
+            title: 'Phone Number',
+            controller: phoneNumber,
             titleStyle: style,
-            controller: email,
           ),
 
           FilledButton(

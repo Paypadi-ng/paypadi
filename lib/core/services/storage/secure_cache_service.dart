@@ -10,14 +10,14 @@ import 'package:talker_flutter/talker_flutter.dart' show Talker;
 /// Only `String` values are supported; attempting to save other types logs an
 /// error and is a no-op. Use this for tokens, secrets, and sensitive user data.
 class SecureCacheService implements CacheService {
-  /// Provide a custom [storage] instance for testing; otherwise the default
-  /// platform-appropriate options are used.
   SecureCacheService({
     required MonitoringService monitoring,
     FlutterSecureStorage? storage,
   }) : _storage =
            storage ??
            const FlutterSecureStorage(
+             // 1. Android encrypted preferences fallback to prevent Keystore crashes
+             aOptions: AndroidOptions.biometric(),
              iOptions: IOSOptions(
                accessibility: KeychainAccessibility.first_unlock_this_device,
              ),
@@ -31,15 +31,35 @@ class SecureCacheService implements CacheService {
   @override
   Future<T?> get<T>(String key, [T Function(dynamic raw)? parser]) async {
     try {
-      final value = await _storage.read(key: key);
+      final String? value = await _storage.read(key: key);
       _logger.debug(
         "$runtimeType: read '$key' (present: ${value != null})",
       );
-      if (value == null) return null;
-      return parser != null ? parser(value) : value as T?;
-    } catch (e, st) {
+
+      if (value == null) {
+        return null;
+      }
+
+      if (parser != null) {
+        return parser(value);
+      }
+
+      // 2. Auto-parse primitives to prevent TypeError crashes
+      final String typeStr = T.toString();
+
+      if (typeStr == 'String' || typeStr == 'String?') {
+        return value as T?;
+      } else if (typeStr == 'int' || typeStr == 'int?') {
+        return int.tryParse(value) as T?;
+      } else if (typeStr == 'double' || typeStr == 'double?') {
+        return double.tryParse(value) as T?;
+      } else if (typeStr == 'bool' || typeStr == 'bool?') {
+        return (value.toLowerCase() == 'true') as T?;
+      }
+
+      return value as T?;
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: get error for key "$key"', e, st);
-      // captureException — a token read failure causes silent auth breakage
       await _monitoring.captureException(
         e,
         stackTrace: st,
@@ -53,19 +73,25 @@ class SecureCacheService implements CacheService {
 
   @override
   Future<void> save({required String key, required dynamic value}) async {
-    if (value is! String) {
+    // 3. Automatically stringify primitives so we don't reject valid secure data like PINs
+    final dynamic stringValue =
+        (value is int || value is double || value is bool)
+        ? value.toString()
+        : value;
+
+    if (stringValue is! String) {
       _logger.error(
-        '$runtimeType: only String values are supported. '
+        '$runtimeType: only String/primitives are supported. '
         'Got ${value.runtimeType} for key "$key".',
       );
       return;
     }
+
     try {
-      await _storage.write(key: key, value: value);
+      await _storage.write(key: key, value: stringValue);
       _logger.debug("$runtimeType: saved '$key'");
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: save error for key "$key"', e, st);
-      // captureException — failing to persist a token is a critical write
       await _monitoring.captureException(
         e,
         stackTrace: st,
@@ -81,7 +107,7 @@ class SecureCacheService implements CacheService {
     try {
       await _storage.delete(key: key);
       _logger.debug("$runtimeType: removed '$key'");
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: remove error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Secure cache remove failed for key "$key"',
@@ -96,7 +122,7 @@ class SecureCacheService implements CacheService {
     try {
       await _storage.deleteAll();
       _logger.debug('$runtimeType: cleared all entries');
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: clear error', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Secure cache clear failed',

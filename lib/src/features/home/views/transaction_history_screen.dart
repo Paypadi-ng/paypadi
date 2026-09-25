@@ -28,8 +28,8 @@ class TransactionHistoryScreen extends ConsumerWidget {
         () => ref.invalidate(historyControllerProvider),
       ),
       showAppBar: false,
-      leftPadding: Values.zero,
-      rightPadding: Values.zero,
+      // leftPadding: Values.zero,
+      // rightPadding: Values.zero,
       makeScrollable: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

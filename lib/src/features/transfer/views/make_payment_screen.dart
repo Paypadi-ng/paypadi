@@ -47,7 +47,6 @@ class MakePaymentScreen extends HookConsumerWidget {
               letterSpacing: kZeroLetterSpacing,
             ),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

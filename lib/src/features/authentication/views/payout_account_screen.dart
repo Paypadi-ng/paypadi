@@ -13,6 +13,7 @@ import 'package:paypadi/core/utils/validators.dart';
 import 'package:paypadi/src/features/authentication/controller/bank_account_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/src/shared/widgets/app_textformfield.dart';
+import 'package:paypadi/src/shared/widgets/banks_list.dart';
 
 @RoutePage()
 class PayoutAccountScreen extends HookConsumerWidget {
@@ -73,7 +74,7 @@ class PayoutAccountScreen extends HookConsumerWidget {
               style: context.textTheme.bodyMedium,
             ),
             Values.v32.verticalSpace,
-            _ListOfBanks(
+            BanksList(
               controller: bankController,
               onBankSelected: (bank) {
                 selectedBank.value = bank;
@@ -167,51 +168,6 @@ class PayoutAccountScreen extends HookConsumerWidget {
     };
     unawaited(
       ref.read(payoutAccountProvider.notifier).createPayoutAccount(payload),
-    );
-  }
-}
-
-class _ListOfBanks extends ConsumerWidget {
-  const _ListOfBanks({required this.controller, required this.onBankSelected});
-  final TextEditingController controller;
-  final ValueSetter<BankModel> onBankSelected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final banks = ref.watch(bankListControllerProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Bank Name',
-          style: context.textTheme.bodyLarge?.copyWith(letterSpacing: 0),
-        ),
-        Values.v6.verticalSpace,
-
-        DropdownMenu<BankModel>(
-          enableFilter: true,
-          requestFocusOnTap: true,
-          hintText: 'Select Bank',
-          controller: controller,
-          width: context.screenWidth,
-          menuHeight: context.screenHeight * .4,
-          // trailingIcon: const Icon(Iconsax.arrow_down_1_outline),
-          selectedTrailingIcon: const SizedBox.shrink(),
-          onSelected: (bank) {
-            if (bank == null) return;
-            onBankSelected(bank);
-          },
-          dropdownMenuEntries: [
-            for (BankModel bank in banks.value ?? <BankModel>[])
-              DropdownMenuEntry<BankModel>(
-                value: bank,
-                label: bank.name,
-              ),
-          ],
-        ),
-        Values.v12.verticalSpace,
-      ],
     );
   }
 }

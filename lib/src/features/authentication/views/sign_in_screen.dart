@@ -64,19 +64,9 @@ class SignInScreen extends HookConsumerWidget {
   ) async {
     if (!(form.currentState?.validate() ?? false)) return;
 
+    await ref.read(notificationsServiceProvider).initialize();
     await ref
         .read(appRouterProvider)
         .push(EnterPasswordRoute(phoneNumber: phoneNumber));
-
-    await ref.read(notificationsServiceProvider).initialize();
-
-    await ref.read(notificationsServiceProvider).requestPermission();
-
-    await ref
-        .read(notificationsServiceProvider)
-        .getToken()
-        .then(
-          (token) => token.printLog(),
-        );
   }
 }

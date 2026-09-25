@@ -9,7 +9,6 @@ import 'package:talker_flutter/talker_flutter.dart' show Talker;
 /// [CacheService] backed by [SharedPreferencesWithCache].
 ///
 /// Supports all primitive Dart types plus JSON-encodable objects/maps.
-
 class LocalCacheService implements CacheService {
   LocalCacheService({
     required SharedPreferencesWithCache sharedPreferences,
@@ -25,30 +24,33 @@ class LocalCacheService implements CacheService {
   Future<T?> get<T>(String key, [T Function(dynamic raw)? parser]) async {
     try {
       dynamic raw;
+      final String typeStr = T.toString();
 
-      if (T == String) {
+      // 1. Safe generic checks that handle both T and T? gracefully
+      if (typeStr == 'String' || typeStr == 'String?') {
         raw = _prefs.getString(key);
-      } else if (T == int) {
+      } else if (typeStr == 'int' || typeStr == 'int?') {
         raw = _prefs.getInt(key);
-      } else if (T == double) {
+      } else if (typeStr == 'double' || typeStr == 'double?') {
         raw = _prefs.getDouble(key);
-      } else if (T == bool) {
+      } else if (typeStr == 'bool' || typeStr == 'bool?') {
         raw = _prefs.getBool(key);
-      } else if (T == List<String>) {
+      } else if (typeStr == 'List<String>' || typeStr == 'List<String>?') {
         raw = _prefs.getStringList(key);
       } else {
-        // Map<String, dynamic> and arbitrary objects are stored as JSON strings.
-        final encoded = _prefs.getString(key);
-        if (encoded == null || encoded.isEmpty) return null;
+        // 2. Map<String, dynamic> and custom objects stored as JSON strings.
+        final String? encoded = _prefs.getString(key);
+        if (encoded == null || encoded.isEmpty) {
+          return null;
+        }
 
         try {
           raw = json.decode(encoded);
-          // json.decode already returns Map<String, dynamic> for JSON objects;
-          // Map.from() is redundant and allocates an unnecessary copy.
-          if (T == Map<String, dynamic>) {
+          if (typeStr == 'Map<String, dynamic>' ||
+              typeStr == 'Map<String, dynamic>?') {
             raw = raw as Map<String, dynamic>;
           }
-        } catch (e, st) {
+        } on Exception catch (e, st) {
           _logger.error(
             '$runtimeType: JSON decode failed for key "$key"',
             e,
@@ -58,9 +60,12 @@ class LocalCacheService implements CacheService {
         }
       }
 
-      if (raw == null) return null;
+      if (raw == null) {
+        return null;
+      }
+
       return parser != null ? parser(raw) : raw as T?;
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: get error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache read failed for key "$key"',
@@ -84,21 +89,23 @@ class LocalCacheService implements CacheService {
         await _prefs.setDouble(key, value);
       } else if (value is List<String>) {
         await _prefs.setStringList(key, value);
-      } else if (value is Map<String, dynamic>) {
-        await _prefs.setString(key, json.encode(value));
       } else {
-        // Unsupported type: log and add a breadcrumb so this surfaces in
-        // monitoring the same way all other error paths do.
-        _logger.error(
-          '$runtimeType: unsupported type for key "$key": ${value.runtimeType}',
-        );
-        await _monitoring.addBreadcrumb(
-          message: 'Cache write skipped: unsupported type for key "$key"',
-          category: 'cache',
-          data: {'valueType': value.runtimeType.toString()},
-        );
+        // 3. Attempt to JSON encode custom models or Maps safely
+        try {
+          final String encoded = json.encode(value);
+          await _prefs.setString(key, encoded);
+        } on Exception catch (_) {
+          _logger.error(
+            '$runtimeType: unsupported type or failed encode for key "$key": ${value.runtimeType}',
+          );
+          await _monitoring.addBreadcrumb(
+            message: 'Cache write skipped: unsupported type for key "$key"',
+            category: 'cache',
+            data: {'valueType': value.runtimeType.toString()},
+          );
+        }
       }
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: save error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache write failed for key "$key"',
@@ -116,7 +123,7 @@ class LocalCacheService implements CacheService {
     try {
       await _prefs.remove(key);
       _logger.debug("$runtimeType: removed '$key'");
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: remove error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache remove failed for key "$key"',
@@ -131,7 +138,7 @@ class LocalCacheService implements CacheService {
     try {
       await _prefs.clear();
       _logger.debug('$runtimeType: cleared all entries');
-    } catch (e, st) {
+    } on Exception catch (e, st) {
       _logger.error('$runtimeType: clear error', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache clear failed',

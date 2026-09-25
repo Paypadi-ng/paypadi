@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:paypadi/core/api/response/api_response.dart';
-import 'package:paypadi/core/models/driver_profile_model/driver_profile_model.dart';
 import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
@@ -11,7 +10,7 @@ abstract interface class IProfileRepository {
     Map<String, dynamic> payload,
   );
 
-  FutureResultOf<ApiResponse<UserProfileModel>> getAccountProfile();
+  FutureResultOf<ApiResponse<UserProfileModel>> getUser();
 
   FutureResultOf<dynamic> getDriverProfile();
 

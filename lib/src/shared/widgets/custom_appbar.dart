@@ -53,6 +53,7 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        Values.v16.horizontalSpace,
         AppAvatar(radius: Values.v48, imageUrl: profilePic),
         Values.v10.horizontalSpace,
         Text(

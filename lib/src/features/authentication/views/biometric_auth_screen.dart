@@ -19,7 +19,7 @@ class BiometricAuthenticationScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppScaffold(
-      bottomPadding: Values.v32,
+      // bottomPadding: Values.v32,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -47,6 +47,7 @@ class CreateAccountScreen extends HookConsumerWidget {
     });
 
     return AppScaffold(
+      showAppBar: false,
       child: Form(
         key: formRef.value,
         child: Column(

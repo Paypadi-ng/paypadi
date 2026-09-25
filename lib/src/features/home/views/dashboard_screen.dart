@@ -9,13 +9,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
-import 'package:paypadi/core/models/user_model/user_model.dart';
 import 'package:paypadi/core/utils/constants.dart';
+import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
 import 'package:paypadi/src/features/home/widgets/amount_display.dart';
-import 'package:paypadi/src/features/home/widgets/user_wallet.dart';
+import 'package:paypadi/src/features/home/widgets/user_wallets.dart';
 import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
+import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/src/shared/widgets/custom_appbar.dart';
@@ -26,24 +27,12 @@ class DashboardScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = useState<UserModel?>(null);
-
-    final amountController = useTextEditingController(text: '0');
-    final amountValue = useValueListenable(amountController);
-
-    // useEffect(() {
-    //   final localCache = await ref.read(localCacheProvider.future);
-    //   user.value = await localCache.get(
-    //     CacheKeys.user,
-    //     (raw) => UserModel.fromJson(raw as Map<String, dynamic>),
-    //   );
-    //   return null;
-    // }, const []);
+    final amountTextController = useTextEditingController(text: '0');
+    final amountValue = useValueListenable(amountTextController);
+    final user = ref.watch(userProfileProvider);
 
     return AppScaffold(
       showAppBar: false,
-      leftPadding: Values.zero,
-      rightPadding: Values.zero,
       appBar: CustomAppbar(name: user.value?.firstName),
       onRefresh: () => Future(
         () => ref.invalidate(walletControllerProvider),
@@ -52,13 +41,13 @@ class DashboardScreen extends HookConsumerWidget {
       child: Column(
         children: [
           Values.v32.verticalSpace,
-          const UserWallet(),
+          UserWallet(type: user.value?.role ?? AccountType.unknown),
           Values.v32.verticalSpace,
-          AmountDisplay(controller: amountController),
+          AmountDisplay(controller: amountTextController),
           Values.v48.verticalSpace,
           AppKeypad(
             keyLength: 10,
-            controller: amountController,
+            controller: amountTextController,
           ),
           Values.v36.verticalSpace,
           Row(
@@ -66,7 +55,7 @@ class DashboardScreen extends HookConsumerWidget {
             children: [
               Flexible(
                 child: FilledButton.icon(
-                  onPressed: canTransfer(amountValue.text)
+                  onPressed: _canTransfer(amountValue.text)
                       ? () => initializeTransferProcess(ref, amountValue.text)
                       : null,
                   label: const Text('Send Cash'),
@@ -95,14 +84,23 @@ class DashboardScreen extends HookConsumerWidget {
   }
 
   void initializeTransferProcess(WidgetRef ref, String amount) {
-    ref.read(transactionPayloadProvider)['amount'] = amount;
-    unawaited(ref.read(appRouterProvider).push(const TransferRoute()));
+    final cleanAmount = amount.replaceAll(RegExp(r'[^0-9.]'), '');
+
+    ref.read(transactionPayloadProvider).addAll({'amount': cleanAmount});
+    unawaited(ref.read(appRouterProvider).push(TransferRoute()));
   }
 
-  bool canTransfer(String value) {
+  bool _canTransfer(String value) {
     if (value.trim().isEmpty) return false;
 
-    final parsedAmount = num.tryParse(value.trim());
+    // 1. Strip out commas, spaces, currency symbols, etc.
+    // This leaves only numbers and the decimal point.
+    final cleanValue = value.replaceAll(RegExp(r'[^0-9.]'), '');
+
+    // 2. Parse the clean, raw number string
+    final parsedAmount = num.tryParse(cleanValue);
+
+    // 3. Evaluate
     if (parsedAmount == null) return false;
 
     return parsedAmount > 0;

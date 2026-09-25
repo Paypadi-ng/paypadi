@@ -18,10 +18,11 @@ sealed class UserProfileModel with _$UserProfileModel {
     @JsonKey(name: 'referral_code') required String referralCode,
     @JsonKey(name: 'total_referrals') required int totalReferrals,
     String? email,
+    @JsonKey(name: 'is_driver') bool? isDriver,
     @JsonKey(name: 'last_login') String? lastLogin,
-    @JsonKey(name: 'driver_profile') String? driverProfile,
     @JsonKey(name: 'kyc_status') String? kycStatus,
     ProfileModel? profile,
+    @JsonKey(name: 'driver_profile') DriverProfileModel? driverProfile,
   }) = _UserProfileModel;
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -48,4 +49,31 @@ sealed class ProfileModel with _$ProfileModel {
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) =>
       _$ProfileModelFromJson(json);
+}
+
+@freezed
+sealed class DriverProfileModel with _$DriverProfileModel {
+  const factory DriverProfileModel({
+    required int id,
+    @JsonKey(name: 'total_rides') required int totalRides,
+    @JsonKey(name: 'is_approved') required bool isApproved,
+    @JsonKey(name: 'is_available') required bool isAvailable,
+    @JsonKey(name: 'submitted_for_approval') required bool documentsApproved,
+    @JsonKey(name: 'vehicle_make') required String vehicleMake,
+    @JsonKey(name: 'vehicle_model') required String vehicleModel,
+    @JsonKey(name: 'vehicle_year') required int vehicleYear,
+    @JsonKey(name: 'license_plate') required String licensePlate,
+    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'updated_at') required String updatedAt,
+    @JsonKey(name: 'driver_license_number') String? licenseNumber,
+    @JsonKey(name: 'driver_license_expiry') String? licenseExpiryDate,
+    @JsonKey(name: 'license_front') String? licenseFrontPicUrl,
+    @JsonKey(name: 'license_back') String? licenseBackPicUrl,
+    @JsonKey(name: 'vehicle_registration') String? vehicleRegistrationPicUrl,
+    @JsonKey(name: 'approved_at') String? approvedAt,
+    @JsonKey(name: 'rejection_reason') String? reasonForRejection,
+  }) = _DriverProfileModel;
+
+  factory DriverProfileModel.fromJson(Map<String, dynamic> json) =>
+      _$DriverProfileModelFromJson(json);
 }

@@ -31,6 +31,7 @@ import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/repositories/wallet/wallet_repository.dart';
 import 'package:paypadi/core/services/api_service.dart';
 import 'package:paypadi/core/services/app_version_service.dart';
+import 'package:paypadi/core/services/asset_share_service.dart';
 import 'package:paypadi/core/services/biometrics_service.dart';
 import 'package:paypadi/core/services/file_picker_service.dart';
 import 'package:paypadi/core/services/image_picker_service.dart';
@@ -229,4 +230,9 @@ ImagePickerService imagePickerService(Ref ref) {
 @riverpod
 AppVersionService appVersionService(Ref ref) {
   return AppVersionService();
+}
+
+@riverpod
+AssetShareService assetShareService(Ref ref) {
+  return AssetShareService();
 }

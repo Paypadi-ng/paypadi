@@ -18,7 +18,7 @@ class UserProfile extends _$UserProfile {
   @override
   FutureOr<UserProfileModel?> build() async {
     final repository = ref.watch(profileRepositoryProvider);
-    final result = await repository.getAccountProfile();
+    final result = await repository.getUser();
 
     return result.fold(
       (success) => success.data,

@@ -14,35 +14,30 @@ import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart';
 import 'package:paypadi/src/features/transfer/controller/beneficiaries_controller.dart';
+import 'package:paypadi/src/features/transfer/widgets/transfer_widget.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
-import 'package:paypadi/src/shared/widgets/app_textformfield.dart';
 import 'package:paypadi/src/shared/widgets/app_zero_item.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 @RoutePage()
 class TransferScreen extends HookConsumerWidget {
-  const TransferScreen({super.key});
+  const TransferScreen({super.key, this.number});
+  final String? number;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final receipientAccountNumber = useTextEditingController();
+    final receipientNumber = useTextEditingController(text: number);
 
     return AppScaffold(
       title: 'Transfer',
       child: SingleChildScrollView(
         child: Column(
           children: [
-            Values.v32.verticalSpace,
-            AppTextformfield(
-              title: 'Account Number',
-              hint: 'Enter 10-digit Account number or Phone Number',
-              controller: receipientAccountNumber,
-              keyboardType: TextInputType.number,
-            ),
+            Values.v16.verticalSpace,
+            RecipientInformation(recipientNumberController: receipientNumber),
             Values.v32.verticalSpace,
             FilledButton(
-              onPressed: () =>
-                  continueAction(ref, receipientAccountNumber.text),
+              onPressed: () => _continue(ref, receipientNumber.text),
               child: const Text('Continue'),
             ),
             Values.v32.verticalSpace,
@@ -53,7 +48,7 @@ class TransferScreen extends HookConsumerWidget {
     );
   }
 
-  void continueAction(WidgetRef ref, String receipientNumber) {
+  void _continue(WidgetRef ref, String receipientNumber) {
     if (receipientNumber.isNotEmpty) {
       unawaited(
         ref
