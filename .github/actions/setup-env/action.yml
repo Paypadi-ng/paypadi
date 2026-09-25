@@ -40,12 +40,47 @@ runs:
         java-version: ${{ inputs.java-version }}
         cache: ${{ inputs.cache == 'true' && 'gradle' || '' }}
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+    # Flutter is installed straight from the official repo at the exact
+    # version pinned in pubspec.yaml (environment.flutter). This avoids
+    # third-party setup actions, which may call unpinned actions internally
+    # and are rejected by the repo's SHA-pinning policy.
+    - name: Resolve Flutter version
+      id: flutter
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        VERSION=$(awk '/^environment:/{e=1; next} /^[^ #]/{e=0} e && /^  flutter:/{print $2}' pubspec.yaml | tr -d "\"'")
+        if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "::error::pubspec.yaml must pin environment.flutter to an exact version (got '$VERSION')"
+          exit 1
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "root=$RUNNER_TOOL_CACHE/flutter-$VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Flutter SDK
+      if: inputs.cache == 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        flutter-version-file: ${{ inputs.working-directory }}/pubspec.yaml
-        channel: stable
-        cache: ${{ inputs.cache == 'true' }}
+        path: ${{ steps.flutter.outputs.root }}
+        key: ${{ runner.os }}-${{ runner.arch }}-flutter-${{ steps.flutter.outputs.version }}
+
+    - name: Install Flutter ${{ steps.flutter.outputs.version }}
+      shell: bash
+      env:
+        FLUTTER_VERSION: ${{ steps.flutter.outputs.version }}
+        FLUTTER_ROOT_DIR: ${{ steps.flutter.outputs.root }}
+      # GITHUB_PATH gets $RUNNER_TOOL_CACHE/flutter-<X.Y.Z>/bin only; the
+      # version is validated as digits and dots above, and no workflow here
+      # runs on pull_request_target.
+      run: | # zizmor: ignore[github-env]
+        if [[ ! -x "$FLUTTER_ROOT_DIR/bin/flutter" ]]; then
+          git clone --quiet --depth 1 --branch "$FLUTTER_VERSION" \
+            https://github.com/flutter/flutter.git "$FLUTTER_ROOT_DIR"
+        fi
+        echo "$FLUTTER_ROOT_DIR/bin" >> "$GITHUB_PATH"
+        "$FLUTTER_ROOT_DIR/bin/flutter" config --no-analytics >/dev/null
+        "$FLUTTER_ROOT_DIR/bin/dart" --disable-analytics >/dev/null
+        "$FLUTTER_ROOT_DIR/bin/flutter" --version
 
     - name: Cache pub packages
       if: inputs.cache == 'true'
