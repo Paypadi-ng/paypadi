@@ -12,9 +12,10 @@ on:
 permissions:
   contents: read
 
-# Concurrency applies to direct runs only (workflow_call ignores it).
+# github.workflow is the *caller's* name when this runs via workflow_call, so
+# the PR check and the copies inside deploy-*/build-* never cancel each other.
 concurrency:
-  group: validate-${{ github.ref }}
+  group: validate-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
