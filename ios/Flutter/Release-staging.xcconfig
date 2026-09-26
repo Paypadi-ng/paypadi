@@ -1,0 +1,10 @@
+// TODO(staging): replace GID_CLIENT_ID / REVERSED_CLIENT_ID with the values
+// from the staging app's GoogleService-Info.plist (currently prod's).
+#include "Generated.xcconfig"
+#include "Release.xcconfig"
+
+ASSET_PREFIX=staging
+BUNDLE_NAME=Paypadi Staging
+BUNDLE_DISPLAY_NAME=Paypadi Staging
+GID_CLIENT_ID=193368650800-ei7o59n61qr1mtnr3tknab3khb525b4i.apps.googleusercontent.com
+REVERSED_CLIENT_ID=com.googleusercontent.apps.193368650800-ei7o59n61qr1mtnr3tknab3khb525b4i

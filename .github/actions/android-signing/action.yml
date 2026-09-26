@@ -1,0 +1,48 @@
+name: 'Android upload signing'
+description: >-
+  Writes the upload keystore to $RUNNER_TEMP (outside the workspace, so it can
+  never be swept into an artifact) and points android/key-<flavor>.properties
+  at it.
+
+inputs:
+  flavor:
+    description: 'Flavor to configure: dev | staging | prod'
+    required: true
+  keystore-base64:
+    description: 'Base64-encoded upload keystore'
+    required: true
+  keystore-password:
+    description: 'Keystore password'
+    required: true
+  key-alias:
+    description: 'Key alias'
+    required: true
+  key-password:
+    description: 'Key password'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Write keystore and key properties
+      shell: bash
+      env:
+        FLAVOR: ${{ inputs.flavor }}
+        KEYSTORE_BASE64: ${{ inputs.keystore-base64 }}
+        KEYSTORE_PASSWORD: ${{ inputs.keystore-password }}
+        KEY_ALIAS: ${{ inputs.key-alias }}
+        KEY_PASSWORD: ${{ inputs.key-password }}
+      run: |
+        case "$FLAVOR" in dev|staging|prod) ;; *) echo "::error::Unknown flavor '$FLAVOR'"; exit 1 ;; esac
+        if [[ -z "$KEYSTORE_BASE64" ]]; then
+          echo "::error::Signing secrets for '$FLAVOR' are missing from this environment"
+          exit 1
+        fi
+        KEYSTORE="$RUNNER_TEMP/upload-keystore-$FLAVOR.jks"
+        printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+        {
+          printf 'storeFile=%s\n' "$KEYSTORE"
+          printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
+          printf 'keyAlias=%s\n' "$KEY_ALIAS"
+          printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+        } > "android/key-$FLAVOR.properties"

@@ -1,0 +1,76 @@
+name: Security checks
+
+on:
+  pull_request:
+    branches: [dev, staging, main]
+  push:
+    branches: [dev]
+    paths: [".github/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Enforces the promotion order feature → dev → staging → main.
+  # Hotfixes branch from main as hotfix/* and may target staging or main.
+  promotion-policy:
+    # Required status check in the branch rulesets — keep the name stable.
+    name: Promotion policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch is allowed for this target
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          case "$BASE" in
+            staging) allowed='^(dev|hotfix/.+)$';     from='dev or hotfix/*' ;;
+            main)    allowed='^(staging|hotfix/.+)$'; from='staging or hotfix/*' ;;
+            *)       echo "PRs into $BASE may come from any branch."; exit 0 ;;
+          esac
+          if [[ ! "$HEAD" =~ $allowed ]]; then
+            echo "::error::PRs into '$BASE' must come from $from (got '$HEAD'). Promote through dev → staging → main."
+            exit 1
+          fi
+          echo "'$HEAD' → '$BASE' is an allowed promotion."
+
+  # Blocks PRs that add or upgrade a dependency with a known vulnerability.
+  dependency-review:
+    # Required status check in the branch rulesets — keep the name stable.
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: never
+
+  # Static analysis of the workflows themselves: template injection,
+  # over-broad permissions, unpinned actions, cache poisoning, etc.
+  zizmor:
+    # Required status check in the branch rulesets — keep the name stable.
+    name: Workflow audit (zizmor)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          advanced-security: false
+          min-severity: medium

@@ -4,5 +4,5 @@ storage_mode("git")
 type("development") # The default type
 
 # This ensures match maps the App Store Connect API keys handled by your CI pipeline
-app_identifier(["com.paypadi.dev", "com.paypadi"])
+app_identifier(["com.paypadi.dev", "com.paypadi.staging", "com.paypadi"])
 username("tokiolaoluwa01.dev@gmail.com")

@@ -1,0 +1,147 @@
+name: Paypadi Build — Prod
+
+# Every merge into main (production) builds the signed prod app
+# (com.paypadi) and keeps it as a release candidate. Nothing is distributed:
+# releasing is done by tagging main (see deploy-prod.yml).
+# The `prod-build` environment only accepts the main branch and holds
+# signing credentials only — no store upload credentials.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Target platform"
+        type: choice
+        required: true
+        default: all
+        options: [all, android, ios]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-prod
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: "17"
+
+jobs:
+  # ─── Validation ─────────────────────────────────────────────────────────────
+  validate:
+    uses: ./.github/workflows/validate.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # ─── Android ────────────────────────────────────────────────────────────────
+  android-prod:
+    name: Android — Prod build
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: prod-build
+    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # No dependency caches for prod builds (cache-poisoning protection).
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          setup-java: "true"
+          cache: "false"
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Configure upload signing
+        uses: ./.github/actions/android-signing
+        with:
+          flavor: prod
+          keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Build App Bundle — prod
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          flutter build appbundle \
+            --flavor prod \
+            --target lib/main_prod.dart \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=SENTRY_DSN="$SENTRY_DSN" \
+            --build-number="$GITHUB_RUN_NUMBER" \
+            --release
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paypadi-prod-candidate-${{ github.sha }}.aab
+          path: build/app/outputs/bundle/prodRelease/app-prod-release.aab
+          retention-days: 90
+
+  # ─── iOS ────────────────────────────────────────────────────────────────────
+  # Disabled until IOS_DEPLOY_ENABLED is 'true' (see deploy-dev.yml).
+  ios-prod:
+    name: iOS — Prod build
+    needs: validate
+    runs-on: macos-15
+    environment: prod-build
+    if: >-
+      vars.IOS_DEPLOY_ENABLED == 'true' &&
+      (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          setup-ruby: "true"
+          cache: "false"
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Sync App Store certificates via Match
+        run: bundle exec fastlane ios sync_appstore_certs flavor:prod
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+
+      - name: Build IPA — prod
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          flutter build ipa \
+            --flavor prod \
+            --target lib/main_prod.dart \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=SENTRY_DSN="$SENTRY_DSN" \
+            --build-number="$GITHUB_RUN_NUMBER" \
+            --release \
+            --export-options-plist=ios/ExportOptionsProd.plist
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paypadi-prod-candidate-${{ github.sha }}.ipa
+          path: build/ios/ipa/*.ipa
+          retention-days: 90

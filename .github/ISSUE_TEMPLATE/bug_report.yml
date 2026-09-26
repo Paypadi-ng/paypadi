@@ -1,0 +1,86 @@
+name: Bug report
+description: Something in PayPadi is broken
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This repository is public.** Do not paste tokens, passwords, PINs,
+        OTPs, account numbers, balances, phone numbers, emails or any other
+        customer data — redact them from logs and screenshots.
+
+        Found a security problem? Don't file it here —
+        [report it privately](https://github.com/Paypadi-ng/paypadi/security/advisories/new).
+  - type: dropdown
+    id: flavor
+    attributes:
+      label: Build
+      options:
+        - dev
+        - staging
+        - prod
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Android
+        - iOS
+        - Both
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options:
+        - Onboarding
+        - Authentication / KYC
+        - Home / Wallet
+        - QR payments
+        - Transfers / Receipts
+        - Settings / Profile
+        - Notifications
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the Sentry event ID if this came from a crash report
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version / build number
+      placeholder: e.g. 1.2.0 (145)
+  - type: input
+    id: device
+    attributes:
+      label: Device / OS version
+      placeholder: e.g. Pixel 7, Android 14
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs (Talker/Sentry) — redacted
+      render: shell

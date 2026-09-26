@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose new functionality or a change to existing behavior
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or business problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options:
+        - Onboarding
+        - Authentication / KYC
+        - Home / Wallet
+        - QR payments
+        - Transfers / Receipts
+        - Settings / Profile
+        - Notifications
+        - Infra / CI-CD
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
