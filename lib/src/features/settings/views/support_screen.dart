@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/src/features/settings/widgets/setting_tile.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
+
 // import 'package:icons_plus/icons_plus.dart' show Iconsax;
 
 @RoutePage()

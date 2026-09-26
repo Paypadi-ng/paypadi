@@ -1,22 +1,7 @@
 # Global iOS Configuration
-apple_id("tokiolaoluwa01.dev@gmail.com") 
+apple_id("tokiolaoluwa01.dev@gmail.com")
 itc_team_id("123456789") # Remember to replace with your actual App Store Connect Team ID
 team_id("ABCDE12345")    # Remember to replace with your actual Apple Developer Portal Team ID
 
-# ───────────────────────────────────────────────────────────────────────────
-# DEV FLAVOR CONFIGURATION (Triggered during the deploy_firebase lane)
-# ───────────────────────────────────────────────────────────────────────────
-for_lane :deploy_firebase do
-  package_name("com.paypadi.dev")   # Android Dev
-  app_identifier("com.paypadi.dev") # iOS Dev
-end
-
-# ───────────────────────────────────────────────────────────────────────────
-# PROD FLAVOR CONFIGURATION (Triggered during the deploy_prod lane)
-# ───────────────────────────────────────────────────────────────────────────
-for_lane :deploy_prod do
-  json_key_file(ENV["PLAY_STORE_JSON_KEY"]) # Only needed for Prod Play Store upload
-  
-  package_name("com.paypadi")   # Android Prod
-  app_identifier("com.paypadi") # iOS Prod
-end
+# App identifiers and Play Store credentials are passed explicitly by each
+# lane (see Fastfile), not configured here.

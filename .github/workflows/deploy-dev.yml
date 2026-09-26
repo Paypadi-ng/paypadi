@@ -1,8 +1,22 @@
 name: Paypadi Deploy — Dev
 
+# Dev flavor (com.paypadi.dev) → Firebase App Distribution.
+#
+# • PR into dev: builds an unsigned dev app straight away (no secrets), then
+#   waits for a maintainer to approve the `dev-preview` environment before
+#   building a signed app and sending it to testers. PR workflows run the
+#   PR's own copy of this file, so the approval is what keeps dev secrets
+#   away from unreviewed code — never approve a preview for a PR that changes
+#   .github/ without reading that change first.
+# • Push to dev (i.e. a merged PR): builds and distributes via `dev`, which
+#   only accepts the dev branch.
+
 on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [develop]
+    branches: [dev]
   workflow_dispatch:
     inputs:
       platform:
@@ -12,36 +26,72 @@ on:
         default: all
         options: [all, android, ios]
 
+permissions:
+  contents: read
+
+# A new push to a PR supersedes a preview still waiting for approval.
+# Merged builds queue instead of cancelling mid-upload.
 concurrency:
-  group: deploy-dev-${{ github.ref }}
-  cancel-in-progress: true
+  group: deploy-dev-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  FLUTTER_VERSION: "any"
   JAVA_VERSION: "17"
 
 jobs:
   # ─── Validation ─────────────────────────────────────────────────────────────
   validate:
     uses: ./.github/workflows/validate.yml
-    secrets: inherit
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # ─── Android ────────────────────────────────────────────────────────────────
-  android-dev:
-    name: Android — Dev
+  # ─── PR build check (no secrets) ───────────────────────────────────────────
+  build-check:
+    name: Build dev app (unsigned)
+    if: github.event_name == 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
-    environment: dev
-    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android'
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          setup-java: "true"
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build APK — dev (debug-signed)
+        run: flutter build apk --flavor dev --target lib/main_dev.dart --debug
+
+  # ─── Android ────────────────────────────────────────────────────────────────
+  android-dev:
+    name: Android — Dev → Firebase
+    needs: [validate, build-check]
+    # Runs after build-check on PRs (skipped on pushes); never for fork PRs,
+    # which get no secrets anyway.
+    if: >-
+      always() && needs.validate.result == 'success' &&
+      (needs.build-check.result == 'success' || needs.build-check.result == 'skipped') &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android')
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'pull_request' && 'dev-preview' || 'dev' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
           java-version: ${{ env.JAVA_VERSION }}
           setup-java: "true"
           setup-ruby: "true"
@@ -49,61 +99,74 @@ jobs:
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Decode upload keystore
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" \
-            | base64 --decode > android/app/upload-keystore.jks
-
-      - name: Create key.properties
-        run: |
-          cat > android/key.properties << 'EOF'
-          storeFile=upload-keystore.jks
-          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-          EOF
+      - name: Configure upload signing
+        uses: ./.github/actions/android-signing
+        with:
+          flavor: dev
+          keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Build APK — dev
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build apk \
             --flavor dev \
             --target lib/main_dev.dart \
-            --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }} \
-            --build-number=${{ github.run_number }} \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
             --release
 
-      - name: Upload AAB artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: paypadi-dev-r${{ github.run_number }}.aab
-          path: build/app/outputs/bundle/devRelease/app-dev-release.aab
+          name: paypadi-dev-r${{ github.run_number }}.apk
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
           retention-days: 14
 
-      - name: Setup Firebase Credentials
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-credentials.json
+      - name: Write Firebase credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-credentials.json"
 
-      - name: Deploy to Firebase App Distribution
+      - name: Distribute via Firebase App Distribution
         run: bundle exec fastlane android deploy_firebase
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: firebase-credentials.json
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-credentials.json
           FIREBASE_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_GROUPS: dev-testers
+          RELEASE_NOTES: >-
+            ${{ github.event_name == 'pull_request'
+                && format('PR #{0}: {1} ({2})', github.event.pull_request.number, github.event.pull_request.title, github.event.pull_request.head.sha)
+                || format('dev r{0} ({1})', github.run_number, github.sha) }}
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
+  # Disabled until the repository variable IOS_DEPLOY_ENABLED is 'true' — the
+  # Apple team IDs in fastlane/Appfile and ios/ExportOptionsDev.plist are
+  # still needed.
   ios-dev:
-    name: iOS — Dev
-    needs: validate
+    name: iOS — Dev → Firebase
+    needs: [validate, build-check]
+    if: >-
+      always() && vars.IOS_DEPLOY_ENABLED == 'true' && needs.validate.result == 'success' &&
+      (needs.build-check.result == 'success' || needs.build-check.result == 'skipped') &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
     runs-on: macos-15
-    environment: dev
-    if: github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios'
+    environment: ${{ github.event_name == 'pull_request' && 'dev-preview' || 'dev' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           setup-ruby: "true"
 
       - name: Run code generation
@@ -120,27 +183,37 @@ jobs:
           APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
 
       - name: Build IPA — dev
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          BUILD_NUMBER_OFFSET: ${{ vars.BUILD_NUMBER_OFFSET }}
         run: |
           flutter build ipa \
             --flavor dev \
             --target lib/main_dev.dart \
-            --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }} \
-            --build-number=${{ github.run_number }} \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --build-number="$(( GITHUB_RUN_NUMBER + ${BUILD_NUMBER_OFFSET:-0} ))" \
             --release \
             --export-options-plist=ios/ExportOptionsDev.plist
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: paypadi-dev-r${{ github.run_number }}.ipa
           path: build/ios/ipa/*.ipa
           retention-days: 14
 
-      - name: Setup Firebase Credentials
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase-credentials.json
-
-      - name: Deploy to Firebase App Distribution
-        run: bundle exec fastlane ios deploy_firebase # Fixed: original incorrectly called "android" lane
+      - name: Write Firebase credentials
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: firebase-credentials.json
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-credentials.json"
+
+      - name: Distribute via Firebase App Distribution
+        run: bundle exec fastlane ios deploy_firebase
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-credentials.json
           FIREBASE_APP_ID: ${{ vars.FIREBASE_IOS_APP_ID }}
+          FIREBASE_GROUPS: dev-testers
+          RELEASE_NOTES: >-
+            ${{ github.event_name == 'pull_request'
+                && format('PR #{0}: {1} ({2})', github.event.pull_request.number, github.event.pull_request.title, github.event.pull_request.head.sha)
+                || format('dev r{0} ({1})', github.run_number, github.sha) }}

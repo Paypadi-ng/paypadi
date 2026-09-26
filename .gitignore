@@ -65,3 +65,14 @@ sentry.properties
 **/fastlane/screenshots
 **/fastlane/app_download_*
 firebase-credentials.json
+# Signing & credentials — never commit
+.env
+*.jks
+*.keystore
+key.properties
+key-*.properties
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+*service-account*.json
