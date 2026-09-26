@@ -33,7 +33,7 @@ dependencies:
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
   shared_preferences: ^2.5.5
-  flutter_secure_storage: ^10.0.0
+  flutter_secure_storage: ^11.2.0
   share_plus: ^13.1.0
   screenshot: ^3.0.0
   flutter_to_pdf: ^0.4.1
