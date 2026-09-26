@@ -34,7 +34,8 @@ abstract class AppException implements Exception {
           DioExceptionType.connectionTimeout =>
             const ServerException.requestTimeout(),
           DioExceptionType.sendTimeout => const ServerException.sendTimeout(),
-          DioExceptionType.receiveTimeout =>
+          DioExceptionType.receiveTimeout ||
+          DioExceptionType.transformTimeout =>
             const ServerException.receiveTimeout(),
           DioExceptionType.badCertificate =>
             const ServerException.internalServerError(),
