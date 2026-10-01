@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:paypadi/core/services/storage/cache_service.dart';
 import 'package:paypadi/core/utils/constants.dart' show CacheKeys, debugLogger;
+import 'package:sentry_dio/sentry_dio.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 class ApiService {
@@ -31,6 +33,13 @@ class ApiService {
                 ),
             ],
           );
+
+    dio.addSentry(
+      failedRequestStatusCodes: [
+        SentryStatusCode.range(400, 404),
+        SentryStatusCode(500),
+      ],
+    );
   }
 
   late final Dio dio;
