@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
@@ -22,7 +21,6 @@ class EnterPinScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pinController = useTextEditingController();
-    final biometricService = ref.watch(biometricsProvider);
 
     ref.listen(initiatePaymentControllerProvider, (previous, current) {
       current.when(
@@ -53,7 +51,7 @@ class EnterPinScreen extends HookConsumerWidget {
           ),
           Values.v12.verticalSpace,
           Text(
-            'Enter transaction 4-digit PIN-code or use your biometrics to perform action.',
+            'Enter your 4-digit transaction PIN to confirm this payment.',
             style: context.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w400,
             ),
@@ -64,24 +62,8 @@ class EnterPinScreen extends HookConsumerWidget {
           ),
           const Spacer(flex: 2),
           AppKeypad(
-            showBiometric: true,
             controller: pinController,
             padding: const EdgeInsets.symmetric(horizontal: Values.v24),
-            onBiometricKeyPressed: () async {
-              await biometricService.authenticate();
-
-              // final String? pin = await ref
-              //     .read(secureCacheProvider)
-              //     .read(CacheKeys.transactionPin);
-
-              // if (pin == null) return;
-
-              // ref.read(transactionPayloadProvider)['pin'] = pin;
-              // ref
-              //     .read(initiatePaymentControllerProvider.notifier)
-              //     .initiatePayment();
-            },
-
             onSubmit: (value) {
               ref.read(transferDraftControllerProvider.notifier).setPin(value);
 
