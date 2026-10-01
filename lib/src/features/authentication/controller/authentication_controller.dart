@@ -85,6 +85,10 @@ class AuthenticationController extends _$AuthenticationController {
           accessExpiry: jwtExpiry(response.data.accessToken),
         );
 
+        // The account exists now; drop the sign-up details, password
+        // included, rather than keep them in memory for the session.
+        ref.invalidate(authenticationPayloadProvider);
+
         state = const AsyncData(null);
         unawaited(
           ref.read(appRouterProvider).push(const CreateTransactionPinRoute()),
