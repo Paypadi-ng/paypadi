@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 part 'server_exception.freezed.dart';
 

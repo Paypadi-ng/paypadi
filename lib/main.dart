@@ -9,6 +9,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/env.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_config.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart';
@@ -32,6 +34,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> initializeApp({
   required bool enableMonitoring,
+  required MonitoringConfig monitoringConfig,
   required FirebaseOptions firebaseConfig,
 }) async {
   SentryWidgetsFlutterBinding.ensureInitialized();
@@ -54,12 +57,12 @@ Future<void> initializeApp({
         options.debug = kDebugMode;
         options.dsn = AppEnvironment.sentryDsn;
         options.environment = AppEnvironment.flavor;
-        options.sendDefaultPii = true;
-        // options.enableLogs = true;
-        options.tracesSampleRate = 1.0;
-        // The sampling rate for profiling is relative to tracesSampleRate
-        // Setting to 1.0 will profile 100% of sampled transactions:
-        // options.profilesSampleRate = 1.0;
+
+        options.sendDefaultPii = monitoringConfig.sendDefaultPii;
+        options.tracesSampleRate = monitoringConfig.tracesSampleRate;
+        // ignore: experimental_member_use
+        options.profilesSampleRate = monitoringConfig.profilesSampleRate;
+
         // Configure Session Replay
         // options.replay.sessionSampleRate = 0.1;
         // options.replay.onErrorSampleRate = 1.0;

@@ -50,7 +50,7 @@ class LocalCacheService implements CacheService {
               typeStr == 'Map<String, dynamic>?') {
             raw = raw as Map<String, dynamic>;
           }
-        } on Exception catch (e, st) {
+        } catch (e, st) {
           _logger.error(
             '$runtimeType: JSON decode failed for key "$key"',
             e,
@@ -65,8 +65,9 @@ class LocalCacheService implements CacheService {
       }
 
       return parser != null ? parser(raw) : raw as T?;
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: get error for key "$key"', e, st);
+      // breadcrumb not captureException
       await _monitoring.addBreadcrumb(
         message: 'Cache read failed for key "$key"',
         category: 'cache',
@@ -94,7 +95,7 @@ class LocalCacheService implements CacheService {
         try {
           final String encoded = json.encode(value);
           await _prefs.setString(key, encoded);
-        } on Exception catch (_) {
+        } catch (_) {
           _logger.error(
             '$runtimeType: unsupported type or failed encode for key "$key": ${value.runtimeType}',
           );
@@ -105,7 +106,7 @@ class LocalCacheService implements CacheService {
           );
         }
       }
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: save error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache write failed for key "$key"',
@@ -123,7 +124,7 @@ class LocalCacheService implements CacheService {
     try {
       await _prefs.remove(key);
       _logger.debug("$runtimeType: removed '$key'");
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: remove error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache remove failed for key "$key"',
@@ -138,7 +139,7 @@ class LocalCacheService implements CacheService {
     try {
       await _prefs.clear();
       _logger.debug('$runtimeType: cleared all entries');
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: clear error', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Cache clear failed',
