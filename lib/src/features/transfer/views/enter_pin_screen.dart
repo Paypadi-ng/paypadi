@@ -10,6 +10,7 @@ import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
@@ -25,8 +26,13 @@ class EnterPinScreen extends HookConsumerWidget {
 
     ref.listen(initiatePaymentControllerProvider, (previous, current) {
       current.when(
-        data: (d) {
+        data: (payment) {
           ref.dismissLoading();
+          // A failed attempt leaves the keypad full; clear it so the user
+          // can enter the PIN again.
+          if (previous?.isLoading == true && payment == null) {
+            pinController.clear();
+          }
         },
         error: (e, st) {
           ref.dismissLoading();
@@ -77,7 +83,7 @@ class EnterPinScreen extends HookConsumerWidget {
             },
 
             onSubmit: (value) {
-              ref.read(transactionPayloadProvider)['pin'] = value;
+              ref.read(transferDraftControllerProvider.notifier).setPin(value);
 
               unawaited(
                 ref

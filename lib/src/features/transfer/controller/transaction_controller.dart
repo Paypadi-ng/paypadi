@@ -5,22 +5,22 @@ import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.dart';
 import 'package:paypadi/core/models/payment_model/payment_model.dart';
 import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
-import 'package:paypadi/core/repositories/transaction/i_transaction_repository.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'transaction_controller.g.dart';
 
-@Riverpod(keepAlive: true)
-Map<String, dynamic> transactionPayload(Ref ref) => <String, dynamic>{};
-
 @riverpod
 class AccountLookup extends _$AccountLookup {
   @override
-  FutureOr<AccountLookupModel?> build(String recipientNumber) async {
+  FutureOr<AccountLookupModel?> build(
+    String recipient,
+    LookupBy lookupBy,
+  ) async {
     final repository = ref.watch(transactionRepositoryProvider);
     final result = await repository.getAccountDetails({
-      'phone_number': recipientNumber,
+      lookupBy.field: recipient,
     });
 
     return result.fold(
@@ -35,27 +35,21 @@ class AccountLookup extends _$AccountLookup {
 
 @riverpod
 class InitiatePaymentController extends _$InitiatePaymentController {
-  late final ITransactionRepository _repository;
-
   @override
-  FutureOr<PaymentModel?> build() async {
-    _repository = ref.watch(transactionRepositoryProvider);
-    return null;
-  }
+  FutureOr<PaymentModel?> build() => null;
 
   Future<void> initiatePayment() async {
-    final payloadBuilder = ref.read(transactionPayloadProvider);
-    final Map<String, dynamic> payload = <String, dynamic>{
-      'amount': payloadBuilder['amount'],
-      'transaction_type': 'transfer',
-      'description': payloadBuilder['description'],
-    };
+    // The keypad submits on every completed PIN; ignore repeats while a
+    // request is already in flight.
+    if (state.isLoading) return;
 
+    final draft = ref.read(transferDraftControllerProvider);
     state = const AsyncLoading();
 
-    final result = await _repository.initiatePayment(payload);
+    final result = await ref
+        .read(transactionRepositoryProvider)
+        .initiatePayment(draft.toInitiatePayload());
 
-    // Check if provider is still mounted
     if (!ref.mounted) return;
 
     result.fold(
@@ -75,21 +69,30 @@ class InitiatePaymentController extends _$InitiatePaymentController {
 
 @riverpod
 class TransactionController extends _$TransactionController {
-  late final ITransactionRepository _repository;
-
   @override
-  FutureOr<TransactionModel?> build() async {
-    _repository = ref.watch(transactionRepositoryProvider);
-    return null;
-  }
+  FutureOr<TransactionModel?> build() => null;
 
   Future<void> transfer() async {
+    // A second tap before the first transfer returns must not send the
+    // money again.
+    if (state.isLoading) return;
+
+    final payload = ref
+        .read(transferDraftControllerProvider)
+        .toTransferPayload();
     state = const AsyncLoading();
-    final payload = ref.read(transactionPayloadProvider);
-    final result = await _repository.transfer(payload);
+
+    final result = await ref
+        .read(transactionRepositoryProvider)
+        .transfer(payload);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (success) {
+        // The money has moved: forget the draft, PIN included, so nothing
+        // can be resent or reused by the next transfer.
+        ref.read(transferDraftControllerProvider.notifier).clear();
         state = AsyncValue.data(success.data);
         unawaited(
           ref
@@ -98,6 +101,7 @@ class TransactionController extends _$TransactionController {
         );
       },
       (failure) {
+        // Keep the draft so the user can retry from the confirm screen.
         ref.showExceptionMessage(failure);
         state = const AsyncData(null);
       },

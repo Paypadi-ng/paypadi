@@ -13,92 +13,141 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
 import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/src/shared/widgets/app_textformfield.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 @RoutePage()
 class MakePaymentScreen extends HookConsumerWidget {
-  const MakePaymentScreen({required this.recipientNumber, super.key});
+  const MakePaymentScreen({
+    required this.recipientNumber,
+    this.lookupBy = LookupBy.phoneNumber,
+    super.key,
+  });
+
   final String recipientNumber;
+
+  /// Whether [recipientNumber] is a phone number or an account number.
+  final LookupBy lookupBy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final formKey = useRef(GlobalKey<FormState>());
     final hasSavedAsBeneficiary = useState<bool>(false);
     final commentController = useTextEditingController();
-    final recipientDetails = ref.watch(accountLookupProvider(recipientNumber));
+    final amountController = useTextEditingController();
+    // Transfers started from a QR scan or a withdrawal carry no amount yet,
+    // so ask for one here. Decided once so the field doesn't vanish when
+    // the amount is set.
+    final needsAmount = useMemoized(
+      () => !ref.read(transferDraftControllerProvider).hasAmount,
+    );
+    final recipientDetails = ref.watch(
+      accountLookupProvider(recipientNumber, lookupBy),
+    );
+    final recipient = recipientDetails.value;
 
     return AppScaffold(
       title: 'Transfer',
-      child: Column(
-        children: [
-          Values.v16.verticalSpace,
-          _BankAccountInformation(
-            isLoading: recipientDetails.isLoading,
-            recipient: recipientDetails.value,
-          ),
-          Values.v32.verticalSpace,
-          AppTextformfield(
-            title: 'Comments',
-            hint: 'Enter a narration',
-            controller: commentController,
-            titleStyle: context.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w400,
-              letterSpacing: kZeroLetterSpacing,
+      child: Form(
+        key: formKey.value,
+        child: Column(
+          children: [
+            Values.v16.verticalSpace,
+            _BankAccountInformation(
+              isLoading: recipientDetails.isLoading,
+              recipient: recipient,
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: Values.v14),
-                child: Text(
-                  'Save as Beneficiary',
-                  style: context.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
+            Values.v32.verticalSpace,
+            if (needsAmount)
+              AppTextformfield(
+                title: 'Amount',
+                hint: 'Enter an amount',
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: transferAmountValidator,
+                titleStyle: context.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: kZeroLetterSpacing,
                 ),
               ),
-              Switch.adaptive(
-                value: hasSavedAsBeneficiary.value,
-                onChanged: recipientDetails.isLoading
-                    ? null
-                    : (value) {
-                        hasSavedAsBeneficiary.value = true;
-                        unawaited(
-                          ref
-                              .read(walletControllerProvider.notifier)
-                              .saveBeneficiary(recipientDetails.value!),
-                        );
-                      },
+            AppTextformfield(
+              title: 'Comments',
+              hint: 'Enter a narration',
+              controller: commentController,
+              titleStyle: context.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w400,
+                letterSpacing: kZeroLetterSpacing,
               ),
-            ],
-          ),
-          Values.v48.verticalSpace,
-          FilledButton(
-            onPressed: recipientDetails.value == null
-                ? null
-                : () => continueToPinPage(
-                    ref,
-                    commentController.text,
-                    recipientDetails.value!,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: Values.v14),
+                  child: Text(
+                    'Save as Beneficiary',
+                    style: context.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-            child: const Text('Make Payment'),
-          ),
-        ],
+                ),
+                Switch.adaptive(
+                  value: hasSavedAsBeneficiary.value,
+                  // Nothing to save until the lookup succeeds, and saving
+                  // twice would create a duplicate beneficiary.
+                  onChanged: recipient == null || hasSavedAsBeneficiary.value
+                      ? null
+                      : (value) {
+                          if (!value) return;
+                          hasSavedAsBeneficiary.value = true;
+                          unawaited(
+                            ref
+                                .read(walletControllerProvider.notifier)
+                                .saveBeneficiary(recipient),
+                          );
+                        },
+                ),
+              ],
+            ),
+            Values.v48.verticalSpace,
+            FilledButton(
+              onPressed: recipient == null
+                  ? null
+                  : () => continueToPinPage(
+                      ref,
+                      form: formKey.value,
+                      recipient: recipient,
+                      description: commentController.text,
+                      amount: needsAmount ? amountController.text : null,
+                    ),
+              child: const Text('Make Payment'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void continueToPinPage(
-    WidgetRef ref,
-    String desc,
-    AccountLookupModel recipient,
-  ) {
-    ref.read(transactionPayloadProvider)
-      ..['description'] = desc
-      ..['recipient_account_number'] = recipient.accountNumber
-      ..['recipient_bank_code'] = recipient.bankCode;
+    WidgetRef ref, {
+    required GlobalKey<FormState> form,
+    required AccountLookupModel recipient,
+    required String description,
+    required String? amount,
+  }) {
+    if (!(form.currentState?.validate() ?? false)) return;
+
+    final draft = ref.read(transferDraftControllerProvider.notifier);
+    if (amount != null) draft.setAmount(cleanTransferAmount(amount));
+    draft.setRecipient(
+      accountNumber: recipient.accountNumber,
+      bankCode: recipient.bankCode,
+      description: description,
+    );
 
     unawaited(ref.read(appRouterProvider).push(const EnterPinRoute()));
   }

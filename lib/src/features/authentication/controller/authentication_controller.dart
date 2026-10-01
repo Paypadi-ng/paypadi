@@ -6,6 +6,7 @@ import 'package:paypadi/core/repositories/authentication/i_authentication_reposi
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'authentication_controller.g.dart';
@@ -164,6 +165,9 @@ class AuthenticationController extends _$AuthenticationController {
   }
 
   Future<void> logout() async {
+    // Drop any transfer in progress, PIN included, before anything else.
+    ref.read(transferDraftControllerProvider.notifier).clear();
+
     final localCache = await ref.read(localCacheProvider.future);
 
     await Future.wait([
