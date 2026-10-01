@@ -129,12 +129,15 @@ class SessionController extends _$SessionController
     }
   }
 
+  /// Only a rejected refresh token ends the session: the backend answers 401
+  /// (`token_not_valid`) for an expired or revoked one. A 400 means a
+  /// malformed request, and network or parsing failures say nothing about
+  /// the session, so the user stays signed in for the next attempt.
   bool _isSessionExpiredError(AppException exception) {
     if (exception is ServerException) {
       return exception.maybeMap(
         unauthorizedRequest: (_) => true,
         forbiddenRequest: (_) => true,
-        badRequest: (_) => true,
         orElse: () => false,
       );
     }
