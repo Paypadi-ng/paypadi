@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -62,5 +64,25 @@ class LoadingIndicator extends ConsumerWidget {
         size: Values.v36,
       ),
     );
+  }
+}
+
+/// Dismisses the global loading overlay when a screen is popped.
+///
+/// Screens show the overlay while a request runs and dismiss it when the
+/// request settles, from a listener that lives as long as the screen. If the
+/// user leaves the screen first (the Android back button or the iOS back
+/// swipe still work under the overlay), that listener is gone and the
+/// overlay would block the whole app.
+class DismissLoadingOnPop extends NavigatorObserver {
+  DismissLoadingOnPop(this._dismiss);
+
+  final VoidCallback _dismiss;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    // Navigator callbacks can run while widgets are building, when
+    // providers must not change; dismiss once that has finished.
+    scheduleMicrotask(_dismiss);
   }
 }
