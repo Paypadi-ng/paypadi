@@ -164,6 +164,20 @@ void main() {
       expect(router.pushed.single, isA<CreateTransactionPinRoute>());
     });
 
+    test('forgets the sign-up details, password included, once the account '
+        'exists', () async {
+      final container = containerFor(_registerBody(access: 'a', refresh: 'r'));
+      container.read(authenticationPayloadProvider)
+        ..['phone_number'] = '08031234567'
+        ..['password'] = '123456';
+
+      await container
+          .read(authenticationControllerProvider.notifier)
+          .register();
+
+      expect(container.read(authenticationPayloadProvider), isEmpty);
+    });
+
     test('still moves on when the tokens carry no readable expiry', () async {
       final container = containerFor(
         _registerBody(access: 'opaque-access', refresh: 'opaque-refresh'),
