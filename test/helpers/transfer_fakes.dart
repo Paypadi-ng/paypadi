@@ -9,6 +9,7 @@ import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.da
 import 'package:paypadi/core/models/payment_model/payment_model.dart';
 import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
 import 'package:paypadi/core/repositories/transaction/i_transaction_repository.dart';
+import 'package:paypadi/core/services/storage/transaction_pin_vault.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
@@ -53,6 +54,8 @@ class FakeTransactionRepository implements ITransactionRepository {
   );
 
   void completeInitiate() => _initiate.complete(success(ok(kPayment)));
+
+  void failInitiate(Exception error) => _initiate.complete(failure(error));
 
   @override
   FutureResultOf<ApiResponse<TransactionModel>> transfer(
@@ -106,6 +109,38 @@ class RecordingRouter extends AppRouter {
     pushed.add(route);
     return null;
   }
+
+  int poppedToRoot = 0;
+
+  @override
+  void popUntilRoot() => poppedToRoot++;
+}
+
+/// A transaction PIN vault that records what was saved and cleared.
+class FakePinVault implements TransactionPinVault {
+  String? pin;
+  final List<String> saved = [];
+  int clears = 0;
+
+  @override
+  Future<bool> save(String pin) async {
+    saved.add(pin);
+    this.pin = pin;
+    return true;
+  }
+
+  @override
+  Future<String?> read() async => pin;
+
+  @override
+  Future<void> clear() async {
+    clears++;
+    pin = null;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
 }
 
 /// Swallows toasts, which need an overlay the tests don't build.
