@@ -38,7 +38,27 @@ enum BeneficiaryType {
 
 enum TransactionStatus { success, pending, completed, failure }
 
-enum TransactionType { transfer, deposit, withdrawal, unknown }
+/// Transaction kinds the API sends in `transaction_type`.
+enum TransactionType {
+  transfer,
+  deposit,
+  withdrawal,
+  refund,
+  reversal,
+  fee,
+  reservation,
+  adjustment,
+  unknown;
+
+  /// Whether the transaction moved money into the wallet (`true`) or out of
+  /// it (`false`). `null` when the type alone doesn't say: a reservation
+  /// holds funds without moving them, and an adjustment can go either way.
+  bool? get isCredit => switch (this) {
+    deposit || refund || reversal => true,
+    transfer || withdrawal || fee => false,
+    reservation || adjustment || unknown => null,
+  };
+}
 
 enum UploadStatus { idle, uploading, complete, failed }
 
