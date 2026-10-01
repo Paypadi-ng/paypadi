@@ -5,6 +5,7 @@ import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/repositories/authentication/i_authentication_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'authentication_controller.g.dart';
@@ -69,11 +70,12 @@ class AuthenticationController extends _$AuthenticationController {
 
     await result.fold(
       (response) async {
+        // Registration doesn't return expiry fields; read them from the JWTs.
         await _saveSession(
           refreshToken: response.data.refreshToken,
           accessToken: response.data.accessToken,
-          refreshExpiry: response.data.refreshTokenExpiry,
-          accessExpiry: response.data.accessTokenExpiry,
+          refreshExpiry: jwtExpiry(response.data.refreshToken),
+          accessExpiry: jwtExpiry(response.data.accessToken),
         );
 
         state = const AsyncData(null);
@@ -188,8 +190,8 @@ class AuthenticationController extends _$AuthenticationController {
   Future<void> _saveSession({
     required String refreshToken,
     required String accessToken,
-    required int refreshExpiry,
-    required int accessExpiry,
+    int? refreshExpiry,
+    int? accessExpiry,
   }) async {
     // FIX: Execute all cache saves concurrently, and actually save the expiry timestamps!
     await Future.wait([
@@ -199,12 +201,14 @@ class AuthenticationController extends _$AuthenticationController {
       ref
           .read(secureCacheProvider)
           .save(key: CacheKeys.accessToken, value: accessToken),
-      ref
-          .read(secureCacheProvider)
-          .save(key: CacheKeys.accessTokenExpiry, value: accessExpiry),
-      ref
-          .read(secureCacheProvider)
-          .save(key: CacheKeys.refreshTokenExpiry, value: refreshExpiry),
+      if (accessExpiry != null)
+        ref
+            .read(secureCacheProvider)
+            .save(key: CacheKeys.accessTokenExpiry, value: accessExpiry),
+      if (refreshExpiry != null)
+        ref
+            .read(secureCacheProvider)
+            .save(key: CacheKeys.refreshTokenExpiry, value: refreshExpiry),
     ]);
   }
 }
