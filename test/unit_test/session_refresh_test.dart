@@ -1,12 +1,10 @@
 import 'dart:convert';
 
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/widgets.dart' show RoutePredicate;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/config/router/router.dart';
+import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
@@ -16,6 +14,8 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/transfer_fakes.dart';
 
 int _secondsFromNow(Duration offset) =>
     DateTime.now().toUtc().add(offset).millisecondsSinceEpoch ~/ 1000;
@@ -65,19 +65,6 @@ class _FakePrefs implements SharedPreferencesWithCache {
   dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }
 
-/// Records logout's navigation instead of performing it.
-class _RecordingRouter extends AppRouter {
-  _RecordingRouter({required super.ref});
-
-  @override
-  Future<T?> pushAndPopUntil<T extends Object?>(
-    PageRouteInfo route, {
-    required RoutePredicate predicate,
-    bool scopedPopUntil = true,
-    OnNavigationFailure? onFailure,
-  }) async => null;
-}
-
 /// Lets the refresh that SessionController starts from build() finish.
 Future<void> _settle() async {
   for (var i = 0; i < 50; i++) {
@@ -112,7 +99,7 @@ void main() {
         sharedPreferencesFutureProvider.overrideWith(
           (ref) async => _FakePrefs(),
         ),
-        appRouterProvider.overrideWith((ref) => _RecordingRouter(ref: ref)),
+        appRouterProvider.overrideWith((ref) => RecordingRouter(ref: ref)),
       ],
     );
     addTearDown(container.dispose);
@@ -206,6 +193,8 @@ void main() {
       final container = await startSession(repository);
 
       expect(await stored(container, CacheKeys.refreshToken), isNull);
+      final router = container.read(appRouterProvider) as RecordingRouter;
+      expect(router.replacedStacks.single.single, isA<OnboardingRoute>());
     });
 
     test('keeps the user signed in on a 400', () async {

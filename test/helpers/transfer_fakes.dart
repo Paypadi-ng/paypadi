@@ -93,10 +93,18 @@ class FakeTransactionRepository implements ITransactionRepository {
       throw UnimplementedError('${invocation.memberName}');
 }
 
-/// Records pushes instead of navigating.
+/// Records navigation instead of performing it.
 class RecordingRouter extends AppRouter {
   RecordingRouter({required super.ref});
   final List<PageRouteInfo> pushed = [];
+  final List<List<PageRouteInfo>> replacedStacks = [];
+
+  @override
+  Future<void> replaceAll(
+    List<PageRouteInfo> routes, {
+    OnNavigationFailure? onFailure,
+    bool updateExistingRoutes = true,
+  }) async => replacedStacks.add(routes);
 
   @override
   Future<T?> push<T extends Object?>(
