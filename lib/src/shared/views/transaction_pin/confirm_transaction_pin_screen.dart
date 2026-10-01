@@ -11,6 +11,9 @@ import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
+/// Shown when the confirmation doesn't match the PIN entered first.
+const pinMismatchMessage = "The PINs don't match. Enter the same PIN again.";
+
 @RoutePage()
 class ConfirmTransactionPinScreen extends HookConsumerWidget {
   const ConfirmTransactionPinScreen({required this.pin, super.key});
@@ -46,7 +49,7 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           ),
           Values.v12.verticalSpace,
           Text(
-            'Set a secure password for your account',
+            'Enter the same 4-digit PIN again to confirm it.',
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w400,
             ),
@@ -58,7 +61,8 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: confirmPinController,
-            onSubmit: (confirmedPin) => submitPin(ref, pin, confirmedPin),
+            onSubmit: (confirmedPin) =>
+                submitPin(ref, confirmPinController, confirmedPin),
           ),
           const Spacer(),
         ],
@@ -66,11 +70,20 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> submitPin(WidgetRef ref, String pin, String confirmedPin) async {
-    if (pin == confirmedPin) {
-      await ref
-          .read(riderProfileProvider.notifier)
-          .setTransactionPin(pin, confirmedPin);
+  Future<void> submitPin(
+    WidgetRef ref,
+    TextEditingController field,
+    String confirmedPin,
+  ) async {
+    if (confirmedPin != pin) {
+      // Without this the keypad stayed full and nothing said why.
+      field.clear();
+      ref.showErrorToast(pinMismatchMessage);
+      return;
     }
+
+    await ref
+        .read(riderProfileProvider.notifier)
+        .setTransactionPin(pin, confirmedPin);
   }
 }

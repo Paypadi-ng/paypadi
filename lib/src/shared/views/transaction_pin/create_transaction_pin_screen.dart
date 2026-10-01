@@ -33,7 +33,7 @@ class CreateTransactionPinScreen extends HookConsumerWidget {
           ),
           Values.v12.verticalSpace,
           Text(
-            'Set a secure password for your account',
+            'Choose a 4-digit PIN to approve your payments.',
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w400,
             ),

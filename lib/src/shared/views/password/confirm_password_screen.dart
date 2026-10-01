@@ -11,6 +11,10 @@ import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
+/// Shown when the confirmation doesn't match the password entered first.
+const passwordMismatchMessage =
+    "The passwords don't match. Enter the same password again.";
+
 @RoutePage()
 class ConfirmPasswordScreen extends HookConsumerWidget {
   const ConfirmPasswordScreen({required this.password, super.key});
@@ -60,8 +64,11 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: confirmPasswordController,
-            onSubmit: (confirmedPassword) =>
-                createAccount(ref, password, confirmedPassword),
+            onSubmit: (confirmedPassword) => createAccount(
+              ref,
+              confirmPasswordController,
+              confirmedPassword,
+            ),
           ),
           const Spacer(),
         ],
@@ -71,12 +78,17 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
 
   Future<void> createAccount(
     WidgetRef ref,
-    String password,
+    TextEditingController field,
     String confirmedPassword,
   ) async {
-    if (password == confirmedPassword) {
-      ref.read(authenticationPayloadProvider)['password'] = password;
-      await ref.read(authenticationControllerProvider.notifier).register();
+    if (confirmedPassword != password) {
+      // Without this the keypad stayed full and nothing said why.
+      field.clear();
+      ref.showErrorToast(passwordMismatchMessage);
+      return;
     }
+
+    ref.read(authenticationPayloadProvider)['password'] = password;
+    await ref.read(authenticationControllerProvider.notifier).register();
   }
 }

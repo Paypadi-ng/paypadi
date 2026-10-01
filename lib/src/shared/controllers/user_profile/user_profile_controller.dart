@@ -54,10 +54,15 @@ class RiderProfile extends _$RiderProfile {
         unawaited(
           ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
         );
-        await ref
-            .read(appRouterProvider)
-            .push(const BiometricAuthenticationRoute());
+        // Settle before navigating: push() only completes once the next
+        // screen is popped, so awaiting it first left this in loading, and
+        // the loading overlay blocked the biometrics screen.
         state = const AsyncData(null);
+        unawaited(
+          ref
+              .read(appRouterProvider)
+              .push(const BiometricAuthenticationRoute()),
+        );
       },
       (failure) {
         ref.showExceptionMessage(failure);
