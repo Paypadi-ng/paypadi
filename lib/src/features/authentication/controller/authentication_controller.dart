@@ -2,14 +2,21 @@ import 'dart:async';
 
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
+import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/repositories/authentication/i_authentication_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
+import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
+import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'authentication_controller.g.dart';
+
+/// Shown when biometric unlock can't renew the session.
+const sessionExpiredMessage =
+    'Your session has expired. Enter your password to sign in.';
 
 @Riverpod(keepAlive: true)
 Map<String, dynamic> authenticationPayload(Ref ref) => <String, dynamic>{};
@@ -44,7 +51,7 @@ class AuthenticationController extends _$AuthenticationController {
           _saveToCache(CacheKeys.email, response.data.user.email),
           _saveToCache(CacheKeys.firstName, response.data.user.firstName),
           _saveToCache(CacheKeys.phoneNumber, phoneNumber),
-          _saveToCache(CacheKeys.password, password),
+          _forgetLegacyCredentials(),
         ]);
 
         // Note: It is safer to use unawaited() for listeners or route pushes
@@ -136,32 +143,61 @@ class AuthenticationController extends _$AuthenticationController {
     );
   }
 
-  Future<void> loginWithBiometrics() async {
-    final biometricService = ref.read(biometricsProvider);
+  /// Quick unlock: after a biometric check, renews the stored session with
+  /// its refresh token. No password is kept on the device, so once the
+  /// refresh token has expired the user signs in with their password.
+  Future<void> unlockWithBiometrics() async {
+    if (state.isLoading) return;
 
+    final bool didAuthenticate;
     try {
-      final bool didAuthenticate = await biometricService.authenticate();
-
-      if (didAuthenticate) {
-        final String? phoneNumber = await ref
-            .read(secureCacheProvider)
-            .get<String?>(CacheKeys.phoneNumber);
-
-        final String? password = await ref
-            .read(secureCacheProvider)
-            .get<String?>(CacheKeys.password);
-
-        if (phoneNumber == null || password == null) {
-          return;
-        }
-
-        await login(phoneNumber, password);
-      }
+      didAuthenticate = await ref.read(biometricsProvider).authenticate();
     } on Exception catch (exception) {
-      // Changed to catch Exception strictly, per your lint rules
-      ref.showExceptionMessage(exception);
-      state = const AsyncData(null);
+      if (ref.mounted) ref.showExceptionMessage(exception);
+      return;
     }
+    if (!didAuthenticate || !ref.mounted) return;
+
+    state = const AsyncLoading();
+    try {
+      await ref.read(sessionControllerProvider.notifier).refreshToken();
+    } on Exception catch (exception) {
+      if (!ref.mounted) return;
+      state = const AsyncData(null);
+      if (_isSessionOver(exception)) {
+        ref
+            .read(appToastControllerProvider.notifier)
+            .showError(sessionExpiredMessage);
+      } else {
+        ref.showExceptionMessage(exception);
+      }
+      return;
+    }
+
+    await _forgetLegacyCredentials();
+    if (!ref.mounted) return;
+
+    state = const AsyncData(null);
+    unawaited(ref.read(appRouterProvider).push(const DashboardRoute()));
+  }
+
+  /// No refresh token, or one the server rejected: biometrics can't unlock
+  /// the account any more and the password is needed.
+  bool _isSessionOver(Exception exception) =>
+      exception is ServerException &&
+      exception.maybeMap(
+        unauthorizedRequest: (_) => true,
+        forbiddenRequest: (_) => true,
+        orElse: () => false,
+      );
+
+  /// Deletes the password and transaction PIN that older versions stored.
+  Future<void> _forgetLegacyCredentials() async {
+    final cache = ref.read(secureCacheProvider);
+    await Future.wait([
+      cache.remove(CacheKeys.legacyPassword),
+      cache.remove(CacheKeys.legacyTransactionPin),
+    ]);
   }
 
   Future<void> logout() async {

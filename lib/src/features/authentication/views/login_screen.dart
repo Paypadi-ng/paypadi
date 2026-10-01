@@ -86,7 +86,7 @@ class LoginScreen extends HookConsumerWidget {
             showBiometric: settings.value?.biometricsIsEnabled ?? false,
             onBiometricKeyPressed: () => ref
                 .read(authenticationControllerProvider.notifier)
-                .loginWithBiometrics(),
+                .unlockWithBiometrics(),
             onSubmit: (password) {
               if (phoneNumber == null) return;
 

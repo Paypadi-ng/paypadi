@@ -183,7 +183,10 @@ class CacheKeys {
 
   static const String firstName = 'user_first_name';
   static const String email = 'user_email';
-  static const String password = 'user_password';
   static const String phoneNumber = 'user_phone_number';
-  static const String transactionPin = 'user_transaction_pin';
+
+  // Older versions stored the password and transaction PIN on the device.
+  // These keys are only used to delete those values.
+  static const String legacyPassword = 'user_password';
+  static const String legacyTransactionPin = 'user_transaction_pin';
 }
