@@ -14,6 +14,13 @@ import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+/// The deposit account as copied or shared. It labelled the account
+/// holder's name as the bank before.
+String depositAccountDetails(UserBankAccountModel account) =>
+    'Bank: ${account.bankName}\n'
+    'Account Name: ${account.name}\n'
+    'Account Number: ${account.number}';
+
 @RoutePage()
 class DepositMoneyScreen extends HookConsumerWidget {
   const DepositMoneyScreen({super.key});
@@ -135,9 +142,7 @@ class DepositMoneyScreen extends HookConsumerWidget {
     WidgetRef ref,
     UserBankAccountModel account,
   ) async {
-    final String depositAccountInfo =
-        'Bank: ${account.name} \n'
-        'Account Number: ${account.number}';
+    final String depositAccountInfo = depositAccountDetails(account);
 
     await Clipboard.setData(
       ClipboardData(text: depositAccountInfo),
@@ -145,9 +150,7 @@ class DepositMoneyScreen extends HookConsumerWidget {
   }
 
   Future<void> shareAccountInformation(UserBankAccountModel account) async {
-    final String depositAccountInfo =
-        'Bank: ${account.name} \n'
-        'Account Number: ${account.number}';
+    final String depositAccountInfo = depositAccountDetails(account);
 
     await SharePlus.instance.share(
       ShareParams(text: depositAccountInfo),
