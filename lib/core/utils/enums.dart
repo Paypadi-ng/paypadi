@@ -36,7 +36,25 @@ enum BeneficiaryType {
   final String typeName;
 }
 
-enum TransactionStatus { success, pending, completed, failure }
+enum TransactionStatus {
+  success,
+  pending,
+  completed,
+  failure,
+  unknown;
+
+  /// Reads the status the API sends. Its values aren't documented, so the
+  /// common spellings are mapped and anything else is `unknown`. Before,
+  /// every unrecognised status (e.g. "processing") showed as failed.
+  static TransactionStatus fromApi(Object? value) =>
+      switch (value?.toString().trim().toLowerCase()) {
+        'success' || 'successful' || 'succeeded' => success,
+        'completed' || 'complete' => completed,
+        'pending' || 'processing' || 'initiated' || 'in_progress' => pending,
+        'failed' || 'failure' || 'error' || 'declined' => failure,
+        _ => unknown,
+      };
+}
 
 /// Transaction kinds the API sends in `transaction_type`.
 enum TransactionType {

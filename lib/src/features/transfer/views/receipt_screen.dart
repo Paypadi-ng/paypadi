@@ -193,6 +193,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             AppColors.success.withValues(alpha: .12),
           TransactionStatus.failure => AppColors.failure.withValues(alpha: .12),
           TransactionStatus.pending => Colors.amber.withValues(alpha: .12),
+          TransactionStatus.unknown ||
           null => AppColors.disabled.withValues(alpha: .12),
         },
       ),
@@ -204,7 +205,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             TransactionStatus.completed => AppColors.success,
             TransactionStatus.failure => AppColors.failure,
             TransactionStatus.pending => Colors.amber,
-            null => AppColors.disabled,
+            TransactionStatus.unknown || null => AppColors.disabled,
           },
         ),
         child: Icon(
@@ -213,7 +214,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             TransactionStatus.completed => Icons.check,
             TransactionStatus.failure => Icons.close,
             TransactionStatus.pending => Icons.pending,
-            null => Icons.question_mark,
+            TransactionStatus.unknown || null => Icons.question_mark,
           },
           color: AppColors.white,
         ),

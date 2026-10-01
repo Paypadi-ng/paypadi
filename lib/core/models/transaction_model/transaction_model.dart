@@ -30,7 +30,7 @@ sealed class TransactionHistoryModel with _$TransactionHistoryModel {
     required String id,
     required String amount,
     required String reference,
-    @JsonKey(unknownEnumValue: TransactionStatus.failure)
+    @JsonKey(fromJson: TransactionStatus.fromApi)
     required TransactionStatus status,
     @JsonKey(
       name: 'transaction_type',
