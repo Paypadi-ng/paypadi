@@ -57,8 +57,9 @@ class SecureCacheService implements CacheService {
       }
 
       return value as T?;
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: get error for key "$key"', e, st);
+      // captureException — a token read failure causes silent auth breakage
       await _monitoring.captureException(
         e,
         stackTrace: st,
@@ -89,8 +90,9 @@ class SecureCacheService implements CacheService {
     try {
       await _storage.write(key: key, value: stringValue);
       _logger.debug("$runtimeType: saved '$key'");
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: save error for key "$key"', e, st);
+      // captureException — failing to persist a token is a critical write
       await _monitoring.captureException(
         e,
         stackTrace: st,
@@ -106,7 +108,7 @@ class SecureCacheService implements CacheService {
     try {
       await _storage.delete(key: key);
       _logger.debug("$runtimeType: removed '$key'");
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: remove error for key "$key"', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Secure cache remove failed for key "$key"',
@@ -121,7 +123,7 @@ class SecureCacheService implements CacheService {
     try {
       await _storage.deleteAll();
       _logger.debug('$runtimeType: cleared all entries');
-    } on Exception catch (e, st) {
+    } catch (e, st) {
       _logger.error('$runtimeType: clear error', e, st);
       await _monitoring.addBreadcrumb(
         message: 'Secure cache clear failed',
