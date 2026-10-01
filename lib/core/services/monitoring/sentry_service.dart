@@ -1,4 +1,3 @@
-import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 

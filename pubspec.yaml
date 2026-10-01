@@ -24,7 +24,7 @@ dependencies:
   local_auth: ^3.0.0
   package_info_plus: ^10.1.0
   retrofit: ^4.4.2
-  dio: ^5.8.0+1
+  dio: ^5.11.1
   talker_dio_logger: ^5.0.0
   talker_flutter: ^5.0.0
   talker_riverpod_logger: ^5.0.0

@@ -1,19 +1,22 @@
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 class AppVersionService {
+  AppVersionService({required MonitoringService monitoring})
+    : _monitoring = monitoring;
+
+  final MonitoringService _monitoring;
+
   Future<PackageInfo> getAppInformation() async {
     try {
-      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      return packageInfo;
+      return await PackageInfo.fromPlatform();
     } catch (e) {
-      // Report to crash reporting service (e.g., Firebase Crashlytics)
-      // await FirebaseCrashlytics.instance.recordError(
-      //   e,
-      //   stackTrace,
-      //   reason: 'Failed to retrieve package info',
-      //   fatal: false, // Won't be flagged as a crash in the dashboard
-      // );
-
+      // Non-fatal — log as breadcrumb, not a full exception capture
+      await _monitoring.addBreadcrumb(
+        message: 'Failed to retrieve PackageInfo',
+        category: 'app.version',
+        data: {'error': e.toString()},
+      );
       return PackageInfo(
         appName: 'Unknown',
         packageName: 'Unknown',

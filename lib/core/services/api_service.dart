@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:paypadi/core/services/storage/cache_service.dart';
 import 'package:paypadi/core/utils/constants.dart' show CacheKeys, debugLogger;
+import 'package:sentry_dio/sentry_dio.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 class ApiService {
@@ -31,6 +33,13 @@ class ApiService {
                 ),
             ],
           );
+
+    dio.addSentry(
+      failedRequestStatusCodes: [
+        SentryStatusCode.range(400, 404),
+        SentryStatusCode(500),
+      ],
+    );
   }
 
   late final Dio dio;
@@ -41,11 +50,15 @@ class AuthenticationInterceptor extends Interceptor {
     : _cache = secureCache;
   final CacheService _cache;
 
+  /// Endpoints called without a session, so no (possibly expired) access
+  /// token is attached. The refresh endpoint carries its refresh token in
+  /// the body.
   static const Set<String> _publicPaths = {
     '/auth/login/',
     '/auth/register/',
     '/auth/otp/request/',
     '/auth/otp/verify/',
+    '/auth/jwt/token/refresh/',
   };
 
   @override
@@ -66,15 +79,5 @@ class AuthenticationInterceptor extends Interceptor {
     } finally {
       handler.next(options);
     }
-  }
-
-  bool pathDoesNotRequireCredential(String path) {
-    return switch (path) {
-      '/auth/login/' => true,
-      '/auth/register/' => true,
-      '/auth/otp/request/' => true,
-      '/auth/otp/verify/' => true,
-      _ => false,
-    };
   }
 }
