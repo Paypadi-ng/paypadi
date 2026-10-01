@@ -35,6 +35,9 @@ abstract class AppException implements Exception {
           DioExceptionType.sendTimeout => const ServerException.sendTimeout(),
           DioExceptionType.receiveTimeout =>
             const ServerException.receiveTimeout(),
+          // dio 5.11+: decoding the response body took too long.
+          DioExceptionType.transformTimeout =>
+            const ServerException.receiveTimeout(),
           DioExceptionType.badCertificate =>
             const ServerException.internalServerError(),
           DioExceptionType.badResponse =>
