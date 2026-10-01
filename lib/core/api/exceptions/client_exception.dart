@@ -33,3 +33,12 @@ base class ClientException extends AppException {
   @override
   String toString() => message;
 }
+
+/// The user backed out of a file or image picker. A choice, not an error:
+/// callers should return to where they were rather than report it.
+final class PickCancelledException extends ClientException {
+  const PickCancelledException(String message) : super(message: message);
+
+  @override
+  SeverityLevel get monitoringSeverity => SeverityLevel.info;
+}
