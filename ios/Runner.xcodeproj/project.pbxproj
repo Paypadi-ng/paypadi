@@ -815,7 +815,7 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = S4HUJLZ6F6;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1024,7 +1024,7 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 7DGLK8746N;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1220,11 +1220,15 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F7F7DDB32FDEB7A000E73CAE /* Release-dev.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = S4HUJLZ6F6;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1234,6 +1238,8 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.paypadi.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development com.paypadi.dev";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development com.paypadi.dev";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1429,7 +1435,7 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = S4HUJLZ6F6;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1530,7 +1536,7 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = S4HUJLZ6F6;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1626,11 +1632,15 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F7F7DDB42FDEB7A000E73CAE /* Release-staging.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = S4HUJLZ6F6;
+				DEVELOPMENT_TEAM = BGJ9Z72W23;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = BGJ9Z72W23;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1640,6 +1650,8 @@ D842D2AAFD157E48A26A29A1 /* Release-staging.xcconfig */ = {isa = PBXFileReferenc
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.paypadi.staging;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.paypadi.staging";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.paypadi.staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;

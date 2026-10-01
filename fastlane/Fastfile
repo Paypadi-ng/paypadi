@@ -73,6 +73,7 @@ end
 platform :ios do
   desc "Dev: sync development certificates and profiles"
   lane :sync_dev_certs do
+    setup_ci if is_ci # temporary keychain so match never touches the login keychain
     setup_ci_api_key
     match(type: "development", app_identifier: [APP_IDS[:dev]], readonly: is_ci)
   end
@@ -80,6 +81,7 @@ platform :ios do
   desc "Staging/Prod: sync App Store certificates and profiles"
   desc "Options: flavor (staging | prod)"
   lane :sync_appstore_certs do |options|
+    setup_ci if is_ci
     setup_ci_api_key
     match(
       type: "appstore",

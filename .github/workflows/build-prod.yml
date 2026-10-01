@@ -90,14 +90,15 @@ jobs:
           retention-days: 90
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
-  # Disabled until IOS_DEPLOY_ENABLED is 'true' (see deploy-dev.yml).
+  # Disabled until IOS_PROD_DEPLOY_ENABLED is 'true': prod iOS signing moves to
+  # the Paypadi organization Apple team (dev/staging use IOS_DEPLOY_ENABLED).
   ios-prod:
     name: iOS — Prod build
     needs: validate
     runs-on: macos-15
     environment: prod-build
     if: >-
-      vars.IOS_DEPLOY_ENABLED == 'true' &&
+      vars.IOS_PROD_DEPLOY_ENABLED == 'true' &&
       (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
 
     steps:
