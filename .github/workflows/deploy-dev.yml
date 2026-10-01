@@ -10,6 +10,8 @@ name: Paypadi Deploy — Dev
 #   .github/ without reading that change first.
 # • Push to dev (i.e. a merged PR): builds and distributes via `dev`, which
 #   only accepts the dev branch.
+# • Dependabot PRs get the unsigned build check only: Dependabot runs never
+#   receive environment secrets, so a signed preview could not succeed.
 
 on:
   pull_request:
@@ -29,16 +31,49 @@ on:
 permissions:
   contents: read
 
-# A new push to a PR supersedes a preview still waiting for approval.
-# Merged builds queue instead of cancelling mid-upload.
+# Merged builds on dev queue one at a time (never cancelled mid-upload).
+# PR runs get a group of their own: a shared group would leave a new push
+# stuck behind an older run that is waiting for dev-preview approval, because
+# GitHub doesn't cancel runs waiting on an environment. The
+# cancel-superseded job clears those older runs instead.
 concurrency:
-  group: deploy-dev-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.event_name == 'pull_request' && format('deploy-dev-pr-{0}', github.run_id) || 'deploy-dev' }}
+  cancel-in-progress: false
 
 env:
   JAVA_VERSION: "17"
 
 jobs:
+  # ─── Housekeeping ───────────────────────────────────────────────────────────
+  # Force-cancel older runs for this PR branch that are still queued, running
+  # or waiting for dev-preview approval — a new push supersedes them.
+  cancel-superseded:
+    name: Cancel superseded previews
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel older runs for this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.head_ref }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          for status in waiting queued pending in_progress; do
+            gh run list --repo "$REPO" --workflow deploy-dev.yml --event pull_request \
+              --branch "$BRANCH" --status "$status" --json databaseId --jq '.[].databaseId'
+          done | sort -u | while read -r id; do
+            if (( id < RUN_ID )); then
+              gh api -X POST "repos/$REPO/actions/runs/$id/force-cancel" >/dev/null \
+                && echo "Cancelled superseded run $id"
+            fi
+          done
+
   # ─── Validation ─────────────────────────────────────────────────────────────
   validate:
     uses: ./.github/workflows/validate.yml
@@ -78,7 +113,7 @@ jobs:
     if: >-
       always() && needs.validate.result == 'success' &&
       (needs.build-check.result == 'success' || needs.build-check.result == 'skipped') &&
-      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) &&
       (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android')
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'pull_request' && 'dev-preview' || 'dev' }}
@@ -153,7 +188,7 @@ jobs:
     if: >-
       always() && vars.IOS_DEPLOY_ENABLED == 'true' && needs.validate.result == 'success' &&
       (needs.build-check.result == 'success' || needs.build-check.result == 'skipped') &&
-      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) &&
       (github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios')
     runs-on: macos-15
     environment: ${{ github.event_name == 'pull_request' && 'dev-preview' || 'dev' }}
