@@ -58,9 +58,15 @@ sealed class ServerException extends AppException with _$ServerException {
     String? conflictingAssetId;
     final data = response?.data;
 
+    // Read the body defensively: a cast that fails here throws a TypeError,
+    // which escapes error handling and leaves the caller stuck loading.
     if (data is Map) {
-      message = data['message'] as String?;
-      conflictingAssetId = (data['data'] as Map?)?['document_id'] as String?;
+      message = readableMessage(data['message']);
+      conflictingAssetId = switch (data['data']) {
+        final Map<Object?, Object?> details =>
+          details['document_id']?.toString(),
+        _ => null,
+      };
     }
 
     switch (statusCode) {
@@ -106,6 +112,19 @@ sealed class ServerException extends AppException with _$ServerException {
         );
     }
   }
+
+  /// The first readable message in an error body field: the string itself,
+  /// or the first message inside a map or list of field errors, such as
+  /// `{"phone_number": ["This field is required."]}`.
+  @visibleForTesting
+  static String? readableMessage(Object? value) => switch (value) {
+    final String text when text.trim().isNotEmpty => text,
+    final List<Object?> items =>
+      items.map(readableMessage).nonNulls.firstOrNull,
+    final Map<Object?, Object?> fields =>
+      fields.values.map(readableMessage).nonNulls.firstOrNull,
+    _ => null,
+  };
 
   @override
   String get monitoringContext => 'Server';
