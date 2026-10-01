@@ -229,7 +229,7 @@ ImagePickerService imagePickerService(Ref ref) {
 
 @riverpod
 AppVersionService appVersionService(Ref ref) {
-  return AppVersionService();
+  return AppVersionService(monitoring: ref.watch(monitoringProvider));
 }
 
 @riverpod

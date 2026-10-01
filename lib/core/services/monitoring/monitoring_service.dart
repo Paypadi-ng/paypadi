@@ -1,4 +1,5 @@
-import 'package:paypadi/core/api/exceptions/app_exception.dart';
+/// An enum to control Sentry logging thresholds
+enum SeverityLevel { debug, info, warning, error, fatal }
 
 abstract class MonitoringService {
   Future<void> captureException(

@@ -5,8 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
-
-enum SeverityLevel { debug, info, warning, error, fatal }
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 typedef ExceptionLogger =
     Future<void> Function(
@@ -35,6 +34,9 @@ abstract class AppException implements Exception {
             const ServerException.requestTimeout(),
           DioExceptionType.sendTimeout => const ServerException.sendTimeout(),
           DioExceptionType.receiveTimeout =>
+            const ServerException.receiveTimeout(),
+          // dio 5.11+: decoding the response body took too long.
+          DioExceptionType.transformTimeout =>
             const ServerException.receiveTimeout(),
           DioExceptionType.badCertificate =>
             const ServerException.internalServerError(),

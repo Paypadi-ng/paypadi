@@ -16,20 +16,21 @@ class FilePickerController extends _$FilePickerController {
 
   Future<void> pickFile(DocumentCategory documentCategory) async {
     try {
-      final result = await ref
+      final file = await ref
           .read(filePickerServiceProvider)
           .pickFileFromSystem();
 
       if (!ref.mounted) return;
 
-      final path = result.files.first.xFile.path;
-
       final updated = Map<DocumentCategory, File?>.from(
         state.value ?? _default,
       );
-      updated[documentCategory] = File(path);
+      updated[documentCategory] = file;
 
       state = AsyncData(updated);
+    } on PickCancelledException {
+      // The user backed out of the picker; keep whatever was picked before.
+      return;
     } on ClientException catch (e) {
       if (!ref.mounted) return;
 
