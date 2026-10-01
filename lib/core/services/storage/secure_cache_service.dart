@@ -15,8 +15,6 @@ class SecureCacheService implements CacheService {
   }) : _storage =
            storage ??
            const FlutterSecureStorage(
-             // 1. Android encrypted preferences fallback to prevent Keystore crashes
-             aOptions: AndroidOptions.biometric(),
              iOptions: IOSOptions(
                accessibility: KeychainAccessibility.first_unlock_this_device,
              ),
