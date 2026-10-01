@@ -44,6 +44,7 @@ import 'package:paypadi/core/services/storage/local_cache_service.dart';
 import 'package:paypadi/core/services/storage/secure_cache_service.dart';
 import 'package:paypadi/core/utils/constants.dart' show availableColors;
 import 'package:paypadi/src/shared/controllers/app_color/app_color_controller.dart';
+import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferencesWithCache, SharedPreferencesWithCacheOptions;
@@ -127,6 +128,10 @@ ApiService apiService(Ref ref) {
   return ApiService(
     cacheService: ref.watch(secureCacheProvider),
     baseUrl: AppEnvironment.backendApiBaseUrl,
+    // Read when a request is rejected, not now: the session controller
+    // itself depends on this service.
+    renewSession: () =>
+        ref.read(sessionControllerProvider.notifier).renewSession(),
   );
 }
 

@@ -7,7 +7,6 @@ import 'package:paypadi/core/repositories/authentication/i_authentication_reposi
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
-import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
 import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -85,6 +84,10 @@ class AuthenticationController extends _$AuthenticationController {
           refreshExpiry: jwtExpiry(response.data.refreshToken),
           accessExpiry: jwtExpiry(response.data.accessToken),
         );
+
+        // The account exists now; drop the sign-up details, password
+        // included, rather than keep them in memory for the session.
+        ref.invalidate(authenticationPayloadProvider);
 
         state = const AsyncData(null);
         unawaited(
@@ -198,29 +201,6 @@ class AuthenticationController extends _$AuthenticationController {
       cache.remove(CacheKeys.legacyPassword),
       cache.remove(CacheKeys.legacyTransactionPin),
     ]);
-  }
-
-  Future<void> logout() async {
-    // Drop any transfer in progress, PIN included, before anything else.
-    ref.read(transferDraftControllerProvider.notifier).clear();
-
-    final localCache = await ref.read(localCacheProvider.future);
-
-    await Future.wait([
-      localCache.clear(),
-      ref.read(secureCacheProvider).clear(),
-    ]);
-
-    if (!ref.mounted) return;
-
-    unawaited(
-      ref
-          .read(appRouterProvider)
-          .pushAndPopUntil(
-            const OnboardingRoute(),
-            predicate: (route) => route.settings.name == '/',
-          ),
-    );
   }
 
   Future<void> _saveToCache(String key, String? value) async {

@@ -10,6 +10,7 @@ class ApiService {
   ApiService({
     required CacheService cacheService,
     required String baseUrl,
+    Future<bool> Function()? renewSession,
   }) {
     dio =
         Dio(
@@ -23,6 +24,11 @@ class ApiService {
           ..interceptors.addAll(
             [
               AuthenticationInterceptor(secureCache: cacheService),
+              if (renewSession != null)
+                SessionRenewalInterceptor(
+                  retry: (options) => dio.fetch<dynamic>(options),
+                  renewSession: renewSession,
+                ),
               if (kDebugMode)
                 TalkerDioLogger(
                   talker: debugLogger,
@@ -61,6 +67,9 @@ class AuthenticationInterceptor extends Interceptor {
     '/auth/jwt/token/refresh/',
   };
 
+  /// Whether [path] is called without a session.
+  static bool isPublicPath(String path) => _publicPaths.contains(path);
+
   @override
   Future<void> onRequest(
     RequestOptions options,
@@ -78,6 +87,51 @@ class AuthenticationInterceptor extends Interceptor {
       debugLogger.error('AuthInterceptor: failed to attach token', e, st);
     } finally {
       handler.next(options);
+    }
+  }
+}
+
+/// Renews the session once when a request is rejected with 401 because the
+/// access token expired, then retries the request.
+///
+/// The retry goes back through [AuthenticationInterceptor], which attaches
+/// the renewed token. Public endpoints and requests that were already
+/// retried are passed through as they are, so a 401 can't loop.
+class SessionRenewalInterceptor extends Interceptor {
+  SessionRenewalInterceptor({
+    required Future<Response<dynamic>> Function(RequestOptions options) retry,
+    required Future<bool> Function() renewSession,
+  }) : _retry = retry,
+       _renewSession = renewSession;
+
+  final Future<Response<dynamic>> Function(RequestOptions options) _retry;
+  final Future<bool> Function() _renewSession;
+
+  static const String _retriedKey = 'session_renewal_retried';
+
+  @override
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final options = err.requestOptions;
+    final bool canRenew =
+        err.response?.statusCode == 401 &&
+        !AuthenticationInterceptor.isPublicPath(options.path) &&
+        options.extra[_retriedKey] != true;
+
+    if (!canRenew || !await _renewSession()) {
+      handler.next(err);
+      return;
+    }
+
+    try {
+      final response = await _retry(
+        options.copyWith(extra: {...options.extra, _retriedKey: true}),
+      );
+      handler.resolve(response);
+    } on DioException catch (retryError) {
+      handler.next(retryError);
     }
   }
 }
