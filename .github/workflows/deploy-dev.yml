@@ -179,9 +179,9 @@ jobs:
                 || format('dev r{0} ({1})', github.run_number, github.sha) }}
 
   # ─── iOS ────────────────────────────────────────────────────────────────────
-  # Disabled until the repository variable IOS_DEPLOY_ENABLED is 'true' — the
-  # Apple team IDs in fastlane/Appfile and ios/ExportOptionsDev.plist are
-  # still needed.
+  # Runs when the repository variable IOS_DEPLOY_ENABLED is 'true' (dev and
+  # staging iOS). Needs the MATCH_* and APP_STORE_CONNECT_API_* secrets in
+  # the environment; see CONTRIBUTING.md → iOS signing.
   ios-dev:
     name: iOS — Dev → Firebase
     needs: [validate, build-check]

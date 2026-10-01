@@ -1,8 +1,12 @@
-git_url(ENV["MATCH_GIT_URL"])
+# Certificates and provisioning profiles live (encrypted with MATCH_PASSWORD)
+# in the private Paypadi-ng/ios-certificates repo. CI overrides the URL and
+# credentials via MATCH_GIT_URL / MATCH_GIT_BASIC_AUTHORIZATION and only ever
+# reads (readonly: is_ci in the Fastfile).
+git_url(ENV.fetch("MATCH_GIT_URL", "https://github.com/Paypadi-ng/ios-certificates.git"))
 storage_mode("git")
 
 type("development") # The default type
 
-# This ensures match maps the App Store Connect API keys handled by your CI pipeline
-app_identifier(["com.paypadi.dev", "com.paypadi.staging", "com.paypadi"])
-username("tokiolaoluwa01.dev@gmail.com")
+# Dev and staging only for now; add com.paypadi when prod moves to the
+# Paypadi organization team.
+app_identifier(["com.paypadi.dev", "com.paypadi.staging"])
