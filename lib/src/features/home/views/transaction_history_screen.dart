@@ -112,11 +112,10 @@ class _TransactionTile extends ConsumerWidget {
                 child: isLoading
                     ? Icon(Icons.question_mark, color: color)
                     : Icon(
-                        switch (transaction.type) {
-                          TransactionType.deposit => Icons.arrow_downward,
-                          TransactionType.transfer ||
-                          TransactionType.withdrawal => Icons.arrow_upward,
-                          TransactionType.unknown => Icons.question_mark,
+                        switch (transaction.type.isCredit) {
+                          true => Icons.arrow_downward,
+                          false => Icons.arrow_upward,
+                          null => Icons.question_mark,
                         },
                         color: color,
                       ),
@@ -167,28 +166,26 @@ class _TransactionTile extends ConsumerWidget {
   }
 
   String name(TransactionType type) {
-    return switch (type) {
-      TransactionType.deposit => transaction.senderName,
-      TransactionType.transfer ||
-      TransactionType.withdrawal => transaction.recipientName,
-      TransactionType.unknown => '?',
+    return switch (type.isCredit) {
+      true => transaction.senderName,
+      false => transaction.recipientName,
+      null => '?',
     };
   }
 
   String amountSign(TransactionType type) {
-    return switch (type) {
-      TransactionType.deposit => '+',
-      TransactionType.transfer || TransactionType.withdrawal => '-',
-      TransactionType.unknown => '?',
+    return switch (type.isCredit) {
+      true => '+',
+      false => '-',
+      null => '?',
     };
   }
 
   Color transactionColor(TransactionType type) {
-    return switch (type) {
-      TransactionType.deposit => AppColors.success,
-      TransactionType.transfer ||
-      TransactionType.withdrawal => AppColors.failure,
-      TransactionType.unknown => AppColors.disabled,
+    return switch (type.isCredit) {
+      true => AppColors.success,
+      false => AppColors.failure,
+      null => AppColors.disabled,
     };
   }
 }

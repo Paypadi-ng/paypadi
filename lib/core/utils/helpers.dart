@@ -133,10 +133,10 @@ String getInitials(String fullName) {
 }
 
 String getTransactionDirectionLabel(TransactionType type) {
-  return switch (type) {
-    TransactionType.deposit => 'From',
-    TransactionType.transfer || TransactionType.withdrawal => 'To',
-    TransactionType.unknown => '?',
+  return switch (type.isCredit) {
+    true => 'From',
+    false => 'To',
+    null => '?',
   };
 }
 
