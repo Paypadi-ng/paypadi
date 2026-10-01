@@ -14,6 +14,7 @@ import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart';
 import 'package:paypadi/src/features/transfer/controller/beneficiaries_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/features/transfer/widgets/transfer_widget.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/src/shared/widgets/app_zero_item.dart';
@@ -21,8 +22,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 @RoutePage()
 class TransferScreen extends HookConsumerWidget {
-  const TransferScreen({super.key, this.number});
+  const TransferScreen({super.key, this.number, this.lookupBy});
+
+  /// A recipient to prefill, e.g. from a scanned QR code.
   final String? number;
+
+  /// What [number] is. When null, or once the user edits the number, it is
+  /// inferred from what's typed.
+  final LookupBy? lookupBy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,13 +56,19 @@ class TransferScreen extends HookConsumerWidget {
   }
 
   void _continue(WidgetRef ref, String receipientNumber) {
-    if (receipientNumber.isNotEmpty) {
-      unawaited(
-        ref
-            .read(appRouterProvider)
-            .push(MakePaymentRoute(recipientNumber: receipientNumber)),
-      );
-    }
+    if (receipientNumber.isEmpty) return;
+
+    final by = switch (lookupBy) {
+      final given? when receipientNumber == number => given,
+      _ => LookupBy.infer(receipientNumber),
+    };
+    unawaited(
+      ref
+          .read(appRouterProvider)
+          .push(
+            MakePaymentRoute(recipientNumber: receipientNumber, lookupBy: by),
+          ),
+    );
   }
 }
 
@@ -125,6 +138,7 @@ class _BeneficiariesList extends ConsumerWidget {
                       .push(
                         MakePaymentRoute(
                           recipientNumber: data[index].accountNumber,
+                          lookupBy: LookupBy.accountNumber,
                         ),
                       ),
                 );

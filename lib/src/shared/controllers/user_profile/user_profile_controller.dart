@@ -49,10 +49,10 @@ class RiderProfile extends _$RiderProfile {
     final result = await _profileRepository.setTransactionPin(payload);
     await result.fold(
       (success) async {
+        // The PIN is only ever checked by the server; delete any copy an
+        // older version kept on the device.
         unawaited(
-          ref
-              .read(secureCacheProvider)
-              .save(key: CacheKeys.transactionPin, value: confirmedPin),
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
         );
         await ref
             .read(appRouterProvider)

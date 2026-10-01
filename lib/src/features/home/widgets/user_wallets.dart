@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,6 +13,7 @@ import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart' show formatAmount;
 import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/widgets/app_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -172,8 +175,12 @@ class _DriverWallet extends HookConsumerWidget {
                 child: FilledButton.icon(
                   icon: AppAssets.icons.icWithdraw.svg(),
                   label: const Text('Withdraw'),
-                  onPressed: () =>
+                  onPressed: () {
+                    ref.read(transferDraftControllerProvider.notifier).start();
+                    unawaited(
                       ref.read(appRouterProvider).push(TransferRoute()),
+                    );
+                  },
                   style: FilledButton.styleFrom(
                     fixedSize: kButtonSmallSize,
                     foregroundColor: ref.watch(appPrimaryColorProvider),

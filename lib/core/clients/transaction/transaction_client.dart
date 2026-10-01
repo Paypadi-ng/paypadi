@@ -28,13 +28,13 @@ abstract class TransactionClient implements ITransactionClient {
   });
 
   @override
-  @POST('$_basePath/transfer/')
+  @POST('$_basePath/withdraw/')
   Future<ApiResponse<TransactionModel>> withdraw({
     @Body() required Map<String, dynamic> payload,
   });
 
   @override
-  @POST('$_basePath/transfer/')
+  @POST('$_basePath/deposit/')
   Future<ApiResponse<TransactionModel>> deposit({
     @Body() required Map<String, dynamic> payload,
   });
