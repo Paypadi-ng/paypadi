@@ -103,8 +103,9 @@ Enforced by repository rulesets (no one can bypass them, admins included):
 - 1 approval from someone other than the author, and the **latest push must be
   approved** — pushing after approval requires re-approval.
 - Required checks: **Analyze & Test**, **Dependency review**,
-  **Workflow audit (zizmor)** and **Promotion policy**. Feature branches must
-  be up to date with `dev` before merging.
+  **Workflow audit (zizmor)** and **Promotion policy**; PRs into `dev` also
+  need **Build dev app (unsigned)**. Feature branches must be up to date with
+  `dev` before merging.
 - All review conversations must be resolved.
 - `dev`: squash merge only, linear history. `staging` and `main`: merge
   commits only (promotions keep their ancestry).
@@ -136,6 +137,43 @@ Enforced by lint/CI where possible; call them out in review regardless:
 - Widgets: `HookConsumerWidget` with `useTextEditingController` / `useState`
   / `useEffect` / `useMemoized`; no stateful class fields for things hooks
   already manage.
+
+## iOS signing
+
+Signing uses [fastlane match](https://docs.fastlane.tools/actions/match/):
+certificates and profiles are stored encrypted in the private
+`Paypadi-ng/ios-certificates` repo, and CI only reads them.
+
+| Flavor | Apple team | Xcode `Release-*` signing | Profile | Goes to |
+| --- | --- | --- | --- | --- |
+| dev | `BGJ9Z72W23` | Manual | `match Development com.paypadi.dev` | Firebase App Distribution (registered devices only) |
+| staging | `BGJ9Z72W23` | Manual | `match AppStore com.paypadi.staging` | TestFlight |
+| prod | Paypadi organization team (pending) | — | — | App Store (`IOS_PROD_DEPLOY_ENABLED`) |
+
+`Debug-*` and `Profile-*` stay on automatic signing so running from Xcode
+works with your own account.
+
+**One-time setup (maintainer, with the Apple account):**
+
+1. developer.apple.com: App IDs `com.paypadi.dev` and `com.paypadi.staging`,
+   both with Push Notifications.
+2. App Store Connect: an app record for `com.paypadi.staging`, and an API key
+   (Users and Access → Integrations → Team Keys, role App Manager).
+3. Create the certificates and profiles (prompts for the match passphrase —
+   this becomes `MATCH_PASSWORD`):
+   ```bash
+   bundle exec fastlane match development --app_identifier com.paypadi.dev
+   bundle exec fastlane match appstore --app_identifier com.paypadi.staging
+   ```
+4. After registering a new tester device, refresh the dev profile:
+   `bundle exec fastlane match development --app_identifier com.paypadi.dev --force_for_new_devices`
+
+**CI secrets** (`dev`, `dev-preview`, `staging`): `MATCH_PASSWORD`,
+`MATCH_GIT_URL`, `MATCH_GIT_BASIC_AUTHORIZATION` (base64 of
+`user:<read-only fine-grained token for ios-certificates>`),
+`APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_API_ISSUER_ID`,
+`APP_STORE_CONNECT_API_KEY_BASE64` (the `.p8`, base64). Then set the repo
+variable `IOS_DEPLOY_ENABLED=true`.
 
 ## Building locally
 
