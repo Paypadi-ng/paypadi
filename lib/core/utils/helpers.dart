@@ -61,16 +61,22 @@ String obfuscatePhoneNumber(String phoneNumber) {
   return '$firstPart $obfuscated $lastPart';
 }
 
+/// Formats an amount for display with thousands separators and two decimal
+/// places: "1500" → "1,500.00", "10.5" → "10.50", "1,234.567" → "1,234.57".
+/// Text that isn't a number is returned trimmed but otherwise unchanged.
 String formatAmount(String? amount) {
   if (amount == null || amount.trim().isEmpty) return '';
 
-  final normalized = amount.trim();
-  final value = normalized.contains('.00') ? normalized : '$normalized.00';
+  final trimmed = amount.trim();
+  final value = num.tryParse(trimmed.replaceAll(',', ''));
+  if (value == null) return trimmed;
 
-  return value.replaceAllMapped(
-    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-    (Match m) => '${m[1]},',
+  final [whole, fraction] = value.abs().toStringAsFixed(2).split('.');
+  final grouped = whole.replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+$)'),
+    (match) => '${match[1]},',
   );
+  return '${value < 0 ? '-' : ''}$grouped.$fraction';
 }
 
 String formatDate(DateTime date) {
