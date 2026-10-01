@@ -10,12 +10,13 @@ sealed class AccountPayoutModel with _$AccountPayoutModel {
     @JsonKey(name: 'account_type') required String accountType,
     @JsonKey(name: 'account_name') required String accountName,
     @JsonKey(name: 'account_number') required String accountNumber,
-    @JsonKey(name: 'bank_name') required String bankName,
-    @JsonKey(name: 'bank_code') required String bankCode,
     @JsonKey(name: 'is_primary') required bool isPrimary,
     @JsonKey(name: 'is_verified') required bool isVerified,
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'updated_at') required String updatedAt,
+    // Mobile-money accounts have no bank.
+    @JsonKey(name: 'bank_name') String? bankName,
+    @JsonKey(name: 'bank_code') String? bankCode,
   }) = _AccountPayoutModel;
 
   factory AccountPayoutModel.fromJson(Map<String, dynamic> json) =>
