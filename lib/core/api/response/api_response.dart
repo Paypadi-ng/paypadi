@@ -92,8 +92,9 @@ sealed class SessionResponse with _$SessionResponse {
 @freezed
 sealed class RequestOtpResponse with _$RequestOtpResponse {
   const factory RequestOtpResponse({
-    required String otp,
     @JsonKey(name: 'expires_in') required int expiresIn,
+    // Not in the API schema; the code is meant to reach the user by SMS.
+    String? otp,
   }) = _RequestOtpResponse;
 
   factory RequestOtpResponse.fromJson(Map<String, Object?> json) =>
