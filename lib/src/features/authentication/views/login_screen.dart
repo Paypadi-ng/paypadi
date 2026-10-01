@@ -39,7 +39,6 @@ class LoginScreen extends HookConsumerWidget {
     // useMemoized ensures we only trigger this read once when the widget mounts.
     final cacheFuture = useMemoized(
       () => Future.wait([
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.email),
         ref.read(secureCacheProvider).get<String?>(CacheKeys.firstName),
         ref.read(secureCacheProvider).get<String?>(CacheKeys.phoneNumber),
       ]),
@@ -59,9 +58,8 @@ class LoginScreen extends HookConsumerWidget {
     // 3. Safely unpack the data
     final List<String?> cacheData = snapshot.data!;
 
-    final String firstName = cacheData[1] ?? 'User';
-    final String? email = cacheData[0];
-    final String? phoneNumber = cacheData[2];
+    final String firstName = cacheData[0] ?? 'User';
+    final String? phoneNumber = cacheData[1];
 
     return AppScaffold(
       showAppBar: false,
@@ -100,15 +98,9 @@ class LoginScreen extends HookConsumerWidget {
           const Spacer(),
           Center(
             child: GestureDetector(
-              onTap: () {
-                if (email == null) return;
-
-                unawaited(
-                  ref
-                      .read(appRouterProvider)
-                      .push(ForgotPasswordRoute(email: email)),
-                );
-              },
+              onTap: () => unawaited(
+                ref.read(appRouterProvider).push(const ForgotPasswordRoute()),
+              ),
               child: Text(
                 'Forgot Password?',
                 style: context.textTheme.bodyMedium?.copyWith(

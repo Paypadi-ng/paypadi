@@ -1,24 +1,25 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart'
-    show appPrimaryColorProvider;
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
-@RoutePage()
-class ForgotPasswordScreen extends ConsumerWidget {
-  ForgotPasswordScreen({required this.email, super.key});
+/// What the app can honestly say about password resets.
+///
+/// This screen used to say a reset link had been emailed, but nothing was
+/// ever sent: the API has no endpoint to reset a password yet. Replace this
+/// copy with the real flow once the backend supports one.
+const passwordResetUnavailableMessage =
+    "Password reset isn't available in the app yet. Please contact Paypadi "
+    'support and we will help you get back into your account.';
 
-  final String email;
-  final TapGestureRecognizer resendMail = TapGestureRecognizer();
+@RoutePage()
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return AppScaffold(
       title: '',
       child: Column(
@@ -26,35 +27,14 @@ class ForgotPasswordScreen extends ConsumerWidget {
         children: [
           Values.v24.verticalSpace,
           Text(
-            'Please check your email',
+            'Forgot your password?',
             style: context.textTheme.headlineSmall,
           ),
           Values.v16.verticalSpace,
           Text(
-            "We've sent a password reset link to ${obfuscateEmail(email)}. "
-            'Click the link in the email to reset your password.',
+            passwordResetUnavailableMessage,
             style: context.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w400,
-            ),
-          ),
-          Values.v24.verticalSpace,
-          RichText(
-            text: TextSpan(
-              text:
-                  "If you can't find it, check your spam folder. Still no email? ",
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Send mail again',
-                  recognizer: resendMail..onTap = () {},
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: ref.watch(appPrimaryColorProvider),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
