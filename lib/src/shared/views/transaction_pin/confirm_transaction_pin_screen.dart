@@ -16,11 +16,15 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
   const ConfirmTransactionPinScreen({
     required this.pin,
     this.isUpdating = false,
+    this.currentPin,
     super.key,
   });
 
   final String pin;
   final bool isUpdating;
+
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -106,10 +110,15 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
     String newPin,
     String confirmedPin,
   ) async {
-    if (newPin == confirmedPin) {
+    final current = currentPin;
+    if (current != null && newPin == confirmedPin) {
       await ref
           .read(userProfileProvider.notifier)
-          .changePin(newPin, confirmedPin);
+          .changePin(
+            currentPin: current,
+            newPin: newPin,
+            confirmedPin: confirmedPin,
+          );
     }
   }
 }

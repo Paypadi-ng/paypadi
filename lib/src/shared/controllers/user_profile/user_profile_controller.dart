@@ -31,15 +31,16 @@ class UserProfile extends _$UserProfile {
     );
   }
 
-  Future<void> changePassword(String newPassword) async {
+  /// Changes the password. [currentPassword] is what the user just typed;
+  /// passwords are never kept on the device, so the server checks it.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
     state = const AsyncLoading();
 
-    final oldPassword = await ref
-        .read(secureCacheProvider)
-        .get<String?>(CacheKeys.password);
-
     final payload = <String, dynamic>{
-      'old_password': oldPassword,
+      'old_password': currentPassword,
       'new_password': newPassword,
     };
 
@@ -47,10 +48,9 @@ class UserProfile extends _$UserProfile {
 
     await result.fold(
       (success) async {
+        // Delete any copy an older version kept on the device.
         unawaited(
-          ref
-              .read(secureCacheProvider)
-              .save(key: CacheKeys.password, value: newPassword),
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyPassword),
         );
         ref.read(appRouterProvider).popUntilRoot();
         state = const AsyncData(null);
@@ -62,26 +62,30 @@ class UserProfile extends _$UserProfile {
     );
   }
 
-  Future<void> changePin(String newPin, String confirmedPin) async {
+  /// Changes the transaction PIN. [currentPin] is what the user just typed;
+  /// the server checks it.
+  Future<void> changePin({
+    required String currentPin,
+    required String newPin,
+    required String confirmedPin,
+  }) async {
     state = const AsyncLoading();
 
-    final currentPin = await ref
-        .read(secureCacheProvider)
-        .get<String?>(CacheKeys.transactionPin);
-
     final Map<String, dynamic> payload = {
-      'new_pin': newPin,
       'current_pin': currentPin,
+      'new_pin': newPin,
       'confirm_pin': confirmedPin,
     };
 
-    final result = await _profileRepository.setPin(payload: payload);
+    final result = await _profileRepository.changePin(payload: payload);
     await result.fold(
       (success) async {
+        // The biometric copy holds the old PIN; it's re-saved the next time
+        // the new PIN is typed for a payment. Also delete any plain copy an
+        // older version kept on the device.
+        unawaited(ref.read(transactionPinVaultProvider).clear());
         unawaited(
-          ref
-              .read(secureCacheProvider)
-              .save(key: CacheKeys.transactionPin, value: confirmedPin),
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
         );
         ref.read(appRouterProvider).popUntilRoot();
         state = const AsyncData(null);
@@ -113,10 +117,10 @@ class RiderProfile extends _$RiderProfile {
     final result = await _profileRepository.setPin(payload: payload);
     await result.fold(
       (success) async {
+        // The PIN is only ever checked by the server; delete any copy an
+        // older version kept on the device.
         unawaited(
-          ref
-              .read(secureCacheProvider)
-              .save(key: CacheKeys.transactionPin, value: confirmedPin),
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
         );
         await ref
             .read(appRouterProvider)

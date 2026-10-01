@@ -17,11 +17,15 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
   const ConfirmPasswordScreen({
     required this.password,
     this.isUpdating = false,
+    this.currentPassword,
     super.key,
   });
 
   final String password;
   final bool isUpdating;
+
+  /// The password being replaced, when [isUpdating]; the server checks it.
+  final String? currentPassword;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +88,8 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
             controller: confirmPasswordController,
             onSubmit: (confirmedPassword) async {
               if (isUpdating) {
-                await changePassword(ref, password);
+                await changePassword(ref, password, confirmedPassword);
+                confirmPasswordController.clear();
                 return;
               }
               await createAccount(ref, password, confirmedPassword);
@@ -108,7 +113,15 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
     }
   }
 
-  Future<void> changePassword(WidgetRef ref, String password) async {
-    await ref.read(userProfileProvider.notifier).changePassword(password);
+  Future<void> changePassword(
+    WidgetRef ref,
+    String password,
+    String confirmedPassword,
+  ) async {
+    final current = currentPassword;
+    if (current == null || password != confirmedPassword) return;
+    await ref
+        .read(userProfileProvider.notifier)
+        .changePassword(currentPassword: current, newPassword: password);
   }
 }

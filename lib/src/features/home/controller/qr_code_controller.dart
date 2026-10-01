@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'qr_code_controller.g.dart';
@@ -58,10 +59,16 @@ class QrCodeController extends _$QrCodeController {
       final numberParts = cleanCode.split(RegExp(r'\s+'));
       numberParts.printLog();
 
+      ref.read(transferDraftControllerProvider.notifier).start();
       unawaited(
         ref
             .read(appRouterProvider)
-            .push(TransferRoute(number: numberParts.last)),
+            .push(
+              TransferRoute(
+                number: numberParts.last,
+                lookupBy: LookupBy.phoneNumber,
+              ),
+            ),
       );
     }
   }

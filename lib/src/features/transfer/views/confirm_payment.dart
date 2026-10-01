@@ -20,6 +20,7 @@ class ConfirmPaymentScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentSummary = ref.watch(initiatePaymentControllerProvider);
+    final isTransferring = ref.watch(transactionControllerProvider).isLoading;
 
     ref.listen(transactionControllerProvider, (previous, current) {
       current.when(
@@ -30,7 +31,7 @@ class ConfirmPaymentScreen extends ConsumerWidget {
     });
 
     return AppScaffold(
-      title: 'Withdrawal',
+      title: 'Confirm Payment',
       bgColor: AppColors.scaffoldBackground,
       child: Column(
         children: [
@@ -94,13 +95,6 @@ class ConfirmPaymentScreen extends ConsumerWidget {
                       ? placeholder
                       : '₦ ${formatAmount(paymentSummary.value?.amount)}',
                 ),
-                PaymentDetails(
-                  detail: 'Transaction Fee',
-                  isLoading: paymentSummary.isLoading,
-                  value: paymentSummary.isLoading
-                      ? placeholder
-                      : '₦ ${formatAmount(paymentSummary.value?.amount)}',
-                ),
               ],
             ),
           ),
@@ -113,8 +107,11 @@ class ConfirmPaymentScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            onPressed: () =>
-                ref.read(transactionControllerProvider.notifier).transfer(),
+            onPressed: isTransferring
+                ? null
+                : () => ref
+                      .read(transactionControllerProvider.notifier)
+                      .transfer(),
             child: const Text('Make Payment'),
           ),
           const Spacer(),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/core/utils/enums.dart';
@@ -131,10 +133,10 @@ String getInitials(String fullName) {
 }
 
 String getTransactionDirectionLabel(TransactionType type) {
-  return switch (type) {
-    TransactionType.deposit => 'From',
-    TransactionType.transfer || TransactionType.withdrawal => 'To',
-    TransactionType.unknown => '?',
+  return switch (type.isCredit) {
+    true => 'From',
+    false => 'To',
+    null => '?',
   };
 }
 
@@ -208,4 +210,23 @@ String getDate(String? date) {
   }
 
   return '$month $day$suffix $year';
+}
+
+/// The `exp` claim (seconds since epoch) of a JWT, or null when [token] is
+/// not a readable JWT.
+int? jwtExpiry(String token) {
+  final parts = token.split('.');
+  if (parts.length != 3) return null;
+
+  try {
+    final payload = utf8.decode(
+      base64Url.decode(base64Url.normalize(parts[1])),
+    );
+    final claims = json.decode(payload);
+    return claims is Map && claims['exp'] is num
+        ? (claims['exp'] as num).toInt()
+        : null;
+  } on FormatException {
+    return null;
+  }
 }

@@ -16,8 +16,15 @@ import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
 class CreateTransactionPinScreen extends HookConsumerWidget {
-  const CreateTransactionPinScreen({this.isUpdating = false, super.key});
+  const CreateTransactionPinScreen({
+    this.isUpdating = false,
+    this.currentPin,
+    super.key,
+  });
   final bool isUpdating;
+
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,7 +65,13 @@ class CreateTransactionPinScreen extends HookConsumerWidget {
     unawaited(
       ref
           .read(appRouterProvider)
-          .push(ConfirmTransactionPinRoute(pin: pin, isUpdating: isUpdating)),
+          .push(
+            ConfirmTransactionPinRoute(
+              pin: pin,
+              isUpdating: isUpdating,
+              currentPin: currentPin,
+            ),
+          ),
     );
   }
 }

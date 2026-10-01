@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 part 'server_exception.freezed.dart';
 
@@ -106,6 +107,16 @@ sealed class ServerException extends AppException with _$ServerException {
         );
     }
   }
+
+  /// Whether the server refused what was sent (400, 403 or 422), e.g. a
+  /// wrong PIN — as opposed to an expired session (401), a timeout or an
+  /// outage, which say nothing about the input.
+  bool get isRejectedInput => maybeMap(
+    badRequest: (_) => true,
+    forbiddenRequest: (_) => true,
+    unprocessableEntity: (_) => true,
+    orElse: () => false,
+  );
 
   @override
   String get monitoringContext => 'Server';

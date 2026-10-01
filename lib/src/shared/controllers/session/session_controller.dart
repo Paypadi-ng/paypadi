@@ -6,6 +6,7 @@ import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/repositories/session/i_session_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
+import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -128,12 +129,15 @@ class SessionController extends _$SessionController
     }
   }
 
+  /// Only a rejected refresh token ends the session: the backend answers 401
+  /// (`token_not_valid`) for an expired or revoked one. A 400 means a
+  /// malformed request, and network or parsing failures say nothing about
+  /// the session, so the user stays signed in for the next attempt.
   bool _isSessionExpiredError(AppException exception) {
     if (exception is ServerException) {
       return exception.maybeMap(
         unauthorizedRequest: (_) => true,
         forbiddenRequest: (_) => true,
-        badRequest: (_) => true,
         orElse: () => false,
       );
     }
@@ -151,32 +155,41 @@ class SessionController extends _$SessionController
 
       await result.fold(
         (success) async {
+          final session = success.data;
+          final cache = ref.read(secureCacheProvider);
+
+          // Expiries aren't in the response; read them from the tokens.
+          final int? accessExpiry =
+              session.accessTokenExpiry ?? jwtExpiry(session.accessToken);
+
+          // Without rotation the backend sends no new refresh token, so the
+          // current one and its expiry stay as they are.
+          final String? rotatedRefresh = switch (session.refreshToken) {
+            final token? when token.isNotEmpty => token,
+            _ => null,
+          };
+          final int? refreshExpiry = rotatedRefresh == null
+              ? null
+              : session.refreshTokenExpiry ?? jwtExpiry(rotatedRefresh);
+
           await Future.wait([
-            ref
-                .read(secureCacheProvider)
-                .save(
-                  key: CacheKeys.refreshToken,
-                  value: success.data.refreshToken,
-                ),
-            ref
-                .read(secureCacheProvider)
-                .save(
-                  key: CacheKeys.accessToken,
-                  value: success.data.accessToken,
-                ),
-            ref
-                .read(secureCacheProvider)
-                .save(
-                  key: CacheKeys.accessTokenExpiry,
-                  value: success.data.accessTokenExpiry,
-                ),
-            // IMPORTANT: Persist the new Refresh Token Expiry so the 24-hour clock resets
-            ref
-                .read(secureCacheProvider)
-                .save(
+            cache.save(key: CacheKeys.accessToken, value: session.accessToken),
+            // Clear an expiry we can't read rather than keep the old, past
+            // one, which would trigger another refresh straight away.
+            if (accessExpiry != null)
+              cache.save(key: CacheKeys.accessTokenExpiry, value: accessExpiry)
+            else
+              cache.remove(CacheKeys.accessTokenExpiry),
+            if (rotatedRefresh != null) ...[
+              cache.save(key: CacheKeys.refreshToken, value: rotatedRefresh),
+              if (refreshExpiry != null)
+                cache.save(
                   key: CacheKeys.refreshTokenExpiry,
-                  value: success.data.refreshTokenExpiry,
-                ),
+                  value: refreshExpiry,
+                )
+              else
+                cache.remove(CacheKeys.refreshTokenExpiry),
+            ],
           ]);
 
           unawaited(_scheduleSmartRefresh());

@@ -1,7 +1,9 @@
-# Global iOS Configuration
-apple_id("tokiolaoluwa01.dev@gmail.com")
-itc_team_id("123456789") # Remember to replace with your actual App Store Connect Team ID
-team_id("ABCDE12345")    # Remember to replace with your actual Apple Developer Portal Team ID
+# Apple Developer team for dev and staging (individual account for now).
+# Prod will move to the Paypadi organization team once it exists — update
+# this and the prod Xcode configurations together.
+team_id("BGJ9Z72W23")
 
+# App Store Connect access in CI uses the API key (see setup_ci_api_key in
+# the Fastfile), so no Apple ID or App Store Connect team ID is needed here.
 # App identifiers and Play Store credentials are passed explicitly by each
-# lane (see Fastfile), not configured here.
+# lane.

@@ -53,20 +53,17 @@ class WalletController extends _$WalletController {
       'bank_code': beneficiary.bankCode,
     };
 
-    state = const AsyncLoading();
+    // Saving a beneficiary doesn't change the wallet, so leave the balance
+    // alone; it used to be replaced with null here.
     final result = await ref
         .read(walletRepositoryProvider)
         .saveBeneficiary(payload);
 
-    // Check if provider is still mounted
     if (!ref.mounted) return;
 
     result.fold(
-      (success) => state = const AsyncValue.data(null),
-      (failure) {
-        ref.showExceptionMessage(failure);
-        state = const AsyncData(null);
-      },
+      (_) => null,
+      ref.showExceptionMessage,
     );
   }
 }

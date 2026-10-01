@@ -30,8 +30,6 @@ sealed class TransactionHistoryModel with _$TransactionHistoryModel {
     required String id,
     required String amount,
     required String reference,
-    required String description,
-    required TransactionHistoryMetadata metadata,
     @JsonKey(unknownEnumValue: TransactionStatus.failure)
     required TransactionStatus status,
     @JsonKey(
@@ -43,6 +41,10 @@ sealed class TransactionHistoryModel with _$TransactionHistoryModel {
     @JsonKey(name: 'sender_name') required String senderName,
     @JsonKey(name: 'recipient_name') required String recipientName,
     @JsonKey(name: 'fee_amount') required String transactionFee,
+    // Both are optional in the API; one transaction without them must not
+    // break the whole history list.
+    String? description,
+    TransactionHistoryMetadata? metadata,
   }) = _TransactionHistoryModel;
 
   factory TransactionHistoryModel.fromJson(Map<String, dynamic> json) =>

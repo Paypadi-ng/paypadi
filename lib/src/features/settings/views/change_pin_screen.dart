@@ -42,17 +42,18 @@ class ChangePinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: pinController,
-            onSubmit: (pin) async {
-              final pin = await ref
-                  .read(secureCacheProvider)
-                  .get<String?>(CacheKeys.transactionPin);
-
-              if (pin != null && pin == pin) {
-                pinController.clear();
-                await ref
-                    .read(appRouterProvider)
-                    .push(CreateTransactionPinRoute(isUpdating: true));
-              }
+            // The PIN isn't kept on the device, so it can't be checked here:
+            // it's sent with the new PIN and the server verifies it.
+            onSubmit: (currentPin) async {
+              pinController.clear();
+              await ref
+                  .read(appRouterProvider)
+                  .push(
+                    CreateTransactionPinRoute(
+                      isUpdating: true,
+                      currentPin: currentPin,
+                    ),
+                  );
             },
           ),
           const Spacer(),

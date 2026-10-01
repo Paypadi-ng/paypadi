@@ -44,17 +44,18 @@ class ChangePasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: passwordController,
-            onSubmit: (password) async {
-              final currentPassword = await ref
-                  .read(secureCacheProvider)
-                  .get<String?>(CacheKeys.password);
-
-              if (currentPassword != null && password == currentPassword) {
-                passwordController.clear();
-                await ref
-                    .read(appRouterProvider)
-                    .push(CreatePasswordRoute(isUpdating: true));
-              }
+            // The password isn't kept on the device, so it can't be checked
+            // here: it's sent with the new one and the server verifies it.
+            onSubmit: (currentPassword) async {
+              passwordController.clear();
+              await ref
+                  .read(appRouterProvider)
+                  .push(
+                    CreatePasswordRoute(
+                      isUpdating: true,
+                      currentPassword: currentPassword,
+                    ),
+                  );
             },
           ),
           const Spacer(),

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
@@ -15,7 +14,7 @@ import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
 import 'package:paypadi/src/features/home/widgets/amount_display.dart';
 import 'package:paypadi/src/features/home/widgets/user_wallets.dart';
-import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
@@ -86,7 +85,9 @@ class DashboardScreen extends HookConsumerWidget {
   void initializeTransferProcess(WidgetRef ref, String amount) {
     final cleanAmount = amount.replaceAll(RegExp(r'[^0-9.]'), '');
 
-    ref.read(transactionPayloadProvider).addAll({'amount': cleanAmount});
+    ref
+        .read(transferDraftControllerProvider.notifier)
+        .start(amount: cleanAmount);
     unawaited(ref.read(appRouterProvider).push(TransferRoute()));
   }
 
