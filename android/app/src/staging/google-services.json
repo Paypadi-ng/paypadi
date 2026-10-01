@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "513436288323",
+    "project_id": "paypadi-3ac4c",
+    "storage_bucket": "paypadi-3ac4c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513436288323:android:4c18e558e267b7a1369bf6",
+        "android_client_info": {
+          "package_name": "com.paypadi.staging"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGidUpJUwKJ1-PCEyyO1EjGXdTkNWvIAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
