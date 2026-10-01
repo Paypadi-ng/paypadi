@@ -1,13 +1,37 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
-import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
+import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'qr_code_controller.g.dart';
+
+/// The text in a user's payment QR code: their name, then their phone
+/// number on its own line.
+String paymentQrData({
+  required String? firstName,
+  required String? lastName,
+  required String? phoneNumber,
+}) => '${firstName ?? ''} ${lastName ?? ''}\n${phoneNumber ?? ''}';
+
+/// The phone number in a scanned payment code, or null when the code
+/// doesn't end with one.
+///
+/// Codes generated before this fix dropped the first four characters of the
+/// number ("+2348031234567" became "8031234567"); those get their leading 0
+/// back.
+String? phoneFromPaymentQr(String rawCode) {
+  final String last = rawCode.trim().split(RegExp(r'\s+')).last;
+  final String number = last.replaceAll(RegExp(r'[^\d+]'), '');
+
+  if (RegExp(r'^[789]\d{9}$').hasMatch(number)) return '0$number';
+  if (RegExp(r'^(\+?234\d{10}|0\d{10})$').hasMatch(number)) return number;
+  return null;
+}
 
 @riverpod
 class QrCodeController extends _$QrCodeController {
@@ -35,42 +59,57 @@ class QrCodeController extends _$QrCodeController {
     return null;
   }
 
-  /// Handles the incoming barcode capture events
+  /// Whether a scanned code is being handled, so the frames that keep
+  /// arriving meanwhile are ignored.
+  bool _isHandlingScan = false;
+
+  /// The last code that wasn't a payment code, so it's only reported once.
+  String? _lastRejectedCode;
+
   void _onBarcodeDetected(BarcodeCapture capture) {
-    // GUARD: If we've already captured a value, completely ignore this frame.
-    // This prevents the double-navigation bug.
-    if (state.hasValue && state.value != null) return;
+    final String? rawCode = capture.barcodes.firstOrNull?.rawValue;
+    if (rawCode != null) handleScannedCode(rawCode);
+  }
 
-    final List<Barcode> barcodes = capture.barcodes;
+  /// Opens a transfer to the phone number in a scanned payment code.
+  ///
+  /// Scanning resumes once the user comes back to this screen. Before, the
+  /// barcode subscription was cancelled after the first scan, so the
+  /// scanner stayed dead for as long as the screen was open.
+  @visibleForTesting
+  void handleScannedCode(String rawCode) {
+    if (_isHandlingScan) return;
 
-    if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
-      // 1. Immediately cancel the subscription so it stops listening entirely
-      unawaited(_barcodeSubscription?.cancel());
-
-      // 2. Extract and sanitize the raw code by removing the newline
-      final String rawCode = barcodes.first.rawValue!;
-      final String cleanCode = rawCode.replaceAll('\n', '');
-
-      // Update state with the clean string
-      state = AsyncData(cleanCode);
-
-      // 3. Process and navigate
-      // Splitting by \s+ handles any extra spaces left behind safely
-      final numberParts = cleanCode.split(RegExp(r'\s+'));
-      numberParts.printLog();
-
-      ref.read(transferDraftControllerProvider.notifier).start();
-      unawaited(
+    final String? phoneNumber = phoneFromPaymentQr(rawCode);
+    if (phoneNumber == null) {
+      if (rawCode != _lastRejectedCode) {
+        _lastRejectedCode = rawCode;
         ref
-            .read(appRouterProvider)
-            .push(
-              TransferRoute(
-                number: numberParts.last,
-                lookupBy: LookupBy.phoneNumber,
-              ),
-            ),
-      );
+            .read(appToastControllerProvider.notifier)
+            .showError("This isn't a Paypadi payment code.");
+      }
+      return;
     }
+
+    _isHandlingScan = true;
+    state = AsyncData(phoneNumber);
+    ref.read(transferDraftControllerProvider.notifier).start();
+    unawaited(_openTransfer(phoneNumber));
+  }
+
+  Future<void> _openTransfer(String phoneNumber) async {
+    // push() completes when the transfer screen is popped, which is when
+    // the user is back on this screen and can scan again.
+    await ref
+        .read(appRouterProvider)
+        .push(
+          TransferRoute(number: phoneNumber, lookupBy: LookupBy.phoneNumber),
+        );
+
+    if (!ref.mounted) return;
+    _isHandlingScan = false;
+    _lastRejectedCode = null;
+    state = const AsyncData(null);
   }
 
   Future<void> toggleTorch() async {
