@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.dart';
 import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
@@ -68,26 +69,62 @@ class WalletController extends _$WalletController {
   }
 }
 
+/// The transactions loaded so far, newest first.
+@immutable
+class TransactionHistory {
+  const TransactionHistory({
+    required this.items,
+    required this.nextPage,
+    this.isLoadingMore = false,
+  });
+
+  final List<TransactionHistoryModel> items;
+
+  /// The page to load next, or null once every page has been loaded.
+  final int? nextPage;
+
+  final bool isLoadingMore;
+
+  bool get hasMore => nextPage != null;
+}
+
 @riverpod
 class HistoryController extends _$HistoryController {
   @override
-  FutureOr<List<TransactionHistoryModel>> build() async {
+  FutureOr<TransactionHistory> build() async {
     final repository = ref.watch(walletRepositoryProvider);
     final result = await repository.getTransactionHistory();
 
-    if (!ref.mounted) return List.empty();
+    if (!ref.mounted) {
+      return const TransactionHistory(items: [], nextPage: null);
+    }
 
     return result.fold(
-      (success) => success.data.results,
+      (success) => TransactionHistory(
+        items: success.data.results,
+        nextPage: success.data.next != null ? 2 : null,
+      ),
       (failure) {
         ref.showExceptionMessage(failure);
-        return <TransactionHistoryModel>[];
+        return const TransactionHistory(items: [], nextPage: null);
       },
     );
   }
 
-  Future<void> fetchMore(int page) async {
-    state = const AsyncLoading();
+  /// Appends the next page. A failure keeps what's already loaded.
+  Future<void> loadMore() async {
+    final current = state.value;
+    final page = current?.nextPage;
+    if (current == null || page == null || current.isLoadingMore) return;
+
+    state = AsyncData(
+      TransactionHistory(
+        items: current.items,
+        nextPage: page,
+        isLoadingMore: true,
+      ),
+    );
+
     final result = await ref
         .read(walletRepositoryProvider)
         .getTransactionHistory(page: page);
@@ -95,11 +132,15 @@ class HistoryController extends _$HistoryController {
     if (!ref.mounted) return;
 
     result.fold(
-      (success) =>
-          state = AsyncData([...?state.value, ...success.data.results]),
+      (success) => state = AsyncData(
+        TransactionHistory(
+          items: [...current.items, ...success.data.results],
+          nextPage: success.data.next != null ? page + 1 : null,
+        ),
+      ),
       (failure) {
         ref.showExceptionMessage(failure);
-        state = const AsyncData(<TransactionHistoryModel>[]);
+        state = AsyncData(current);
       },
     );
   }
