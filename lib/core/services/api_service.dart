@@ -41,11 +41,15 @@ class AuthenticationInterceptor extends Interceptor {
     : _cache = secureCache;
   final CacheService _cache;
 
+  /// Endpoints called without a session, so no (possibly expired) access
+  /// token is attached. The refresh endpoint carries its refresh token in
+  /// the body.
   static const Set<String> _publicPaths = {
     '/auth/login/',
     '/auth/register/',
     '/auth/otp/request/',
     '/auth/otp/verify/',
+    '/auth/jwt/token/refresh/',
   };
 
   @override
@@ -66,15 +70,5 @@ class AuthenticationInterceptor extends Interceptor {
     } finally {
       handler.next(options);
     }
-  }
-
-  bool pathDoesNotRequireCredential(String path) {
-    return switch (path) {
-      '/auth/login/' => true,
-      '/auth/register/' => true,
-      '/auth/otp/request/' => true,
-      '/auth/otp/verify/' => true,
-      _ => false,
-    };
   }
 }
