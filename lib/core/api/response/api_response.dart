@@ -52,8 +52,6 @@ sealed class RegisterResponse with _$RegisterResponse {
   const factory RegisterResponse({
     @JsonKey(name: 'access') required String accessToken,
     @JsonKey(name: 'refresh') required String refreshToken,
-    @JsonKey(name: 'access_expires') required int accessTokenExpiry,
-    @JsonKey(name: 'refresh_expires') required int refreshTokenExpiry,
     required UserModel user,
   }) = _RegisterResponse;
 
