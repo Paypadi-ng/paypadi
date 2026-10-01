@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/repositories/session/i_session_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
+import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
+import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_controller.g.dart';
@@ -18,7 +21,8 @@ class SessionController extends _$SessionController
   Timer? _refreshTimer;
   late final ISessionRepository _repository;
 
-  bool _isRefreshing = false;
+  /// The renewal in flight, shared by every caller until it finishes.
+  Future<bool>? _renewal;
   // The buffer is how much "safety time" we want left before making the call.
   // Token lifespan (60m) - Buffer (5m) = Timer waits 55 minutes.
   static const Duration _refreshBuffer = Duration(minutes: 5);
@@ -72,7 +76,7 @@ class SessionController extends _$SessionController
 
       if (refreshExpirationDate.isBefore(now)) {
         debugLogger.info('Refresh token expired (24h passed). Forcing logout.');
-        unawaited(ref.read(authenticationControllerProvider.notifier).logout());
+        unawaited(logout());
         return;
       }
     }
@@ -106,15 +110,22 @@ class SessionController extends _$SessionController
     }
   }
 
-  Future<void> _handleTokenRefresh() async {
-    if (_isRefreshing) {
-      return;
-    }
+  Future<void> _handleTokenRefresh() => renewSession();
 
-    _isRefreshing = true;
+  /// Renews the access token with the refresh token. Callers that ask while
+  /// a renewal is in flight (the refresh timer, several requests answered
+  /// with 401 at once) share that one request instead of each sending
+  /// their own.
+  ///
+  /// Returns whether the session is usable afterwards. When the server
+  /// rejects the refresh token the user is signed out.
+  Future<bool> renewSession() =>
+      _renewal ??= _renew().whenComplete(() => _renewal = null);
 
+  Future<bool> _renew() async {
     try {
       await refreshToken();
+      return true;
     } on Exception catch (e, stackTrace) {
       final AppException exception = AppException.handleException(
         e,
@@ -122,11 +133,34 @@ class SessionController extends _$SessionController
       );
 
       if (_isSessionExpiredError(exception)) {
-        unawaited(ref.read(authenticationControllerProvider.notifier).logout());
+        unawaited(logout());
       }
-    } finally {
-      _isRefreshing = false;
+      return false;
     }
+  }
+
+  /// Signs the user out: forgets the session and everything typed during
+  /// it, then returns to onboarding.
+  ///
+  /// This lives here because this provider is never disposed. On the
+  /// auto-dispose AuthenticationController the provider could be disposed
+  /// while storage was being cleared, and the navigation was then skipped,
+  /// leaving a signed-out user on a signed-in screen.
+  Future<void> logout() async {
+    _cancelTimer();
+    ref
+      ..invalidate(transferDraftControllerProvider)
+      ..invalidate(authenticationPayloadProvider)
+      ..invalidate(profilePayloadProvider);
+
+    final localCache = await ref.read(localCacheProvider.future);
+    await Future.wait([
+      localCache.clear(),
+      ref.read(secureCacheProvider).clear(),
+    ]);
+
+    // Replace the whole stack so Back can't return to a signed-in screen.
+    await ref.read(appRouterProvider).replaceAll([const OnboardingRoute()]);
   }
 
   /// Only a rejected refresh token ends the session: the backend answers 401
