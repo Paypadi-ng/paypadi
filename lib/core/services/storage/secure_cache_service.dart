@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/services/storage/cache_service.dart';
 import 'package:paypadi/core/utils/constants.dart';

@@ -1,4 +1,5 @@
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
+import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 base class ClientException extends AppException {
   const ClientException({
