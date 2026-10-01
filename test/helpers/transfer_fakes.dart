@@ -127,3 +127,26 @@ class SilentToastController extends AppToastController {
   @override
   void showError(String message) => errors.add(message);
 }
+
+/// Like the real router, push() completes only when the pushed screen is
+/// popped, which the test does with [closePushedScreen]. [RecordingRouter] completes
+/// pushes immediately, which hides code that waits on a push.
+class PendingPushRouter extends AppRouter {
+  PendingPushRouter({required super.ref});
+  final List<PageRouteInfo> pushed = [];
+  final List<Completer<void>> _onScreen = [];
+
+  @override
+  Future<T?> push<T extends Object?>(
+    PageRouteInfo route, {
+    OnNavigationFailure? onFailure,
+  }) {
+    pushed.add(route);
+    final popped = Completer<void>();
+    _onScreen.add(popped);
+    return popped.future.then((_) => null);
+  }
+
+  /// Pops the most recently pushed screen.
+  void closePushedScreen() => _onScreen.removeLast().complete();
+}
