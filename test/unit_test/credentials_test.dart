@@ -142,6 +142,7 @@ void main() {
       CacheKeys.phoneNumber: '08031234567',
       CacheKeys.legacyPassword: '123456',
       CacheKeys.legacyTransactionPin: '1234',
+      CacheKeys.email: 'previous.user@example.com',
     });
   }
 
@@ -199,6 +200,16 @@ void main() {
       expect(await stored(container, CacheKeys.legacyPassword), isNull);
       expect(await stored(container, CacheKeys.legacyTransactionPin), isNull);
       expect(router.pushed.single, isA<DashboardRoute>());
+    });
+
+    test('clears the stored email when the user has none', () async {
+      final container = containerWith();
+
+      await container
+          .read(authenticationControllerProvider.notifier)
+          .login('08031234567', '654321');
+
+      expect(await stored(container, CacheKeys.email), isNull);
     });
   });
 
