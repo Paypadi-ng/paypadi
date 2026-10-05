@@ -214,8 +214,14 @@ class AuthenticationController extends _$AuthenticationController {
     ]);
   }
 
+  /// Saves [value], or removes the key when there's no value: the secure
+  /// cache can't store null, and a user without an email would otherwise
+  /// keep the previous user's.
   Future<void> _saveToCache(String key, String? value) async {
-    await ref.read(secureCacheProvider).save(key: key, value: value);
+    final cache = ref.read(secureCacheProvider);
+    await (value == null
+        ? cache.remove(key)
+        : cache.save(key: key, value: value));
   }
 
   Future<void> _saveSession({
