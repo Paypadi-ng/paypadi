@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/gen/colors.gen.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/models/user_bank_account_model/user_bank_account_model.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
@@ -13,6 +14,10 @@ import 'package:paypadi/src/shared/widgets/app_card.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+/// Shown when the deposit account fails to load with no server message.
+const depositAccountUnavailableMessage =
+    "We couldn't load your deposit account. Please try again.";
 
 /// The deposit account as copied or shared. It labelled the account
 /// holder's name as the bank before.
@@ -28,6 +33,35 @@ class DepositMoneyScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final depositAccount = ref.watch(bankAccountControllerProvider);
+
+    // Without this the screen fell back to its skeleton placeholders ("John
+    // Doe", "123456789") as if they were the user's account details.
+    if (depositAccount case AsyncValue(:final error?, isLoading: false)) {
+      return AppScaffold(
+        title: 'Add money',
+        child: Padding(
+          padding: const EdgeInsets.only(top: Values.v32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                error is AppException
+                    ? error.message
+                    : depositAccountUnavailableMessage,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Values.v12.verticalSpace,
+              TextButton(
+                onPressed: () => ref.invalidate(bankAccountControllerProvider),
+                child: const Text('Try again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return AppScaffold(
       title: 'Add money',
