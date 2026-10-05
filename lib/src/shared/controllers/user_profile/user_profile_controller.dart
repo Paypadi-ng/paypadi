@@ -32,7 +32,7 @@ class UserProfile extends _$UserProfile {
 
 @riverpod
 class RiderProfile extends _$RiderProfile {
-  late final IProfileRepository _profileRepository;
+  late IProfileRepository _profileRepository;
 
   @override
   FutureOr<void> build() {
@@ -74,7 +74,7 @@ class RiderProfile extends _$RiderProfile {
 
 @riverpod
 class DriverProfile extends _$DriverProfile {
-  late final IProfileRepository _profileRepository;
+  late IProfileRepository _profileRepository;
 
   @override
   FutureOr<void> build() {

@@ -35,7 +35,7 @@ String? phoneFromPaymentQr(String rawCode) {
 
 @riverpod
 class QrCodeController extends _$QrCodeController {
-  late final MobileScannerController scannerController;
+  late MobileScannerController scannerController;
   StreamSubscription<BarcodeCapture>? _barcodeSubscription;
 
   @override

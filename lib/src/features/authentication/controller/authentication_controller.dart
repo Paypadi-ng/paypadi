@@ -22,7 +22,7 @@ Map<String, dynamic> authenticationPayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class AuthenticationController extends _$AuthenticationController {
-  late final IAuthenticationRepository _repository;
+  late IAuthenticationRepository _repository;
 
   @override
   FutureOr<void> build() {

@@ -33,7 +33,7 @@ class BankListController extends _$BankListController {
 
 @riverpod
 class VerifiedBankAccount extends _$VerifiedBankAccount {
-  late final IWalletRepository _repository;
+  late IWalletRepository _repository;
 
   @override
   FutureOr<VerifiedBankAccountModel?> build() {
@@ -60,7 +60,7 @@ class VerifiedBankAccount extends _$VerifiedBankAccount {
 
 @riverpod
 class PayoutAccount extends _$PayoutAccount {
-  late final IPayoutAccountRepository _repository;
+  late IPayoutAccountRepository _repository;
 
   @override
   FutureOr<AccountPayoutModel?> build() {

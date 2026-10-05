@@ -19,7 +19,7 @@ part 'session_controller.g.dart';
 class SessionController extends _$SessionController
     with WidgetsBindingObserver {
   Timer? _refreshTimer;
-  late final ISessionRepository _repository;
+  late ISessionRepository _repository;
 
   /// The renewal in flight, shared by every caller until it finishes.
   Future<bool>? _renewal;
