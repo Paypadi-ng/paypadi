@@ -62,6 +62,16 @@ sealed class ServerException extends AppException with _$ServerException {
     // which escapes error handling and leaves the caller stuck loading.
     if (data is Map) {
       message = readableMessage(data['message']);
+      // Validation failures carry a generic summary in `message` ("Validation
+      // failed") and the reason the user needs in `error` ("Insufficient
+      // balance"). Other statuses put a code there (e.g. "token_not_valid"),
+      // so only a sentence-like `error` on 400/422 replaces the message.
+      final String? detail = readableMessage(data['error']);
+      if ((statusCode == 400 || statusCode == 422) &&
+          detail != null &&
+          detail.trim().contains(' ')) {
+        message = detail;
+      }
       conflictingAssetId = switch (data['data']) {
         final Map<Object?, Object?> details =>
           details['document_id']?.toString(),
