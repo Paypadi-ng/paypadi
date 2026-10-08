@@ -15,7 +15,7 @@ Map<String, dynamic> profilePayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class UserProfile extends _$UserProfile {
-  late final IProfileRepository _profileRepository;
+  late IProfileRepository _profileRepository;
 
   @override
   FutureOr<UserProfileModel?> build() async {

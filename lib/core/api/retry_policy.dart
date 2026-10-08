@@ -22,6 +22,7 @@ bool _isTransient(Object error) => switch (error) {
     requestTimeout: (_) => true,
     sendTimeout: (_) => true,
     receiveTimeout: (_) => true,
+    transformTimeout: (_) => true,
     noInternetConnection: (_) => true,
     internalServerError: (_) => true,
     badGateway: (_) => true,
