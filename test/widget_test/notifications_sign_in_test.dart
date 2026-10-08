@@ -13,6 +13,7 @@ import 'package:paypadi/core/models/user_model/user_model.dart';
 import 'package:paypadi/core/repositories/authentication/i_authentication_repository.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/services/notifications/notifications_service.dart';
+import 'package:paypadi/core/services/url_launcher_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
@@ -76,6 +77,14 @@ class _FakeAuthRepository implements IAuthenticationRepository {
 class _NoopMonitoring implements MonitoringService {
   @override
   dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
+}
+
+/// Records the links it's asked to open.
+class _RecordingLauncher extends UrlLauncherService {
+  final List<String?> opened = [];
+
+  @override
+  Future<void> launchWebUrl(String? url) async => opened.add(url);
 }
 
 void main() {
@@ -166,5 +175,19 @@ void main() {
 
     expect(find.text(passwordResetUnavailableMessage), findsOneWidget);
     expect(find.textContaining("We've sent"), findsNothing);
+  });
+
+  testWidgets('Forgot Password opens the support page', (tester) async {
+    final launcher = _RecordingLauncher();
+    final container = ProviderContainer(
+      overrides: [urlLauncherProvider.overrideWithValue(launcher)],
+    );
+    addTearDown(container.dispose);
+    await pump(tester, container, const ForgotPasswordScreen());
+
+    await tester.tap(find.text('Contact support'));
+    await tester.pumpAndSettle();
+
+    expect(launcher.opened, [appSupportAndFaqs]);
   });
 }
