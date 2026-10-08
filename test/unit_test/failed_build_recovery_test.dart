@@ -3,16 +3,20 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
+import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/api/retry_policy.dart';
 import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
 import 'package:paypadi/core/models/user_bank_account_model/user_bank_account_model.dart';
+import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
+import 'package:paypadi/core/repositories/profile/i_profile_repository.dart';
 import 'package:paypadi/core/repositories/transaction/i_transaction_repository.dart';
 import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/src/features/home/controller/bank_account_controller.dart';
 import 'package:paypadi/src/features/transfer/controller/receipt_controller.dart';
+import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 
@@ -69,7 +73,56 @@ class _FlakyTransactionRepository implements ITransactionRepository {
       throw UnimplementedError('${invocation.memberName}');
 }
 
+class _ProfileRepository implements IProfileRepository {
+  int calls = 0;
+
+  @override
+  FutureResultOf<ApiResponse<UserProfileModel>> getUser() async {
+    calls++;
+    return success(
+      ok(
+        const UserProfileModel(
+          id: 'u1',
+          role: AccountType.rider,
+          phoneNumber: '+2348031234567',
+          firstName: 'Ada',
+          lastName: 'Obi',
+          isActive: true,
+          phoneVerified: true,
+          dateJoined: '2026-10-01T09:00:00Z',
+          totalReferrals: 0,
+        ),
+      ),
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
 void main() {
+  test(
+    'the user profile can be reloaded, as the QR screen Retry does',
+    () async {
+      final profile = _ProfileRepository();
+      final container = ProviderContainer(
+        overrides: [profileRepositoryProvider.overrideWithValue(profile)],
+      );
+      addTearDown(container.dispose);
+      container.listen(userProfileProvider, (_, _) {});
+
+      await container.read(userProfileProvider.future);
+      container.invalidate(userProfileProvider);
+
+      expect(
+        (await container.read(userProfileProvider.future))?.firstName,
+        'Ada',
+      );
+      expect(profile.calls, 2);
+    },
+  );
+
   group('a controller whose build failed', () {
     test('shows the API error straight away and rebuilds cleanly', () async {
       final wallet = _FlakyWalletRepository();
@@ -130,6 +183,10 @@ void main() {
       expect(
         retryTransientFailures(8, const ServerException.serviceUnavailable()),
         const Duration(milliseconds: 6400),
+      );
+      expect(
+        retryTransientFailures(0, const ServerException.transformTimeout()),
+        const Duration(milliseconds: 200),
       );
       expect(
         retryTransientFailures(10, const ServerException.requestTimeout()),
