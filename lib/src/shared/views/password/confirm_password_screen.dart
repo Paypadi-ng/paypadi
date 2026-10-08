@@ -50,10 +50,10 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
       );
     });
 
-    // Only when changing an existing PIN/password. During sign-up there's
-    // no session yet, so reading the profile would fail with 401.
+    // Only when changing an existing PIN/password; sign-up has its own
+    // listener above.
     if (isUpdating) {
-      ref.listen(userProfileProvider, (previous, current) {
+      ref.listen(accountSecurityProvider, (previous, current) {
         current.when(
           data: (d) {
             confirmPasswordController.clear();
@@ -125,7 +125,7 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
     final current = currentPassword;
     if (current == null) return;
     await ref
-        .read(userProfileProvider.notifier)
+        .read(accountSecurityProvider.notifier)
         .changePassword(currentPassword: current, newPassword: password);
   }
 }

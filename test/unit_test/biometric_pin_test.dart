@@ -162,12 +162,12 @@ void main() {
     });
   });
 
-  group('UserProfile.changePin', () {
+  group('AccountSecurity.changePin', () {
     Future<void> changePin() => container
-        .read(userProfileProvider.notifier)
+        .read(accountSecurityProvider.notifier)
         .changePin(currentPin: '1111', newPin: '2222', confirmedPin: '2222');
 
-    setUp(() => container.listen(userProfileProvider, (_, _) {}));
+    setUp(() => container.listen(accountSecurityProvider, (_, _) {}));
 
     test('sends the PIN the user typed as the current PIN', () async {
       await changePin();
@@ -199,12 +199,12 @@ void main() {
     });
   });
 
-  group('UserProfile.changePassword', () {
-    setUp(() => container.listen(userProfileProvider, (_, _) {}));
+  group('AccountSecurity.changePassword', () {
+    setUp(() => container.listen(accountSecurityProvider, (_, _) {}));
 
     test('sends the password the user typed as the current one', () async {
       await container
-          .read(userProfileProvider.notifier)
+          .read(accountSecurityProvider.notifier)
           .changePassword(currentPassword: '135790', newPassword: '246801');
 
       expect(profile.passwordChanges.single, {

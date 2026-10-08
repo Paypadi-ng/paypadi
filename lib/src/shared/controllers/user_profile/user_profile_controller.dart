@@ -15,12 +15,10 @@ Map<String, dynamic> profilePayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class UserProfile extends _$UserProfile {
-  late IProfileRepository _profileRepository;
-
   @override
   FutureOr<UserProfileModel?> build() async {
-    _profileRepository = ref.watch(profileRepositoryProvider);
-    final result = await _profileRepository.getUser();
+    final repository = ref.watch(profileRepositoryProvider);
+    final result = await repository.getUser();
 
     return result.fold(
       (success) => success.data,
@@ -30,6 +28,18 @@ class UserProfile extends _$UserProfile {
       },
     );
   }
+}
+
+/// Changes the signed-in user's password and transaction PIN.
+///
+/// Its loading state drives the change screens. These used to run on
+/// [UserProfile], so finishing a change left that provider holding null:
+/// Home lost the user's name, and the wallet card showed "Refresh this page",
+/// until the profile was loaded again.
+@riverpod
+class AccountSecurity extends _$AccountSecurity {
+  @override
+  FutureOr<void> build() {}
 
   /// Changes the password. [currentPassword] is what the user just typed;
   /// passwords are never kept on the device, so the server checks it.
@@ -37,6 +47,7 @@ class UserProfile extends _$UserProfile {
     required String currentPassword,
     required String newPassword,
   }) async {
+    if (state.isLoading) return;
     state = const AsyncLoading();
 
     final payload = <String, dynamic>{
@@ -44,16 +55,19 @@ class UserProfile extends _$UserProfile {
       'new_password': newPassword,
     };
 
-    final result = await _profileRepository.changePassword(payload: payload);
+    final result = await ref
+        .read(profileRepositoryProvider)
+        .changePassword(payload: payload);
+    if (!ref.mounted) return;
 
-    await result.fold(
-      (success) async {
+    result.fold(
+      (success) {
         // Delete any copy an older version kept on the device.
         unawaited(
           ref.read(secureCacheProvider).remove(CacheKeys.legacyPassword),
         );
-        ref.read(appRouterProvider).popUntilRoot();
         state = const AsyncData(null);
+        ref.read(appRouterProvider).popUntilRoot();
       },
       (failure) {
         ref.showExceptionMessage(failure);
@@ -69,6 +83,7 @@ class UserProfile extends _$UserProfile {
     required String newPin,
     required String confirmedPin,
   }) async {
+    if (state.isLoading) return;
     state = const AsyncLoading();
 
     final Map<String, dynamic> payload = {
@@ -77,9 +92,13 @@ class UserProfile extends _$UserProfile {
       'confirm_pin': confirmedPin,
     };
 
-    final result = await _profileRepository.changePin(payload: payload);
-    await result.fold(
-      (success) async {
+    final result = await ref
+        .read(profileRepositoryProvider)
+        .changePin(payload: payload);
+    if (!ref.mounted) return;
+
+    result.fold(
+      (success) {
         // The biometric copy holds the old PIN; it's re-saved the next time
         // the new PIN is typed for a payment. Also delete any plain copy an
         // older version kept on the device.
@@ -87,8 +106,8 @@ class UserProfile extends _$UserProfile {
         unawaited(
           ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
         );
-        ref.read(appRouterProvider).popUntilRoot();
         state = const AsyncData(null);
+        ref.read(appRouterProvider).popUntilRoot();
       },
       (failure) {
         ref.showExceptionMessage(failure);
