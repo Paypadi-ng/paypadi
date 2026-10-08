@@ -123,6 +123,13 @@ class SessionController extends _$SessionController
       _renewal ??= _renew().whenComplete(() => _renewal = null);
 
   Future<bool> _renew() async {
+    // Nothing to renew, and no one to sign out: e.g. a protected request
+    // made during sign-up, before there's a session.
+    final String? storedRefreshToken = await ref
+        .read(secureCacheProvider)
+        .get<String>(CacheKeys.refreshToken);
+    if (storedRefreshToken == null) return false;
+
     try {
       await refreshToken();
       return true;

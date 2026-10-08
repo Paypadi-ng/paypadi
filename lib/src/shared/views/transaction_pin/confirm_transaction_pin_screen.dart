@@ -48,20 +48,24 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
       );
     });
 
-    ref.listen(userProfileProvider, (previous, current) {
-      current.when(
-        data: (d) {
-          confirmPinController.clear();
-          ref.dismissLoading();
-        },
-        error: (e, st) {
-          confirmPinController.clear();
-          ref.dismissLoading();
-          ref.showExceptionMessage(e, st);
-        },
-        loading: () => ref.showLoading(),
-      );
-    });
+    // Only when changing an existing PIN/password. During sign-up there's
+    // no session yet, so reading the profile would fail with 401.
+    if (isUpdating) {
+      ref.listen(userProfileProvider, (previous, current) {
+        current.when(
+          data: (d) {
+            confirmPinController.clear();
+            ref.dismissLoading();
+          },
+          error: (e, st) {
+            confirmPinController.clear();
+            ref.dismissLoading();
+            ref.showExceptionMessage(e, st);
+          },
+          loading: () => ref.showLoading(),
+        );
+      });
+    }
 
     return AppScaffold(
       child: Column(
