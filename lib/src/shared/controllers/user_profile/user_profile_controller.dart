@@ -15,16 +15,84 @@ Map<String, dynamic> profilePayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class UserProfile extends _$UserProfile {
+  late final IProfileRepository _profileRepository;
+
   @override
   FutureOr<UserProfileModel?> build() async {
-    final repository = ref.watch(profileRepositoryProvider);
-    final result = await repository.getUser();
+    _profileRepository = ref.watch(profileRepositoryProvider);
+    final result = await _profileRepository.getUser();
 
     return result.fold(
       (success) => success.data,
       (failure) {
         ref.showExceptionMessage(failure);
         return null;
+      },
+    );
+  }
+
+  /// Changes the password. [currentPassword] is what the user just typed;
+  /// passwords are never kept on the device, so the server checks it.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AsyncLoading();
+
+    final payload = <String, dynamic>{
+      'old_password': currentPassword,
+      'new_password': newPassword,
+    };
+
+    final result = await _profileRepository.changePassword(payload: payload);
+
+    await result.fold(
+      (success) async {
+        // Delete any copy an older version kept on the device.
+        unawaited(
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyPassword),
+        );
+        ref.read(appRouterProvider).popUntilRoot();
+        state = const AsyncData(null);
+      },
+      (failure) {
+        ref.showExceptionMessage(failure);
+        state = const AsyncData(null);
+      },
+    );
+  }
+
+  /// Changes the transaction PIN. [currentPin] is what the user just typed;
+  /// the server checks it.
+  Future<void> changePin({
+    required String currentPin,
+    required String newPin,
+    required String confirmedPin,
+  }) async {
+    state = const AsyncLoading();
+
+    final Map<String, dynamic> payload = {
+      'current_pin': currentPin,
+      'new_pin': newPin,
+      'confirm_pin': confirmedPin,
+    };
+
+    final result = await _profileRepository.changePin(payload: payload);
+    await result.fold(
+      (success) async {
+        // The biometric copy holds the old PIN; it's re-saved the next time
+        // the new PIN is typed for a payment. Also delete any plain copy an
+        // older version kept on the device.
+        unawaited(ref.read(transactionPinVaultProvider).clear());
+        unawaited(
+          ref.read(secureCacheProvider).remove(CacheKeys.legacyTransactionPin),
+        );
+        ref.read(appRouterProvider).popUntilRoot();
+        state = const AsyncData(null);
+      },
+      (failure) {
+        ref.showExceptionMessage(failure);
+        state = const AsyncData(null);
       },
     );
   }
@@ -46,7 +114,7 @@ class RiderProfile extends _$RiderProfile {
       'confirm_pin': confirmedPin,
     };
 
-    final result = await _profileRepository.setTransactionPin(payload);
+    final result = await _profileRepository.setPin(payload: payload);
     await result.fold(
       (success) async {
         // The PIN is only ever checked by the server; delete any copy an

@@ -14,9 +14,9 @@ import '../helpers/transfer_fakes.dart';
 
 class _FakeProfileRepository implements IProfileRepository {
   @override
-  Future<Result<ApiResponse<void>, Exception>> setTransactionPin(
-    Map<String, dynamic> payload,
-  ) async => success(ok<void>(null));
+  Future<Result<ApiResponse<void>, Exception>> setPin({
+    required Map<String, dynamic> payload,
+  }) async => success(ok<void>(null));
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

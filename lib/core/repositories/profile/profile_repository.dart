@@ -13,16 +13,6 @@ class ProfileRepository implements IProfileRepository {
   final IProfileClient _client;
 
   @override
-  FutureApiResultOf<void> setTransactionPin(
-    Map<String, dynamic> payload,
-  ) async {
-    final response = await Result.fromAsync<ApiResponse<void>>(
-      () => _client.setTransactionPin(payload: payload),
-    );
-    return response;
-  }
-
-  @override
   FutureResultOf<ApiResponse<UserProfileModel>> getUser() async {
     final response = await Result.fromAsync<ApiResponse<UserProfileModel>>(
       _client.getUser,
@@ -99,6 +89,36 @@ class ProfileRepository implements IProfileRepository {
         break;
     }
 
+    return response;
+  }
+
+  @override
+  FutureApiResultOf<dynamic> changePassword({
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await Result.fromAsync<ApiResponse<dynamic>>(
+      () => _client.changePassword(payload: payload),
+    );
+    return response;
+  }
+
+  @override
+  FutureApiResultOf<void> setPin({
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await Result.fromAsync<ApiResponse<void>>(
+      () => _client.setPin(payload: payload),
+    );
+    return response;
+  }
+
+  @override
+  FutureApiResultOf<void> changePin({
+    required Map<String, dynamic> payload,
+  }) async {
+    final response = await Result.fromAsync<ApiResponse<void>>(
+      () => _client.changePin(payload: payload),
+    );
     return response;
   }
 }

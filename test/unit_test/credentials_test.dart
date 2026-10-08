@@ -24,7 +24,7 @@ import '../helpers/transfer_fakes.dart';
 int _secondsFromNow(Duration offset) =>
     DateTime.now().toUtc().add(offset).millisecondsSinceEpoch ~/ 1000;
 
-const _user = UserModel(
+final _user = UserModel(
   id: 'b7d1c2e4',
   role: 'rider',
   phoneNumber: '08031234567',
@@ -32,7 +32,7 @@ const _user = UserModel(
   lastName: 'Obi',
   isActive: true,
   phoneVerified: true,
-  dateJoined: '2026-10-01T09:00:00Z',
+  dateJoined: DateTime.utc(2026, 10, 1, 9),
 );
 
 class _FakeAuthRepository implements IAuthenticationRepository {
@@ -82,9 +82,9 @@ class _FakeProfileRepository implements IProfileRepository {
   final List<Map<String, dynamic>> pins = [];
 
   @override
-  FutureApiResultOf<void> setTransactionPin(
-    Map<String, dynamic> payload,
-  ) async {
+  FutureApiResultOf<void> setPin({
+    required Map<String, dynamic> payload,
+  }) async {
     pins.add(payload);
     return success(ok<void>(null));
   }

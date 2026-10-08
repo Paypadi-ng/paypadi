@@ -102,7 +102,7 @@ class AuthenticationController extends _$AuthenticationController {
 
         state = const AsyncData(null);
         unawaited(
-          ref.read(appRouterProvider).push(const CreateTransactionPinRoute()),
+          ref.read(appRouterProvider).push(CreateTransactionPinRoute()),
         );
       },
       (failure) {

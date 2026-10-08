@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
@@ -40,7 +42,19 @@ class ChangePinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: pinController,
-            onSubmit: (currentPin) {},
+            // The PIN isn't kept on the device, so it can't be checked here:
+            // it's sent with the new PIN and the server verifies it.
+            onSubmit: (currentPin) async {
+              pinController.clear();
+              await ref
+                  .read(appRouterProvider)
+                  .push(
+                    CreateTransactionPinRoute(
+                      isUpdating: true,
+                      currentPin: currentPin,
+                    ),
+                  );
+            },
           ),
           const Spacer(),
         ],

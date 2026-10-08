@@ -16,14 +16,39 @@ const pinMismatchMessage = "The PINs don't match. Enter the same PIN again.";
 
 @RoutePage()
 class ConfirmTransactionPinScreen extends HookConsumerWidget {
-  const ConfirmTransactionPinScreen({required this.pin, super.key});
+  const ConfirmTransactionPinScreen({
+    required this.pin,
+    this.isUpdating = false,
+    this.currentPin,
+    super.key,
+  });
+
   final String pin;
+  final bool isUpdating;
+
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final confirmPinController = useTextEditingController();
 
     ref.listen(riderProfileProvider, (previous, current) {
+      current.when(
+        data: (d) {
+          confirmPinController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          confirmPinController.clear();
+          ref.dismissLoading();
+          ref.showExceptionMessage(e, st);
+        },
+        loading: () => ref.showLoading(),
+      );
+    });
+
+    ref.listen(userProfileProvider, (previous, current) {
       current.when(
         data: (d) {
           confirmPinController.clear();
@@ -61,8 +86,20 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: confirmPinController,
-            onSubmit: (confirmedPin) =>
-                submitPin(ref, confirmPinController, confirmedPin),
+            onSubmit: (confirmedPin) async {
+              // Checked for both new and changed PINs: without this the
+              // keypad stayed full and nothing said why.
+              if (confirmedPin != pin) {
+                confirmPinController.clear();
+                ref.showErrorToast(pinMismatchMessage);
+                return;
+              }
+              if (isUpdating) {
+                await changePin(ref);
+              } else {
+                await setPin(ref);
+              }
+            },
           ),
           const Spacer(),
         ],
@@ -70,20 +107,14 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> submitPin(
-    WidgetRef ref,
-    TextEditingController field,
-    String confirmedPin,
-  ) async {
-    if (confirmedPin != pin) {
-      // Without this the keypad stayed full and nothing said why.
-      field.clear();
-      ref.showErrorToast(pinMismatchMessage);
-      return;
-    }
+  Future<void> setPin(WidgetRef ref) =>
+      ref.read(riderProfileProvider.notifier).setTransactionPin(pin, pin);
 
+  Future<void> changePin(WidgetRef ref) async {
+    final current = currentPin;
+    if (current == null) return;
     await ref
-        .read(riderProfileProvider.notifier)
-        .setTransactionPin(pin, confirmedPin);
+        .read(userProfileProvider.notifier)
+        .changePin(currentPin: current, newPin: pin, confirmedPin: pin);
   }
 }

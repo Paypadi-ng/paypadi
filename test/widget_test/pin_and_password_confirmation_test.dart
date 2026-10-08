@@ -17,9 +17,9 @@ class _FakeProfileRepository implements IProfileRepository {
   final List<Map<String, dynamic>> pins = [];
 
   @override
-  Future<Result<ApiResponse<void>, Exception>> setTransactionPin(
-    Map<String, dynamic> payload,
-  ) async {
+  Future<Result<ApiResponse<void>, Exception>> setPin({
+    required Map<String, dynamic> payload,
+  }) async {
     pins.add(payload);
     return success(ok<void>(null));
   }

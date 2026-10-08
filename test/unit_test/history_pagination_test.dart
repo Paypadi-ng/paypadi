@@ -21,7 +21,7 @@ TransactionHistoryModel _transaction(String id) => TransactionHistoryModel(
   reference: 'REF-$id',
   status: TransactionStatus.success,
   type: TransactionType.transfer,
-  createdAt: '2026-10-01T09:00:00Z',
+  createdAt: DateTime.utc(2026, 10, 1, 9),
   senderName: 'Ada Obi',
   recipientName: 'Tunde Bello',
   transactionFee: '0.00',

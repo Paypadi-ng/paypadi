@@ -49,7 +49,7 @@ class _FakeAuthRepository implements IAuthenticationRepository {
     Map<String, dynamic> payload,
   ) async => success(
     ok(
-      const LoginResponse(
+      LoginResponse(
         accessToken: 'access',
         refreshToken: 'refresh',
         accessTokenExpiry: 4102444800,
@@ -62,7 +62,7 @@ class _FakeAuthRepository implements IAuthenticationRepository {
           lastName: 'Obi',
           isActive: true,
           phoneVerified: true,
-          dateJoined: '2026-10-01T09:00:00Z',
+          dateJoined: DateTime.utc(2026, 10, 1, 9),
         ),
       ),
     ),

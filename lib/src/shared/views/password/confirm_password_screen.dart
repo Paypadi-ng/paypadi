@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
+import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
@@ -17,14 +18,39 @@ const passwordMismatchMessage =
 
 @RoutePage()
 class ConfirmPasswordScreen extends HookConsumerWidget {
-  const ConfirmPasswordScreen({required this.password, super.key});
+  const ConfirmPasswordScreen({
+    required this.password,
+    this.isUpdating = false,
+    this.currentPassword,
+    super.key,
+  });
+
   final String password;
+  final bool isUpdating;
+
+  /// The password being replaced, when [isUpdating]; the server checks it.
+  final String? currentPassword;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final confirmPasswordController = useTextEditingController();
 
     ref.listen(authenticationControllerProvider, (previous, current) {
+      current.when(
+        data: (d) {
+          confirmPasswordController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          confirmPasswordController.clear();
+          ref.dismissLoading();
+          ref.showExceptionMessage(e, st);
+        },
+        loading: () => ref.showLoading(),
+      );
+    });
+
+    ref.listen(userProfileProvider, (previous, current) {
       current.when(
         data: (d) {
           confirmPasswordController.clear();
@@ -64,11 +90,21 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: confirmPasswordController,
-            onSubmit: (confirmedPassword) => createAccount(
-              ref,
-              confirmPasswordController,
-              confirmedPassword,
-            ),
+            onSubmit: (confirmedPassword) async {
+              // Checked for both new and changed passwords: without this the
+              // keypad stayed full and nothing said why.
+              if (confirmedPassword != password) {
+                confirmPasswordController.clear();
+                ref.showErrorToast(passwordMismatchMessage);
+                return;
+              }
+              if (isUpdating) {
+                await changePassword(ref);
+              } else {
+                await createAccount(ref);
+              }
+              confirmPasswordController.clear();
+            },
           ),
           const Spacer(),
         ],
@@ -76,19 +112,16 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> createAccount(
-    WidgetRef ref,
-    TextEditingController field,
-    String confirmedPassword,
-  ) async {
-    if (confirmedPassword != password) {
-      // Without this the keypad stayed full and nothing said why.
-      field.clear();
-      ref.showErrorToast(passwordMismatchMessage);
-      return;
-    }
-
+  Future<void> createAccount(WidgetRef ref) async {
     ref.read(authenticationPayloadProvider)['password'] = password;
     await ref.read(authenticationControllerProvider.notifier).register();
+  }
+
+  Future<void> changePassword(WidgetRef ref) async {
+    final current = currentPassword;
+    if (current == null) return;
+    await ref
+        .read(userProfileProvider.notifier)
+        .changePassword(currentPassword: current, newPassword: password);
   }
 }

@@ -56,7 +56,7 @@ class _FlakyTransactionRepository implements ITransactionRepository {
               reference: reference,
               status: TransactionStatus.completed,
               type: TransactionType.transfer,
-              createdAt: '2026-10-01T22:33:53Z',
+              createdAt: DateTime.utc(2026, 10, 1, 22, 33, 53),
               senderName: 'Steve Jorkwitz',
               recipientName: 'Olaoluwa Toki',
               transactionFee: '5.00',
