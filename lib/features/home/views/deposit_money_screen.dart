@@ -8,7 +8,7 @@ import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
-import 'package:paypadi/features/home/controllers/bank_account_controller.dart';
+import 'package:paypadi/features/home/controllers/deposit_account_controller.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_card.dart';
@@ -33,7 +33,7 @@ class DepositMoneyScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final depositAccount = ref.watch(bankAccountControllerProvider);
+    final depositAccount = ref.watch(depositAccountControllerProvider);
 
     // Without this the screen fell back to its skeleton placeholders ("John
     // Doe", "123456789") as if they were the user's account details.
@@ -55,7 +55,8 @@ class DepositMoneyScreen extends HookConsumerWidget {
               ),
               Values.v12.verticalSpace,
               TextButton(
-                onPressed: () => ref.invalidate(bankAccountControllerProvider),
+                onPressed: () =>
+                    ref.invalidate(depositAccountControllerProvider),
                 child: const Text('Try again'),
               ),
             ],

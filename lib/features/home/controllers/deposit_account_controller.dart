@@ -4,10 +4,10 @@ import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'bank_account_controller.g.dart';
+part 'deposit_account_controller.g.dart';
 
 @Riverpod(retry: retryTransientFailures)
-class BankAccountController extends _$BankAccountController {
+class DepositAccountController extends _$DepositAccountController {
   late IWalletRepository _repository;
 
   @override

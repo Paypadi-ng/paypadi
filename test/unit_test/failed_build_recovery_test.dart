@@ -16,7 +16,7 @@ import 'package:paypadi/data/transaction/providers.dart';
 import 'package:paypadi/data/wallet/i_wallet_repository.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
-import 'package:paypadi/features/home/controllers/bank_account_controller.dart';
+import 'package:paypadi/features/home/controllers/deposit_account_controller.dart';
 import 'package:paypadi/features/transfer/controllers/receipt_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
@@ -132,21 +132,24 @@ void main() {
         overrides: [walletRepositoryProvider.overrideWithValue(wallet)],
       );
       addTearDown(container.dispose);
-      container.listen(bankAccountControllerProvider, (_, _) {});
+      container.listen(depositAccountControllerProvider, (_, _) {});
 
       await expectLater(
-        container.read(bankAccountControllerProvider.future),
+        container.read(depositAccountControllerProvider.future),
         throwsA(_noVirtualAccount),
       );
       // Not retried: the 400 is what the screen shows, not a loading state.
-      expect(container.read(bankAccountControllerProvider).isLoading, isFalse);
+      expect(
+        container.read(depositAccountControllerProvider).isLoading,
+        isFalse,
+      );
       expect(wallet.calls, 1);
 
       // Rebuilding used to throw LateInitializationError, replacing the real
       // error and never loading the account.
-      container.invalidate(bankAccountControllerProvider);
+      container.invalidate(depositAccountControllerProvider);
       expect(
-        await container.read(bankAccountControllerProvider.future),
+        await container.read(depositAccountControllerProvider.future),
         _account,
       );
     });
