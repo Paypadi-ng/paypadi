@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/core/models/bank_model/bank_model.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/data/payout_account/models/bank_model.dart';
 import 'package:paypadi/src/features/authentication/controller/bank_account_controller.dart';
 
 class BanksList extends ConsumerWidget {

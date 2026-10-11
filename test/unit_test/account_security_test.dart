@@ -4,11 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
-import 'package:paypadi/core/repositories/profile/i_profile_repository.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
+import 'package:paypadi/data/profile/i_profile_repository.dart';
+import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
 import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
 

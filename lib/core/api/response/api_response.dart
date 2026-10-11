@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:paypadi/core/models/user_model/user_model.dart';
+import 'package:paypadi/data/authentication/models/user_model.dart';
 
 part 'api_response.freezed.dart';
 part 'api_response.g.dart';

@@ -2,11 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.dart';
-import 'package:paypadi/core/models/beneficiary_model/beneficiary_model.dart';
-import 'package:paypadi/core/models/wallet_model/wallet_model.dart';
-import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
+import 'package:paypadi/data/transaction/models/account_lookup_model.dart';
+import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
+import 'package:paypadi/data/wallet/i_wallet_repository.dart';
+import 'package:paypadi/data/wallet/models/wallet_model.dart';
 import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
 

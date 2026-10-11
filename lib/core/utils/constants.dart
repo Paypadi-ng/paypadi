@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:paypadi/core/models/beneficiary_model/beneficiary_model.dart';
-import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
 import 'package:paypadi/core/utils/enums.dart';
+import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
+import 'package:paypadi/data/transaction/models/transaction_model.dart';
 import 'package:paypadi/gen/assets.gen.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:talker_flutter/talker_flutter.dart';

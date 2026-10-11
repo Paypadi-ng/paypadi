@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
-import 'package:paypadi/core/models/account_payout_model/account_payout_model.dart';
-import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
-import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/data/payout_account/models/account_payout_model.dart';
+import 'package:paypadi/data/profile/models/user_profile_model.dart';
+import 'package:paypadi/data/transaction/models/transaction_model.dart';
 
 // Sample bodies follow the Swagger schemas at /api/v1/swagger, including the
 // fields they mark as nullable or optional.

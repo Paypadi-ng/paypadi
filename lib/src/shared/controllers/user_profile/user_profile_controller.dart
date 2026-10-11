@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
-import 'package:paypadi/core/repositories/profile/i_profile_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/data/profile/i_profile_repository.dart';
+import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_profile_controller.g.dart';

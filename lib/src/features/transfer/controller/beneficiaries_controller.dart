@@ -1,6 +1,6 @@
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/core/models/beneficiary_model/beneficiary_model.dart';
 import 'package:paypadi/core/utils/enums.dart';
+import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'beneficiaries_controller.g.dart';

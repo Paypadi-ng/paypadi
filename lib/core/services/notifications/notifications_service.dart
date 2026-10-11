@@ -1,4 +1,4 @@
-import 'package:paypadi/core/models/push_notifications_message/push_notifications_message.dart';
+import 'package:paypadi/core/services/notifications/push_notifications_message.dart';
 
 abstract class INotificationsService {
   /// Initializes the notification service (e.g., configuring settings).

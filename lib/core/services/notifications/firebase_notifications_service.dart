@@ -1,6 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:paypadi/core/models/push_notifications_message/push_notifications_message.dart';
 import 'package:paypadi/core/services/notifications/notifications_service.dart';
+import 'package:paypadi/core/services/notifications/push_notifications_message.dart';
 
 class FirebaseNotificationsService implements INotificationsService {
   FirebaseNotificationsService(this._messaging);

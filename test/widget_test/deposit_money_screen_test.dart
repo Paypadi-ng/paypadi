@@ -5,10 +5,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/models/user_bank_account_model/user_bank_account_model.dart';
-import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
+import 'package:paypadi/data/wallet/i_wallet_repository.dart';
+import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/src/features/home/views/deposit_money_screen.dart';
 
 import '../helpers/transfer_fakes.dart';

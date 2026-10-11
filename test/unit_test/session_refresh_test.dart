@@ -9,10 +9,10 @@ import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/repositories/session/i_session_repository.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
+import 'package:paypadi/data/session/i_session_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/transfer_fakes.dart';

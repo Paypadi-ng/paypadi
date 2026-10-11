@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/clients/transaction/transaction_client.dart';
+import 'package:paypadi/data/transaction/transaction_client.dart';
 
 /// Records each request path instead of sending it.
 class _CapturingAdapter implements HttpClientAdapter {
