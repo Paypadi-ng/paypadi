@@ -9,7 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart' show appPrimaryColorProvider;
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
 import 'package:paypadi/features/authentication/widgets/pincode_field.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';

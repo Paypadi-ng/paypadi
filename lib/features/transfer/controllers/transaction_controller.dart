@@ -8,7 +8,7 @@ import 'package:paypadi/data/transaction/models/account_lookup_model.dart';
 import 'package:paypadi/data/transaction/models/payment_model.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';
 import 'package:paypadi/data/transaction/providers.dart';
-import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

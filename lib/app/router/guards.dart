@@ -3,8 +3,42 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/session/session_unlocked.dart';
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
+
+/// What a protected route may show, given the stored session and whether
+/// the user has unlocked the app since it started.
+enum SessionAccess {
+  /// The session is alive and the user has unlocked the app.
+  allowed,
+
+  /// The session is alive but the user hasn't unlocked yet: send them to the
+  /// quick unlock (biometrics or password) before anything protected.
+  locked,
+
+  /// No session, or its refresh token has expired: full sign-in needed.
+  signedOut,
+}
+
+SessionAccess sessionAccess({
+  required String? refreshToken,
+  required int? refreshExpiry,
+  required bool unlocked,
+  DateTime? now,
+}) {
+  if (refreshToken == null || refreshExpiry == null) {
+    return SessionAccess.signedOut;
+  }
+  final expiresAt = DateTime.fromMillisecondsSinceEpoch(
+    refreshExpiry * 1000,
+    isUtc: true,
+  );
+  if (!expiresAt.isAfter((now ?? DateTime.now()).toUtc())) {
+    return SessionAccess.signedOut;
+  }
+  return unlocked ? SessionAccess.allowed : SessionAccess.locked;
+}
 
 class AuthenticationGuard extends AutoRouteGuard {
   const AuthenticationGuard(this.ref);
@@ -15,39 +49,25 @@ class AuthenticationGuard extends AutoRouteGuard {
     NavigationResolver resolver,
     StackRouter router,
   ) async {
-    final String? refreshToken = await ref
-        .read(secureCacheProvider)
-        .get<String?>(CacheKeys.refreshToken);
+    final cache = ref.read(secureCacheProvider);
+    final access = sessionAccess(
+      refreshToken: await cache.get<String?>(CacheKeys.refreshToken),
+      refreshExpiry: await cache.get<int?>(CacheKeys.refreshTokenExpiry),
+      // A valid stored session isn't enough: without this a protected route
+      // opened directly (a deep link, a notification) skipped the unlock.
+      unlocked: ref.read(sessionUnlockedProvider),
+    );
 
-    final int? refreshExpiresTimestamp = await ref
-        .read(secureCacheProvider)
-        .get<int?>(CacheKeys.refreshTokenExpiry);
-
-    bool isSessionDead = true;
-
-    if (refreshToken != null && refreshExpiresTimestamp != null) {
-      final DateTime refreshExpirationDate =
-          DateTime.fromMillisecondsSinceEpoch(
-            refreshExpiresTimestamp * 1000,
-            isUtc: true,
-          );
-
-      if (refreshExpirationDate.isAfter(DateTime.now().toUtc())) {
-        isSessionDead = false;
-      }
+    switch (access) {
+      case SessionAccess.allowed:
+        resolver.next();
+      case SessionAccess.locked:
+        unawaited(router.replace(const LoginRoute()));
+        resolver.next(false);
+      case SessionAccess.signedOut:
+        unawaited(router.replace(const SignInRoute()));
+        resolver.next(false);
     }
-
-    if (isSessionDead) {
-      // 1. Session is completely dead (or missing). Navigate to the sign-in screen.
-      unawaited(router.replace(const SignInRoute()));
-
-      // 2. Explicitly abort the pending protected navigation.
-      resolver.next(false);
-      return;
-    }
-
-    // User is authenticated and within their 24-hour window, allow navigation to proceed.
-    resolver.next();
   }
 }
 

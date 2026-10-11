@@ -86,7 +86,7 @@ All checks should pass before continuing. Resolve any reported issues first.
 
 ## Project Structure
 
-`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. `test/unit_test/architecture_test.dart` fails the build if an import goes the wrong way.
+`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. Features never import each other: state that more than one feature needs lives in `shared/controllers/`, and features open each other's screens through the router. `test/architecture_test.dart` fails the build if an import breaks either rule.
 
 ```
 lib/
@@ -108,7 +108,7 @@ lib/
 │   ├── api/                 # ApiService (Dio + interceptors), Result, retry policy,
 │   │                        # typed exceptions/, generic response envelopes in response/
 │   ├── services/            # storage/, monitoring/, notifications/, device/
-│   └── utils/               # Constants, enums, helpers, validators, extensions
+│   └── utils/               # Constants, enums, formatters, dates, jwt, validators, extensions
 │
 ├── data/                    # Backend access, one folder per API domain
 │   ├── authentication/      # Each domain has:
@@ -119,17 +119,17 @@ lib/
 │   └── payout_account/
 │
 ├── shared/                  # App-wide UI and state; never imports features/
-│   ├── controllers/         # Loading, toasts, colour, app version, user profile, bank list
+│   ├── controllers/         # State several features share: loading, toasts, colour, settings,
+│   │                        # user profile, wallet, transfer draft, bank list
 │   ├── extensions/          # ref.showLoading(), ref.showExceptionMessage(), …
 │   ├── placeholder_data.dart  # Rows shown while lists load (skeletons)
 │   └── widgets/             # Reusable widgets (AppScaffold, AppKeypad, …)
 │
 └── features/                # One folder per user-facing flow
     ├── authentication/      # Each feature has:
-    ├── account_security/    #   controllers/  Riverpod controllers
-    ├── home/                #   views/        screens (@RoutePage)
-    ├── onboarding/          #   widgets/      widgets used only by this feature
-    ├── settings/
+    ├── home/                #   controllers/  Riverpod controllers
+    ├── onboarding/          #   views/        screens (@RoutePage)
+    ├── settings/            #   widgets/      widgets used only by this feature
     └── transfer/
 ```
 
@@ -368,9 +368,12 @@ flutter test
 
 ```pseudocode
 test/
-├── helpers/        # Shared fakes (repositories, router)
-├── unit_test/      # Controllers, repositories, services, utilities, and the architecture test
-└── widget_test/    # Widget rendering and interaction tests
+├── architecture_test.dart   # Enforces the lib/ layer rules
+├── helpers/                 # Shared fakes (repositories, router)
+├── app/  core/  data/  shared/  features/
+│                            # Mirrors lib/: a test sits under the folder of the code it
+│                            # covers, e.g. test/core/utils/ for lib/core/utils/.
+│                            # Widget tests live beside the unit tests for that feature.
 ```
 
 When writing tests, mock at the **repository boundary** — inject mock repositories via Riverpod provider overrides. Do not mock clients or Dio directly.

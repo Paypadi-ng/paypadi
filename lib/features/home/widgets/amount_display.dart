@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 
 class AmountDisplay extends HookWidget {
