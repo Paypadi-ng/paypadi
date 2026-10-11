@@ -25,7 +25,7 @@ import 'package:paypadi/features/authentication/controllers/authentication_contr
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 int _secondsFromNow(Duration offset) =>
     DateTime.now().toUtc().add(offset).millisecondsSinceEpoch ~/ 1000;

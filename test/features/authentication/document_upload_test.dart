@@ -13,7 +13,7 @@ import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:paypadi/data/profile/providers.dart';
 import 'package:paypadi/features/authentication/controllers/file_upload_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 class _QueuedFilePicker extends FilePickerService {
   _QueuedFilePicker(this._files);

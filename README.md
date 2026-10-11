@@ -86,7 +86,7 @@ All checks should pass before continuing. Resolve any reported issues first.
 
 ## Project Structure
 
-`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. Features never import each other: state that more than one feature needs lives in `shared/controllers/`, and features open each other's screens through the router. `test/unit_test/architecture_test.dart` fails the build if an import breaks either rule.
+`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. Features never import each other: state that more than one feature needs lives in `shared/controllers/`, and features open each other's screens through the router. `test/architecture_test.dart` fails the build if an import breaks either rule.
 
 ```
 lib/
@@ -368,9 +368,12 @@ flutter test
 
 ```pseudocode
 test/
-├── helpers/        # Shared fakes (repositories, router)
-├── unit_test/      # Controllers, repositories, services, utilities, and the architecture test
-└── widget_test/    # Widget rendering and interaction tests
+├── architecture_test.dart   # Enforces the lib/ layer rules
+├── helpers/                 # Shared fakes (repositories, router)
+├── app/  core/  data/  shared/  features/
+│                            # Mirrors lib/: a test sits under the folder of the code it
+│                            # covers, e.g. test/core/utils/ for lib/core/utils/.
+│                            # Widget tests live beside the unit tests for that feature.
 ```
 
 When writing tests, mock at the **repository boundary** — inject mock repositories via Riverpod provider overrides. Do not mock clients or Dio directly.

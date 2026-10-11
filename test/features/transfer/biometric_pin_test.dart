@@ -14,7 +14,7 @@ import 'package:paypadi/features/transfer/controllers/transaction_controller.dar
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 class _FakeProfileRepository implements IProfileRepository {
   final List<Map<String, dynamic>> pinChanges = [];

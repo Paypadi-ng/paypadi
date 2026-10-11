@@ -11,7 +11,7 @@ import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
 import 'package:paypadi/features/home/views/deposit_money_screen.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 /// Fails the first deposit-account request, then succeeds.
 class _FlakyWalletRepository implements IWalletRepository {

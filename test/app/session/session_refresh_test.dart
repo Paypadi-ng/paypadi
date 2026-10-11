@@ -18,7 +18,7 @@ import 'package:paypadi/data/session/models/session_response.dart';
 import 'package:paypadi/data/session/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 int _secondsFromNow(Duration offset) =>
     DateTime.now().toUtc().add(offset).millisecondsSinceEpoch ~/ 1000;

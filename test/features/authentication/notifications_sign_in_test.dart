@@ -24,7 +24,7 @@ import 'package:paypadi/features/authentication/views/forgot_password_screen.dar
 import 'package:paypadi/features/authentication/views/sign_in_screen.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 /// Notification setup that always fails, and a token stream whose
 /// listeners the test can see.

@@ -20,7 +20,7 @@ import 'package:paypadi/features/home/controllers/deposit_account_controller.dar
 import 'package:paypadi/features/transfer/controllers/receipt_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 const _noVirtualAccount = ServerException.badRequest(
   'Could not generate virtual account. Please use standard deposit.',

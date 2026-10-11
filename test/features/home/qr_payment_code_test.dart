@@ -6,7 +6,7 @@ import 'package:paypadi/features/home/controllers/qr_code_controller.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 void main() {
   group('payment QR codes', () {

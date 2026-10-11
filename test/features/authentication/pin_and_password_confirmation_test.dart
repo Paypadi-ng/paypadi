@@ -12,7 +12,7 @@ import 'package:paypadi/features/authentication/views/confirm_password_screen.da
 import 'package:paypadi/features/authentication/views/confirm_transaction_pin_screen.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 class _FakeProfileRepository implements IProfileRepository {
   final List<Map<String, dynamic>> pins = [];

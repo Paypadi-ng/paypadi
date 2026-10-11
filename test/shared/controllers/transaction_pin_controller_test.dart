@@ -12,7 +12,7 @@ import 'package:paypadi/data/profile/providers.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 class _FakeProfileRepository implements IProfileRepository {
   @override

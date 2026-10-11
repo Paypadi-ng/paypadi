@@ -9,7 +9,7 @@ import 'package:paypadi/features/transfer/views/confirm_payment.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 void main() {
   testWidgets('Make Payment is disabled while the transfer is in flight, so '

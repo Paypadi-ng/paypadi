@@ -15,7 +15,7 @@ import 'package:paypadi/features/authentication/controllers/account_security_con
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 const _profile = UserProfileModel(
   id: 'u1',

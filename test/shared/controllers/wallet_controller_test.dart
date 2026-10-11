@@ -10,7 +10,7 @@ import 'package:paypadi/data/wallet/providers.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
 
-import '../helpers/transfer_fakes.dart';
+import '../../helpers/transfer_fakes.dart';
 
 final _wallet = WalletModel(
   id: 'w1',
