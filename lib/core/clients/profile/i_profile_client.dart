@@ -23,7 +23,11 @@ abstract interface class IProfileClient {
 
   Future<ApiResponse<UserProfileModel>> getUser();
 
-  Future<ApiResponse<void>> setTransactionPin({
+  Future<ApiResponse<void>> setPin({
+    required Map<String, dynamic> payload,
+  });
+
+  Future<ApiResponse<void>> changePin({
     required Map<String, dynamic> payload,
   });
 

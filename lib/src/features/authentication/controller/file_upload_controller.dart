@@ -71,12 +71,18 @@ class FileUploadController extends _$FileUploadController {
     final files = ref.watch(filePickerControllerProvider).value ?? {};
 
     return <DocumentCategory, UploadState>{
-      for (final entry in files.entries)
-        entry.key: _uploadStates.containsKey(entry.key)
-            // Preserve existing upload progress, just sync the latest file.
-            ? _uploadStates[entry.key]!.copyWith(file: entry.value)
-            : UploadState(file: entry.value),
+      for (final MapEntry(key: category, value: file) in files.entries)
+        category: _syncedState(category, file),
     };
+  }
+
+  /// Keeps a category's upload progress while its file is unchanged. A newly
+  /// picked or cleared file starts over at idle; before, a re-picked file
+  /// kept the previous file's "complete" status and was never uploaded.
+  UploadState _syncedState(DocumentCategory category, File? file) {
+    final previous = _uploadStates[category];
+    if (previous != null && previous.file?.path == file?.path) return previous;
+    return _uploadStates[category] = UploadState(file: file);
   }
 
   Future<void> upload(DocumentCategory category) async {

@@ -91,6 +91,7 @@ Future<void> _runApp({required bool isMonitored}) async {
   try {
     await providerContainer.read(sharedPreferencesFutureProvider.future);
     await providerContainer.read(sessionControllerProvider.future);
+    await providerContainer.read(notificationsServiceProvider).initialize();
   } catch (e, stack) {
     debugLogger.error(
       'Failed to initialize SharedPreferencesWithCache',

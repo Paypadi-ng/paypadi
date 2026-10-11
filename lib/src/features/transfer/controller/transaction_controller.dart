@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/config/router/router.gr.dart';
+import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.dart';
 import 'package:paypadi/core/models/payment_model/payment_model.dart';
 import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
@@ -38,7 +39,18 @@ class InitiatePaymentController extends _$InitiatePaymentController {
   @override
   FutureOr<PaymentModel?> build() => null;
 
-  Future<void> initiatePayment() async {
+  /// Starts the payment with the PIN in the transfer draft.
+  ///
+  /// [pinFromVault]: the PIN came from the biometric PIN vault.
+  /// If the server refuses it, the stored PIN is forgotten so a stale one
+  /// (e.g. changed on another device) isn't offered again.
+  ///
+  /// [rememberPin]: biometric confirmation is on, so a typed PIN the server
+  /// accepts is stored for next time. Only accepted PINs are ever stored.
+  Future<void> initiatePayment({
+    bool pinFromVault = false,
+    bool rememberPin = false,
+  }) async {
     // The keypad submits on every completed PIN; ignore repeats while a
     // request is already in flight.
     if (state.isLoading) return;
@@ -52,14 +64,24 @@ class InitiatePaymentController extends _$InitiatePaymentController {
 
     if (!ref.mounted) return;
 
+    final vault = ref.read(transactionPinVaultProvider);
     result.fold(
       (success) {
+        final pin = draft.pin;
+        if (rememberPin && !pinFromVault && pin != null) {
+          unawaited(vault.save(pin));
+        }
         state = AsyncValue.data(success.data);
         unawaited(
           ref.read(appRouterProvider).push(const ConfirmPaymentRoute()),
         );
       },
       (failure) {
+        if (pinFromVault &&
+            failure is ServerException &&
+            failure.isRejectedInput) {
+          unawaited(vault.clear());
+        }
         ref.showExceptionMessage(failure);
         state = const AsyncData(null);
       },

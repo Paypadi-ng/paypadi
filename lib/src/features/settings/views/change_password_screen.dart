@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/src/shared/widgets/app_keypad.dart';
@@ -42,51 +44,23 @@ class ChangePasswordScreen extends HookConsumerWidget {
           AppKeypad(
             keyLength: passwordPinLength,
             controller: passwordController,
-            onSubmit: (password) {},
+            // The password isn't kept on the device, so it can't be checked
+            // here: it's sent with the new one and the server verifies it.
+            onSubmit: (currentPassword) async {
+              passwordController.clear();
+              await ref
+                  .read(appRouterProvider)
+                  .push(
+                    CreatePasswordRoute(
+                      isUpdating: true,
+                      currentPassword: currentPassword,
+                    ),
+                  );
+            },
           ),
           const Spacer(),
         ],
       ),
     );
   }
-
-  // void _changePasswordRouteOnSubmit(WidgetRef ref, String currentPassword) {
-  //   // ref
-  //   //     .read(appRouterProvider)
-  //   //     .push(
-  //   //       PasswordRoute(
-  //   //         onSubmit: (password) => _passwordRouteOnSubmit(ref, password),
-  //   //       ),
-  //   //     );
-  // }
-
-  // void _passwordRouteOnSubmit(WidgetRef ref, String password) {
-  //   ref
-  //       .read(appRouterProvider)
-  //       .push(
-  //         ConfirmPasswordRoute(
-  //           onSubmit:
-  //               (confirmPassword) => _confirmPasswordRouteOnSubmit(
-  //                 ref,
-  //                 password,
-  //                 confirmPassword,
-  //               ),
-  //         ),
-  //       );
-  // }
-
-  // void _confirmPasswordRouteOnSubmit(
-  //   WidgetRef ref,
-  //   String password,
-  //   String confirmPassword,
-  // ) {
-  //   if (password == confirmPassword) {
-  //     ref
-  //         .read(secureCacheProvider)
-  //         .write(key: CacheKeys.loginPin, value: confirmPassword);
-  //     ref
-  //         .read(appRouterProvider)
-  //         .popUntilRouteWithName(AppBottomNavBarRoute.name);
-  //   }
-  // }
 }

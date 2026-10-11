@@ -10,7 +10,7 @@ part 'profile_picture_controller.g.dart';
 
 @riverpod
 class ProfilePicture extends _$ProfilePicture {
-  late final ImagePickerService _service;
+  late ImagePickerService _service;
 
   @override
   FutureOr<File?> build() {

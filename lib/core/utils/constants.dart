@@ -7,35 +7,6 @@ import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-class Values {
-  static const double zero = 0.0;
-  static const double v1 = 1.0;
-  static const double v2 = 2.0;
-  static const double v4 = 4.0;
-  static const double v6 = 6.0;
-  static const double v8 = 8.0;
-  static const double v10 = 10.0;
-  static const double v12 = 12.0;
-  static const double v14 = 14.0;
-  static const double v16 = 16.0;
-  static const double v18 = 18.0;
-  static const double v20 = 20.0;
-  static const double v24 = 24.0;
-  static const double v28 = 28.0;
-  static const double v32 = 32.0;
-  static const double v36 = 36.0;
-  static const double v48 = 48.0;
-  static const double v64 = 64.0;
-  static const double v72 = 72.0;
-  static const double v84 = 84.0;
-  static const double v92 = 92.0;
-  static const double v96 = 96.0;
-  static const double v108 = 108.0;
-  static const double v120 = 120.0;
-  static const double v136 = 136.0;
-  static const double v150 = 150.0;
-}
-
 const int transactionPinLength = 4;
 
 const int passwordPinLength = 6;
@@ -56,8 +27,17 @@ const Size kAppBarSize = Size(double.infinity, 56);
 
 const Duration animatedFooDuration = Durations.medium4;
 
-const String kDemoProfilePic =
-    'https://images.unsplash.com/photo-1590086782957-93c06ef21604?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8d2hpdGUlMjBtYWxlfGVufDB8fDB8fHww';
+const String appSupportAndFaqs =
+    'https://paypadi-website-main.vercel.app/index.html#faqs';
+
+const String appTermsAndConditions =
+    'https://paypadi-website-main.vercel.app/legal.html#terms';
+
+const String appPrivacyPolicy =
+    'https://paypadi-website-main.vercel.app/legal.html#privacy';
+
+const String appUserProfilePic =
+    'https://p1.hiclipart.com/preview/314/450/342/circle-user-profile-avatar-computer-program-symbol-oval-png-clipart.jpg';
 
 const String placeholder = 'Placeholder';
 
@@ -111,12 +91,8 @@ final List<BeneficiaryModel> kMockBeneficiaries = List.generate(
     bankName: ['First Bank', 'GT Bank', 'Opay', 'UBA', 'Zenith'][index],
     bankCode: ['058', '044', '033', '011', '232'][index],
     isVerified: index != 3,
-    createdAt: DateTime.now()
-        .subtract(Duration(days: index + 2))
-        .toIso8601String(),
-    updatedAt: DateTime.now()
-        .subtract(Duration(hours: index * 3))
-        .toIso8601String(),
+    createdAt: DateTime.now().subtract(Duration(days: index + 2)),
+    updatedAt: DateTime.now().subtract(Duration(hours: index * 3)),
   ),
 );
 
@@ -138,9 +114,7 @@ final List<TransactionHistoryModel> kMockTransactionHistory = List.generate(
       isPinVerified: index.isEven,
     ),
     type: index.isEven ? TransactionType.transfer : TransactionType.deposit,
-    createdAt: DateTime.now()
-        .subtract(Duration(days: index, hours: index + 1))
-        .toIso8601String(),
+    createdAt: DateTime.now().subtract(Duration(days: index, hours: index + 1)),
     senderName: index.isEven ? 'PayPadi Wallet' : 'GTBank Card',
     recipientName: index.isEven ? 'Tunde Adebayo' : 'PayPadi Wallet',
     transactionFee: index.isEven ? '15' : '0',
@@ -168,6 +142,35 @@ final Talker debugLogger = TalkerFlutter.init(
     },
   ),
 );
+
+class Values {
+  static const double zero = 0.0;
+  static const double v1 = 1.0;
+  static const double v2 = 2.0;
+  static const double v4 = 4.0;
+  static const double v6 = 6.0;
+  static const double v8 = 8.0;
+  static const double v10 = 10.0;
+  static const double v12 = 12.0;
+  static const double v14 = 14.0;
+  static const double v16 = 16.0;
+  static const double v18 = 18.0;
+  static const double v20 = 20.0;
+  static const double v24 = 24.0;
+  static const double v28 = 28.0;
+  static const double v32 = 32.0;
+  static const double v36 = 36.0;
+  static const double v48 = 48.0;
+  static const double v64 = 64.0;
+  static const double v72 = 72.0;
+  static const double v84 = 84.0;
+  static const double v92 = 92.0;
+  static const double v96 = 96.0;
+  static const double v108 = 108.0;
+  static const double v120 = 120.0;
+  static const double v136 = 136.0;
+  static const double v150 = 150.0;
+}
 
 class CacheKeys {
   static const String darkMode = 'dark_mode';

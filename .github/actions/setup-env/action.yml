@@ -9,7 +9,7 @@ inputs:
   ruby-version:
     description: 'Ruby version to use (for Fastlane/iOS)'
     required: false
-    default: '3.2'
+    default: '3.3'
   setup-java:
     description: 'Whether to setup Java (for Android)'
     required: false

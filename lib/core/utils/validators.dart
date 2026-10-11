@@ -42,10 +42,6 @@ String? otpValidator(String? otp) {
 }
 
 String? phoneNumberValidator(String? phone) {
-  // Validate Nigerian phone numbers in local format only.
-  // Acceptable format:
-  // - Local: 0XXXXXXXXXX (11 digits, e.g. 08031234567)
-
   if (phone == null || phone.trim().isEmpty) {
     return 'Enter a phone number';
   }
@@ -53,11 +49,13 @@ String? phoneNumberValidator(String? phone) {
   // Remove common separators (spaces, dashes, parentheses)
   final normalized = phone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
 
-  // Local: starts with 0, exactly 11 digits (e.g. 08031234567)
-  final isValidLocal = RegExp(r'^0?\d{10}$').hasMatch(normalized);
+  // Regex breakdown for industry standard Nigerian numbers:
+  // ^(?:\+?234|0) -> Starts with optional '+234', '234', or a single '0'
+  // [789][01]\d{8}$ -> Followed by a valid Nigerian mobile prefix (70, 80, 90, 81, etc.) and 8 more digits
+  final nigerianPhoneRegex = RegExp(r'^(?:\+?234|0)[789][01]\d{8}$');
 
-  if (!isValidLocal) {
-    return 'Enter a valid number (e.g. 08031234567)';
+  if (!nigerianPhoneRegex.hasMatch(normalized)) {
+    return 'Enter a valid Nigerian phone number (e.g., +2348031234567 or 08031234567)';
   }
 
   return null;

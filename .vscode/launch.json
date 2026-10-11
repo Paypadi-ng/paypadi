@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Paypadi Debug-dev",
+      "name": "Debug-dev",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_dev.dart",
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "name": "Paypadi Debug-prod",
+      "name": "Debug-prod",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_prod.dart",
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "name": "Paypadi Release-Dev",
+      "name": "Release-Dev",
       "type": "dart",
       "request": "launch",
       "flutterMode": "release",
@@ -39,7 +39,7 @@
       ]
     },
     {
-      "name": "Paypadi Release",
+      "name": "Release",
       "type": "dart",
       "request": "launch",
       "program": "lib/main_prod.dart",
