@@ -12,6 +12,7 @@ sealed class ServerException extends AppException with _$ServerException {
   const factory ServerException.requestCancelled() = _RequestCancelled;
   const factory ServerException.requestTimeout() = _RequestTimeout;
   const factory ServerException.sendTimeout() = _SendTimeout;
+  const factory ServerException.transformTimeout() = _TransformTimeout;
   const factory ServerException.receiveTimeout() = _ReceiveTimeout;
   const factory ServerException.badRequest(String? reason) = _BadRequest;
   const factory ServerException.unauthorizedRequest(String? reason) =
@@ -62,6 +63,16 @@ sealed class ServerException extends AppException with _$ServerException {
     // which escapes error handling and leaves the caller stuck loading.
     if (data is Map) {
       message = readableMessage(data['message']);
+      // Validation failures carry a generic summary in `message` ("Validation
+      // failed") and the reason the user needs in `error` ("Insufficient
+      // balance"). Other statuses put a code there (e.g. "token_not_valid"),
+      // so only a sentence-like `error` on 400/422 replaces the message.
+      final String? detail = readableMessage(data['error']);
+      if ((statusCode == 400 || statusCode == 422) &&
+          detail != null &&
+          detail.trim().contains(' ')) {
+        message = detail;
+      }
       conflictingAssetId = switch (data['data']) {
         final Map<Object?, Object?> details =>
           details['document_id']?.toString(),
@@ -126,6 +137,16 @@ sealed class ServerException extends AppException with _$ServerException {
     _ => null,
   };
 
+  /// Whether the server refused what was sent (400, 403 or 422), e.g. a
+  /// wrong PIN — as opposed to an expired session (401), a timeout or an
+  /// outage, which say nothing about the input.
+  bool get isRejectedInput => maybeMap(
+    badRequest: (_) => true,
+    forbiddenRequest: (_) => true,
+    unprocessableEntity: (_) => true,
+    orElse: () => false,
+  );
+
   @override
   String get monitoringContext => 'Server';
 
@@ -151,6 +172,7 @@ sealed class ServerException extends AppException with _$ServerException {
     internalServerError: (_) => SeverityLevel.error,
     serviceUnavailable: (_) => SeverityLevel.error,
     defaultError: (_) => SeverityLevel.error,
+    transformTimeout: (_) => SeverityLevel.warning,
   );
 
   @override
@@ -172,6 +194,7 @@ sealed class ServerException extends AppException with _$ServerException {
     requestCancelled: (_) => {},
     requestTimeout: (_) => {},
     sendTimeout: (_) => {},
+    transformTimeout: (_) => {},
     receiveTimeout: (_) => {},
     noInternetConnection: (_) => {},
     methodNotAllowed: (_) => {},

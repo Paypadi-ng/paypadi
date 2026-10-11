@@ -11,10 +11,23 @@ import 'package:paypadi/src/shared/widgets/app_keypad.dart';
 import 'package:paypadi/src/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
+/// Shown when the confirmation doesn't match the PIN entered first.
+const pinMismatchMessage = "The PINs don't match. Enter the same PIN again.";
+
 @RoutePage()
 class ConfirmTransactionPinScreen extends HookConsumerWidget {
-  const ConfirmTransactionPinScreen({required this.pin, super.key});
+  const ConfirmTransactionPinScreen({
+    required this.pin,
+    this.isUpdating = false,
+    this.currentPin,
+    super.key,
+  });
+
   final String pin;
+  final bool isUpdating;
+
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,6 +48,25 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
       );
     });
 
+    // Only when changing an existing PIN/password; sign-up has its own
+    // listener above.
+    if (isUpdating) {
+      ref.listen(accountSecurityProvider, (previous, current) {
+        current.when(
+          data: (d) {
+            confirmPinController.clear();
+            ref.dismissLoading();
+          },
+          error: (e, st) {
+            confirmPinController.clear();
+            ref.dismissLoading();
+            ref.showExceptionMessage(e, st);
+          },
+          loading: () => ref.showLoading(),
+        );
+      });
+    }
+
     return AppScaffold(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +78,7 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           ),
           Values.v12.verticalSpace,
           Text(
-            'Set a secure password for your account',
+            'Enter the same 4-digit PIN again to confirm it.',
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w400,
             ),
@@ -58,7 +90,20 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
           const Spacer(flex: 3),
           AppKeypad(
             controller: confirmPinController,
-            onSubmit: (confirmedPin) => submitPin(ref, pin, confirmedPin),
+            onSubmit: (confirmedPin) async {
+              // Checked for both new and changed PINs: without this the
+              // keypad stayed full and nothing said why.
+              if (confirmedPin != pin) {
+                confirmPinController.clear();
+                ref.showErrorToast(pinMismatchMessage);
+                return;
+              }
+              if (isUpdating) {
+                await changePin(ref);
+              } else {
+                await setPin(ref);
+              }
+            },
           ),
           const Spacer(),
         ],
@@ -66,11 +111,14 @@ class ConfirmTransactionPinScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> submitPin(WidgetRef ref, String pin, String confirmedPin) async {
-    if (pin == confirmedPin) {
-      await ref
-          .read(riderProfileProvider.notifier)
-          .setTransactionPin(pin, confirmedPin);
-    }
+  Future<void> setPin(WidgetRef ref) =>
+      ref.read(riderProfileProvider.notifier).setTransactionPin(pin, pin);
+
+  Future<void> changePin(WidgetRef ref) async {
+    final current = currentPin;
+    if (current == null) return;
+    await ref
+        .read(accountSecurityProvider.notifier)
+        .changePin(currentPin: current, newPin: pin, confirmedPin: pin);
   }
 }

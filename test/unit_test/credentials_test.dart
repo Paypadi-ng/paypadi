@@ -24,7 +24,7 @@ import '../helpers/transfer_fakes.dart';
 int _secondsFromNow(Duration offset) =>
     DateTime.now().toUtc().add(offset).millisecondsSinceEpoch ~/ 1000;
 
-const _user = UserModel(
+final _user = UserModel(
   id: 'b7d1c2e4',
   role: 'rider',
   phoneNumber: '08031234567',
@@ -32,7 +32,7 @@ const _user = UserModel(
   lastName: 'Obi',
   isActive: true,
   phoneVerified: true,
-  dateJoined: '2026-10-01T09:00:00Z',
+  dateJoined: DateTime.utc(2026, 10, 1, 9),
 );
 
 class _FakeAuthRepository implements IAuthenticationRepository {
@@ -82,9 +82,9 @@ class _FakeProfileRepository implements IProfileRepository {
   final List<Map<String, dynamic>> pins = [];
 
   @override
-  FutureApiResultOf<void> setTransactionPin(
-    Map<String, dynamic> payload,
-  ) async {
+  FutureApiResultOf<void> setPin({
+    required Map<String, dynamic> payload,
+  }) async {
     pins.add(payload);
     return success(ok<void>(null));
   }
@@ -142,6 +142,7 @@ void main() {
       CacheKeys.phoneNumber: '08031234567',
       CacheKeys.legacyPassword: '123456',
       CacheKeys.legacyTransactionPin: '1234',
+      CacheKeys.email: 'previous.user@example.com',
     });
   }
 
@@ -199,6 +200,16 @@ void main() {
       expect(await stored(container, CacheKeys.legacyPassword), isNull);
       expect(await stored(container, CacheKeys.legacyTransactionPin), isNull);
       expect(router.pushed.single, isA<DashboardRoute>());
+    });
+
+    test('clears the stored email when the user has none', () async {
+      final container = containerWith();
+
+      await container
+          .read(authenticationControllerProvider.notifier)
+          .login('08031234567', '654321');
+
+      expect(await stored(container, CacheKeys.email), isNull);
     });
   });
 

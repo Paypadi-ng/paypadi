@@ -114,6 +114,6 @@ class SetupDriverScreen extends HookConsumerWidget {
       ..['last_name'] = lastName
       ..['email'] = email;
 
-    unawaited(ref.read(appRouterProvider).push(const CreatePasswordRoute()));
+    unawaited(ref.read(appRouterProvider).push(CreatePasswordRoute()));
   }
 }

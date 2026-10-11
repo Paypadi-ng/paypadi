@@ -48,6 +48,38 @@ void main() {
       },
     );
 
+    test('shows the specific validation reason over the generic summary', () {
+      expect(
+        _handle(400, {
+          'status': false,
+          'message': 'Validation failed',
+          'error': 'Insufficient balance',
+        }),
+        const ServerException.badRequest('Insufficient balance'),
+      );
+    });
+
+    test('keeps the message when error is empty or a code', () {
+      expect(
+        _handle(400, {
+          'message': 'Could not generate virtual account.',
+          'error': null,
+        }),
+        const ServerException.badRequest('Could not generate virtual account.'),
+      );
+      expect(
+        _handle(401, {
+          'message': 'Token is invalid',
+          'error': 'token_not_valid',
+        }),
+        const ServerException.unauthorizedRequest('Token is invalid'),
+      );
+      expect(
+        _handle(400, {'message': 'Bad PIN', 'error': 'invalid_pin'}),
+        const ServerException.badRequest('Bad PIN'),
+      );
+    });
+
     test('tolerates a data field that is not a map', () {
       expect(
         _handle(409, {

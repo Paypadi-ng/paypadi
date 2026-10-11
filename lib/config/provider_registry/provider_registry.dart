@@ -42,6 +42,8 @@ import 'package:paypadi/core/services/notifications/notifications_service.dart';
 import 'package:paypadi/core/services/receipt_service.dart';
 import 'package:paypadi/core/services/storage/local_cache_service.dart';
 import 'package:paypadi/core/services/storage/secure_cache_service.dart';
+import 'package:paypadi/core/services/storage/transaction_pin_vault.dart';
+import 'package:paypadi/core/services/url_launcher_service.dart';
 import 'package:paypadi/core/utils/constants.dart' show availableColors;
 import 'package:paypadi/src/shared/controllers/app_color/app_color_controller.dart';
 import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
@@ -70,6 +72,11 @@ Future<SharedPreferencesWithCache> sharedPreferencesFuture(Ref ref) {
 @Riverpod(keepAlive: true)
 SecureCacheService secureCache(Ref ref) {
   return SecureCacheService(monitoring: ref.watch(monitoringProvider));
+}
+
+@Riverpod(keepAlive: true)
+TransactionPinVault transactionPinVault(Ref ref) {
+  return TransactionPinVault(monitoring: ref.watch(monitoringProvider));
 }
 
 @Riverpod(keepAlive: true)
@@ -240,4 +247,9 @@ AppVersionService appVersionService(Ref ref) {
 @riverpod
 AssetShareService assetShareService(Ref ref) {
   return AssetShareService();
+}
+
+@riverpod
+UrlLauncherService urlLauncher(Ref ref) {
+  return const UrlLauncherService();
 }

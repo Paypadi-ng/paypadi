@@ -7,7 +7,7 @@ import 'package:retrofit/retrofit.dart';
 
 part 'payout_account_client.g.dart';
 
-const String _basePath = '/auth/driver/payout-accounts/';
+const String _basePath = '/auth/driver/payout-accounts';
 
 @RestApi()
 abstract class PayoutAccountClient implements IPayoutAccountClient {
@@ -19,7 +19,7 @@ abstract class PayoutAccountClient implements IPayoutAccountClient {
   // });
 
   @override
-  @POST(_basePath)
+  @POST('$_basePath/')
   Future<ApiResponse<AccountPayoutModel>> createPayoutAccount({
     @Body() required Map<String, dynamic> payload,
   });

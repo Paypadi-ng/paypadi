@@ -103,6 +103,6 @@ class SetupPassengerScreen extends HookConsumerWidget {
       ..['first_name'] = firstName
       ..['last_name'] = lastName;
 
-    unawaited(ref.read(appRouterProvider).push(const CreatePasswordRoute()));
+    unawaited(ref.read(appRouterProvider).push(CreatePasswordRoute()));
   }
 }

@@ -22,7 +22,7 @@ Map<String, dynamic> authenticationPayload(Ref ref) => <String, dynamic>{};
 
 @riverpod
 class AuthenticationController extends _$AuthenticationController {
-  late final IAuthenticationRepository _repository;
+  late IAuthenticationRepository _repository;
 
   @override
   FutureOr<void> build() {
@@ -39,7 +39,6 @@ class AuthenticationController extends _$AuthenticationController {
     await result.fold(
       (response) async {
         await Future.wait([
-          ref.read(notificationsServiceProvider).requestPermission(),
           _saveSession(
             refreshToken: response.data.refreshToken,
             accessToken: response.data.accessToken,
@@ -53,11 +52,23 @@ class AuthenticationController extends _$AuthenticationController {
           _forgetLegacyCredentials(),
         ]);
 
-        // Note: It is safer to use unawaited() for listeners or route pushes
-        // to prevent blocking the UI thread unnecessarily.
-        ref.read(notificationsServiceProvider).onTokenRefresh.listen((token) {
-          token.printLog();
-        });
+        // Asking for notification permission is best-effort and mustn't hold
+        // up signing in: before, a failure here left the login stuck loading.
+        final notifications = ref.read(notificationsServiceProvider);
+        unawaited(
+          notifications.requestPermission().catchError(
+            (Object error, StackTrace stack) {
+              debugLogger.error('Notification permission failed', error, stack);
+              return false;
+            },
+          ),
+        );
+        // Cancelled with this controller; a new listener was added (and never
+        // removed) on every sign-in before.
+        final tokenRefresh = notifications.onTokenRefresh.listen(
+          (token) => token.printLog(),
+        );
+        ref.onDispose(tokenRefresh.cancel);
 
         state = const AsyncData(null);
         unawaited(ref.read(appRouterProvider).push(const DashboardRoute()));
@@ -91,7 +102,7 @@ class AuthenticationController extends _$AuthenticationController {
 
         state = const AsyncData(null);
         unawaited(
-          ref.read(appRouterProvider).push(const CreateTransactionPinRoute()),
+          ref.read(appRouterProvider).push(CreateTransactionPinRoute()),
         );
       },
       (failure) {
@@ -203,8 +214,14 @@ class AuthenticationController extends _$AuthenticationController {
     ]);
   }
 
+  /// Saves [value], or removes the key when there's no value: the secure
+  /// cache can't store null, and a user without an email would otherwise
+  /// keep the previous user's.
   Future<void> _saveToCache(String key, String? value) async {
-    await ref.read(secureCacheProvider).save(key: key, value: value);
+    final cache = ref.read(secureCacheProvider);
+    await (value == null
+        ? cache.remove(key)
+        : cache.save(key: key, value: value));
   }
 
   Future<void> _saveSession({
