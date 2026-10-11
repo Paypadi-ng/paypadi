@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/core/utils/formatters.dart';
 
 void main() {
   test('formats amounts with separators and two decimal places', () {

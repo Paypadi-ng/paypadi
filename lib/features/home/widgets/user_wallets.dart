@@ -9,7 +9,7 @@ import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart' show formatAmount;
+import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/features/home/controllers/wallet_controller.dart';
 import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
 import 'package:paypadi/gen/assets.gen.dart';

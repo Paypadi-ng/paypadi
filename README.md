@@ -108,7 +108,7 @@ lib/
 │   ├── api/                 # ApiService (Dio + interceptors), Result, retry policy,
 │   │                        # typed exceptions/, generic response envelopes in response/
 │   ├── services/            # storage/, monitoring/, notifications/, device/
-│   └── utils/               # Constants, enums, helpers, validators, extensions
+│   └── utils/               # Constants, enums, formatters, dates, jwt, validators, extensions
 │
 ├── data/                    # Backend access, one folder per API domain
 │   ├── authentication/      # Each domain has:

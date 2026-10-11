@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/core/utils/jwt.dart';
 
 String _token(Map<String, dynamic> claims) {
   String encode(Map<String, dynamic> part) =>

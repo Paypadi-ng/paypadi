@@ -10,7 +10,7 @@ import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
 import 'package:paypadi/data/transaction/providers.dart';
 import 'package:paypadi/features/transfer/controllers/beneficiaries_controller.dart';

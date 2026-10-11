@@ -7,7 +7,7 @@ import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
+import 'package:paypadi/core/utils/jwt.dart';
 import 'package:paypadi/data/authentication/i_authentication_repository.dart';
 import 'package:paypadi/data/authentication/providers.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
