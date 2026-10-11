@@ -167,8 +167,7 @@ abstract class AppException implements Exception {
       ),
 
       final ClientException clientEx => _getClientExceptionMessage(clientEx),
-      //  If it's a custom AppException (like ObdConnectionDroppedException),
-      // we extract its native message instead of defaulting to a generic error!
+      // Any other AppException already carries a message meant for the user.
       final AppException appEx => appEx.message,
 
       _ => 'Something went wrong. Please try again later.',
