@@ -8,12 +8,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart' show Values;
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/features/authentication/controllers/file_upload_controller.dart';
 import 'package:paypadi/gen/assets.gen.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
@@ -148,7 +148,7 @@ class _FilePickerWidget extends ConsumerWidget {
           horizontal: Values.v24,
         ),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.grey200),
+          border: Border.all(color: context.palette.grey200),
           borderRadius: BorderRadius.circular(Values.v12),
         ),
         child: Column(
@@ -156,18 +156,18 @@ class _FilePickerWidget extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(Values.v10),
               decoration: BoxDecoration(
-                color: AppColors.white,
-                border: Border.all(color: AppColors.grey300),
+                color: context.palette.surface,
+                border: Border.all(color: context.palette.grey300),
                 borderRadius: BorderRadius.circular(Values.v8),
                 boxShadow: [
                   BoxShadow(
                     blurRadius: Values.v2,
                     offset: const Offset(Values.zero, Values.v1),
-                    color: AppColors.boxShadow.withValues(alpha: .05),
+                    color: context.palette.boxShadow.withValues(alpha: .05),
                   ),
                   BoxShadow(
                     offset: const Offset(Values.zero, Values.v2),
-                    color: AppColors.boxShadow.withValues(alpha: .05),
+                    color: context.palette.boxShadow.withValues(alpha: .05),
                   ),
                 ],
               ),
@@ -185,7 +185,7 @@ class _FilePickerWidget extends ConsumerWidget {
                   TextSpan(
                     text: 'or drag and drop',
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.grey600,
+                      color: context.palette.grey600,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -196,7 +196,7 @@ class _FilePickerWidget extends ConsumerWidget {
             Text(
               'PDF, PNG, or JPG (max. 800x400px)',
               style: context.textTheme.bodyMedium?.copyWith(
-                color: AppColors.grey600,
+                color: context.palette.grey600,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -227,7 +227,9 @@ class _UploadFileWidget extends HookConsumerWidget {
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: isFailed ? AppColors.failure : AppColors.grey200,
+              color: isFailed
+                  ? context.palette.failure
+                  : context.palette.grey200,
             ),
             borderRadius: BorderRadius.circular(Values.v12),
           ),
@@ -258,7 +260,7 @@ class _UploadFileWidget extends HookConsumerWidget {
             },
             // child: const Icon(
             //   EvaIcons.trash_2_outline,
-            //   color: AppColors.grey400,
+            //   color: context.palette.grey400,
             // ),
           ),
         ),
@@ -284,7 +286,7 @@ class _FileUploadWidget extends HookConsumerWidget {
           fileName,
           overflow: TextOverflow.ellipsis,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: AppColors.grey700,
+            color: context.palette.grey700,
           ),
         ),
 
@@ -294,13 +296,13 @@ class _FileUploadWidget extends HookConsumerWidget {
             Text(
               state[documentCategory]?.formattedProgress ?? '0B of 0B',
               style: context.textTheme.bodySmall?.copyWith(
-                color: AppColors.grey600,
+                color: context.palette.grey600,
               ),
             ),
             Text(
               ' | ',
               style: context.textTheme.bodySmall?.copyWith(
-                color: AppColors.grey300,
+                color: context.palette.grey300,
               ),
             ),
             _FileUploadStatusWidget(
@@ -322,7 +324,7 @@ class _FileUploadWidget extends HookConsumerWidget {
                   child: LinearProgressIndicator(
                     value: state[documentCategory]?.progress,
                     minHeight: Values.v8,
-                    backgroundColor: AppColors.grey200,
+                    backgroundColor: context.palette.grey200,
                     valueColor: AlwaysStoppedAnimation(
                       primaryColor,
                     ),
@@ -342,7 +344,7 @@ class _FileUploadWidget extends HookConsumerWidget {
             child: Text(
               'Try again',
               style: context.textTheme.bodyMedium?.copyWith(
-                color: AppColors.failure,
+                color: context.palette.failure,
               ),
             ),
           ),
@@ -377,16 +379,16 @@ class _FileUploadStatusWidget extends StatelessWidget {
         // switch (uploadStatus) {
         //   UploadStatus.uploading => const Icon(
         //     EvaIcons.cloud_upload_outline,
-        //     color: AppColors.grey500,
+        //     color: context.palette.grey500,
         //   ),
         //   UploadStatus.complete => const Icon(
         //     EvaIcons.checkmark_circle,
-        //     color: AppColors.success,
+        //     color: context.palette.success,
         //   ),
         //   UploadStatus.failed => const Icon(
         //     Iconsax.close_circle_outline,
         //     size: Values.v16,
-        //     color: AppColors.failure,
+        //     color: context.palette.failure,
         //   ),
         //   _ => const SizedBox.shrink(),
         // },
@@ -395,10 +397,10 @@ class _FileUploadStatusWidget extends StatelessWidget {
             statusText,
             style: context.textTheme.bodyMedium?.copyWith(
               color: switch (uploadStatus) {
-                UploadStatus.uploading => AppColors.grey500,
-                UploadStatus.complete => AppColors.success,
-                UploadStatus.failed => AppColors.failure,
-                _ => AppColors.grey500,
+                UploadStatus.uploading => context.palette.grey500,
+                UploadStatus.complete => context.palette.success,
+                UploadStatus.failed => context.palette.failure,
+                _ => context.palette.grey500,
               },
             ),
           ),

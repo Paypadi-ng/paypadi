@@ -6,11 +6,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart' show Values;
 import 'package:paypadi/core/utils/dates.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/validators.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
@@ -155,7 +155,7 @@ class _ExpiryDateWidget extends HookConsumerWidget {
                   border: Border.all(
                     color: hasFocus.value
                         ? primaryColor
-                        : AppColors.unfocusedTextField,
+                        : context.palette.unfocusedTextField,
                   ),
                 ),
                 child: Text(

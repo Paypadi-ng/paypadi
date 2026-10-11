@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/gen/colors.gen.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/shared/widgets/app_network_image.dart';
 
 class AppAvatar extends StatelessWidget {
@@ -16,8 +16,8 @@ class AppAvatar extends StatelessWidget {
       width: radius,
       height: radius,
       duration: kThemeChangeDuration,
-      decoration: const BoxDecoration(
-        color: AppColors.disabled,
+      decoration: BoxDecoration(
+        color: context.palette.disabled,
         shape: BoxShape.circle,
       ),
     );

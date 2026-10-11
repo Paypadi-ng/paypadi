@@ -7,11 +7,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/data/transaction/models/account_lookup_model.dart';
 import 'package:paypadi/features/transfer/controllers/transaction_controller.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
 import 'package:paypadi/shared/widgets/app_network_image.dart';
@@ -173,7 +173,7 @@ class _BankAccountInformation extends StatelessWidget {
         vertical: Values.v10,
       ),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.bankBorderColor),
+        border: Border.all(color: context.palette.bankBorderColor),
         borderRadius: BorderRadius.circular(Values.v48),
       ),
       child: Row(
@@ -210,7 +210,7 @@ class _BankAccountInformation extends StatelessWidget {
                     isLoading ? 'AccountNumber' : '${recipient?.accountNumber}',
                     style: context.textTheme.titleSmall?.copyWith(
                       letterSpacing: kZeroLetterSpacing,
-                      color: AppColors.grey600,
+                      color: context.palette.grey600,
                     ),
                   ),
                 ),

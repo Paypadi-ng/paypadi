@@ -4,13 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/dates.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
 import 'package:paypadi/shared/placeholder_data.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
@@ -149,7 +149,7 @@ class _TransactionTile extends ConsumerWidget {
                       getTransactionDate(transaction.createdAt),
                       style: context.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w400,
-                        color: AppColors.grey500,
+                        color: context.palette.grey500,
                       ),
                     ),
                   ),
@@ -162,7 +162,7 @@ class _TransactionTile extends ConsumerWidget {
               child: Text(
                 '${amountSign(transaction.type)}₦ ${formatAmount(transaction.amount)}',
                 style: context.textTheme.bodyLarge?.copyWith(
-                  color: transactionColor(transaction.type),
+                  color: transactionColor(context, transaction.type),
                 ),
               ),
             ),
@@ -188,11 +188,11 @@ class _TransactionTile extends ConsumerWidget {
     };
   }
 
-  Color transactionColor(TransactionType type) {
+  Color transactionColor(BuildContext context, TransactionType type) {
     return switch (type.isCredit) {
-      true => AppColors.success,
-      false => AppColors.failure,
-      null => AppColors.disabled,
+      true => context.palette.success,
+      false => context.palette.failure,
+      null => context.palette.disabled,
     };
   }
 }

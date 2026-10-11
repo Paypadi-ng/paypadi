@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/gen/colors.gen.dart';
+import 'package:paypadi/app/theme.dart';
 
 /// A photo from a URL, clipped to [borderRadius] (or a circle).
 ///
@@ -25,7 +25,7 @@ class AppNetworkImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final placeholder = SizedBox.square(
       dimension: size,
-      child: const ColoredBox(color: AppColors.disabled),
+      child: ColoredBox(color: context.palette.disabled),
     );
     final image = Image.network(
       url,

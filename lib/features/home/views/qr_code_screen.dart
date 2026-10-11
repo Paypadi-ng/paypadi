@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/features/home/controllers/qr_code_controller.dart';
@@ -13,6 +14,7 @@ import 'package:paypadi/gen/assets.gen.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/asset_share_controller.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -66,7 +68,7 @@ class _QrCodeScreenState extends ConsumerState<QrCodeScreen> {
               else
                 IconButton(
                   onPressed: () async => _share(),
-                  icon: AppAssets.icons.icShare.svg(),
+                  icon: AppAssets.icons.icShare.themed(context),
                 ),
             ],
           ),
@@ -94,6 +96,8 @@ class _QrCodeScreenState extends ConsumerState<QrCodeScreen> {
         size: const Size.square(Values.v120 * 2.5),
       ),
       decoration: PrettyQrDecoration(
+        // The shared image stays dark-on-white in both themes so any app
+        // can scan it.
         background: AppColors.white,
         image: PrettyQrDecorationImage(
           image: AssetImage(AppAssets.images.appLogo.path),
@@ -148,8 +152,8 @@ class _ScanPageActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.grey50,
-        border: BoxBorder.all(color: AppColors.grey200),
+        color: context.palette.grey50,
+        border: BoxBorder.all(color: context.palette.grey200),
         borderRadius: BorderRadius.circular(Values.v8),
       ),
       child: ValueListenableBuilder(
@@ -167,10 +171,12 @@ class _ScanPageActions extends StatelessWidget {
                     horizontal: Values.v36,
                   ),
                   decoration: BoxDecoration(
-                    color: scanValue ? AppColors.white : AppColors.grey50,
+                    color: scanValue
+                        ? context.palette.surface
+                        : context.palette.grey50,
                     borderRadius: BorderRadius.circular(Values.v8),
                     border: scanValue
-                        ? BoxBorder.all(color: AppColors.grey300)
+                        ? BoxBorder.all(color: context.palette.grey300)
                         : null,
                   ),
                   child: Text('Scan', style: context.textTheme.bodyMedium),
@@ -185,10 +191,12 @@ class _ScanPageActions extends StatelessWidget {
                     horizontal: Values.v36,
                   ),
                   decoration: BoxDecoration(
-                    color: !scanValue ? AppColors.white : AppColors.grey50,
+                    color: !scanValue
+                        ? context.palette.surface
+                        : context.palette.grey50,
                     borderRadius: BorderRadius.circular(Values.v8),
                     border: !scanValue
-                        ? BoxBorder.all(color: AppColors.grey300)
+                        ? BoxBorder.all(color: context.palette.grey300)
                         : null,
                   ),
                   child: Text('My code', style: context.textTheme.bodyMedium),
@@ -244,17 +252,30 @@ class _GenerateQrCode extends HookConsumerWidget {
             return Column(
               spacing: Values.v16,
               children: [
-                SizedBox.square(
-                  dimension: Values.v120 * 2.5,
-                  child: PrettyQrView.data(
-                    data: paymentQrData(
-                      firstName: user?.firstName,
-                      lastName: user?.lastName,
-                      phoneNumber: user?.phoneNumber,
-                    ),
-                    decoration: PrettyQrDecoration(
-                      image: PrettyQrDecorationImage(
-                        image: AssetImage(AppAssets.images.appLogo.path),
+                // Scanners need dark modules on a light background, so in
+                // the dark theme the code sits on a white tile with a margin.
+                Container(
+                  padding: EdgeInsets.all(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Values.v12
+                        : Values.zero,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(Values.v12),
+                  ),
+                  child: SizedBox.square(
+                    dimension: Values.v120 * 2.5,
+                    child: PrettyQrView.data(
+                      data: paymentQrData(
+                        firstName: user?.firstName,
+                        lastName: user?.lastName,
+                        phoneNumber: user?.phoneNumber,
+                      ),
+                      decoration: PrettyQrDecoration(
+                        image: PrettyQrDecorationImage(
+                          image: AssetImage(AppAssets.images.appLogo.path),
+                        ),
                       ),
                     ),
                   ),

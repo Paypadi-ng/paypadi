@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/gen/colors.gen.dart' show AppColors;
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
@@ -55,7 +55,7 @@ class ReferralScreen extends HookConsumerWidget {
                 horizontal: Values.v10,
               ),
               decoration: BoxDecoration(
-                color: AppColors.black.withValues(alpha: .2),
+                color: context.palette.boxShadow.withValues(alpha: .2),
                 borderRadius: BorderRadius.circular(Values.v10),
               ),
               child: Row(
@@ -64,7 +64,7 @@ class ReferralScreen extends HookConsumerWidget {
                   Text(
                     profile.value?.referralCode ?? '',
                     style: context.textTheme.labelSmall?.copyWith(
-                      color: AppColors.white,
+                      color: context.palette.onPrimary,
                       letterSpacing: kZeroLetterSpacing,
                     ),
                   ),
@@ -80,13 +80,13 @@ class ReferralScreen extends HookConsumerWidget {
                         horizontal: Values.v8,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: .3),
+                        color: context.palette.onPrimary.withValues(alpha: .3),
                         borderRadius: BorderRadius.circular(Values.v10),
                       ),
                       child: Text(
                         'Copy',
                         style: context.textTheme.labelSmall?.copyWith(
-                          color: AppColors.white,
+                          color: context.palette.onPrimary,
                           letterSpacing: kZeroLetterSpacing,
                         ),
                       ),
@@ -108,7 +108,7 @@ class ReferralScreen extends HookConsumerWidget {
                   Text(
                     'Signed up',
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.white,
+                      color: context.palette.onPrimary,
                       fontWeight: FontWeight.w600,
                       letterSpacing: kZeroLetterSpacing,
                     ),
@@ -116,7 +116,7 @@ class ReferralScreen extends HookConsumerWidget {
                   Text(
                     '${profile.value?.totalReferrals ?? 0}',
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: AppColors.white,
+                      color: context.palette.onPrimary,
                       fontWeight: FontWeight.w500,
                       letterSpacing: kZeroLetterSpacing,
                     ),

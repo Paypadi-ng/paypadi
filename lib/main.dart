@@ -17,6 +17,7 @@ import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/svg_cache.dart';
+import 'package:paypadi/shared/controllers/settings_controller.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger_observer.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger_settings.dart';
@@ -93,6 +94,11 @@ Future<void> _runApp({required bool isMonitored}) async {
   try {
     await providerContainer.read(sharedPreferencesFutureProvider.future);
     await providerContainer.read(sessionControllerProvider.future);
+    // Load the saved theme before the first frame, so a dark-mode user
+    // doesn't see a flash of the light theme. The listener keeps the
+    // auto-disposed settings loaded until the app starts watching them.
+    providerContainer.listen(settingsControllerProvider, (_, _) {});
+    await providerContainer.read(settingsControllerProvider.future);
     await providerContainer.read(notificationsServiceProvider).initialize();
   } catch (e, stack) {
     debugLogger.error(

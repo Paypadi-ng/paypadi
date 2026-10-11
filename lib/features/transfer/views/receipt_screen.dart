@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/dates.dart';
@@ -16,7 +17,7 @@ import 'package:paypadi/features/transfer/widgets/dotted_line.dart';
 import 'package:paypadi/features/transfer/widgets/payment_details.dart';
 import 'package:paypadi/features/transfer/widgets/receipt_card.dart';
 import 'package:paypadi/gen/assets.gen.dart';
-import 'package:paypadi/gen/colors.gen.dart' show AppColors;
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -41,7 +42,7 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
 
     return AppScaffold(
       showAppBar: false,
-      bgColor: AppColors.scaffoldBackground,
+      bgColor: context.palette.scaffoldBackground,
       child: Column(
         children: [
           Row(
@@ -56,7 +57,7 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
                 onPressed: () async => ref
                     .read(receiptServiceProvider)
                     .shareReceipt(pixelRatio, _screenshotController),
-                icon: AppAssets.icons.icShare.svg(),
+                icon: AppAssets.icons.icShare.themed(context),
               ),
             ],
           ),
@@ -94,10 +95,10 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
                     ),
                   ),
                   Values.v32.verticalSpace,
-                  const Divider(
+                  Divider(
                     indent: Values.v8,
                     endIndent: Values.v8,
-                    color: AppColors.dividerColor,
+                    color: context.palette.dividerColor,
                   ),
                   Values.v32.verticalSpace,
                   PaymentDetails(
@@ -185,11 +186,13 @@ class _PaymentDetailsStatusIcon extends HookWidget {
         shape: BoxShape.circle,
         color: switch (status) {
           TransactionStatus.success || TransactionStatus.completed =>
-            AppColors.success.withValues(alpha: .12),
-          TransactionStatus.failure => AppColors.failure.withValues(alpha: .12),
+            context.palette.success.withValues(alpha: .12),
+          TransactionStatus.failure => context.palette.failure.withValues(
+            alpha: .12,
+          ),
           TransactionStatus.pending => Colors.amber.withValues(alpha: .12),
           TransactionStatus.unknown ||
-          null => AppColors.disabled.withValues(alpha: .12),
+          null => context.palette.disabled.withValues(alpha: .12),
         },
       ),
       child: Container(
@@ -197,10 +200,10 @@ class _PaymentDetailsStatusIcon extends HookWidget {
           shape: BoxShape.circle,
           color: switch (status) {
             TransactionStatus.success ||
-            TransactionStatus.completed => AppColors.success,
-            TransactionStatus.failure => AppColors.failure,
+            TransactionStatus.completed => context.palette.success,
+            TransactionStatus.failure => context.palette.failure,
             TransactionStatus.pending => Colors.amber,
-            TransactionStatus.unknown || null => AppColors.disabled,
+            TransactionStatus.unknown || null => context.palette.disabled,
           },
         ),
         child: Icon(
@@ -211,7 +214,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             TransactionStatus.pending => Icons.pending,
             TransactionStatus.unknown || null => Icons.question_mark,
           },
-          color: AppColors.white,
+          color: context.palette.onPrimary,
         ),
       ),
     );

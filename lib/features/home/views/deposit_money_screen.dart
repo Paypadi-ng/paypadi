@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/features/home/controllers/deposit_account_controller.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_card.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
@@ -80,7 +80,7 @@ class DepositMoneyScreen extends HookConsumerWidget {
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w400,
                   letterSpacing: kZeroLetterSpacing,
-                  color: AppColors.walletCardTextColor,
+                  color: context.palette.walletCardTextColor,
                 ),
               ),
               Skeletonizer(
@@ -99,7 +99,7 @@ class DepositMoneyScreen extends HookConsumerWidget {
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w400,
                   letterSpacing: kZeroLetterSpacing,
-                  color: AppColors.walletCardTextColor,
+                  color: context.palette.walletCardTextColor,
                 ),
               ),
               Skeletonizer(
