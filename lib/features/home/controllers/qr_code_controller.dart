@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'qr_code_controller.g.dart';

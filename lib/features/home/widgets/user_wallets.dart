@@ -10,10 +10,10 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/formatters.dart';
-import 'package:paypadi/features/home/controllers/wallet_controller.dart';
-import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
 import 'package:paypadi/gen/assets.gen.dart';
 import 'package:paypadi/gen/colors.gen.dart';
+import 'package:paypadi/shared/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/wallet_controller.dart';
 import 'package:paypadi/shared/widgets/app_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 

@@ -86,7 +86,7 @@ All checks should pass before continuing. Resolve any reported issues first.
 
 ## Project Structure
 
-`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. `test/unit_test/architecture_test.dart` fails the build if an import goes the wrong way.
+`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. Features never import each other: state that more than one feature needs lives in `shared/controllers/`, and features open each other's screens through the router. `test/unit_test/architecture_test.dart` fails the build if an import breaks either rule.
 
 ```
 lib/
@@ -119,17 +119,17 @@ lib/
 │   └── payout_account/
 │
 ├── shared/                  # App-wide UI and state; never imports features/
-│   ├── controllers/         # Loading, toasts, colour, app version, user profile, bank list
+│   ├── controllers/         # State several features share: loading, toasts, colour, settings,
+│   │                        # user profile, wallet, transfer draft, bank list
 │   ├── extensions/          # ref.showLoading(), ref.showExceptionMessage(), …
 │   ├── placeholder_data.dart  # Rows shown while lists load (skeletons)
 │   └── widgets/             # Reusable widgets (AppScaffold, AppKeypad, …)
 │
 └── features/                # One folder per user-facing flow
     ├── authentication/      # Each feature has:
-    ├── account_security/    #   controllers/  Riverpod controllers
-    ├── home/                #   views/        screens (@RoutePage)
-    ├── onboarding/          #   widgets/      widgets used only by this feature
-    ├── settings/
+    ├── home/                #   controllers/  Riverpod controllers
+    ├── onboarding/          #   views/        screens (@RoutePage)
+    ├── settings/            #   widgets/      widgets used only by this feature
     └── transfer/
 ```
 

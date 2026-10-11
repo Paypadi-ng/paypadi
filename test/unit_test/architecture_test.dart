@@ -8,12 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// lib/gen/ sit below everything. The one way up is the app's navigation,
 /// theme and session, which every screen uses; auto_route's generated router
 /// imports every page, so that cycle is unavoidable.
+///
+/// Features don't import each other: state that several features need lives
+/// in shared/, and features reach each other's screens through the router.
 void main() {
   const below = <String, Set<String>>{
     'core': {'core', 'gen'},
     'data': {'core', 'gen', 'data'},
     'shared': {'core', 'gen', 'data', 'shared'},
-    'features': {'core', 'gen', 'data', 'shared', 'features'},
+    'features': {'core', 'gen', 'data', 'shared'},
     'app': {'core', 'gen', 'data', 'shared', 'features', 'app'},
   };
   const appServices = {
@@ -28,7 +31,7 @@ void main() {
   );
   final generated = RegExp(r'\.(g|freezed|gr|gen)\.dart$');
 
-  test('no layer imports one above it', () {
+  test('no layer imports one above it, and features stay independent', () {
     final violations = <String>[];
 
     for (final file in Directory('lib').listSync(recursive: true)) {
@@ -45,6 +48,11 @@ void main() {
         final target = match.group(1)!;
         final targetLayer = target.split('/').first;
         if (allowed.contains(targetLayer)) continue;
+        if (layer == 'features' &&
+            targetLayer == 'features' &&
+            target.split('/')[1] == path.split('/')[1]) {
+          continue;
+        }
         if (layer != 'core' &&
             layer != 'data' &&
             appServices.contains(target)) {

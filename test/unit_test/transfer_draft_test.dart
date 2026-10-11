@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/transfer_draft.dart';
 
 void main() {
   group('LookupBy.infer', () {

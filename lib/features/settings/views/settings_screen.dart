@@ -10,11 +10,11 @@ import 'package:paypadi/app/session/session_controller.dart';
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/features/settings/controllers/settings_controller.dart';
 import 'package:paypadi/features/settings/widgets/setting_tile.dart';
 import 'package:paypadi/gen/assets.gen.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/app_version_controller.dart';
+import 'package:paypadi/shared/controllers/settings_controller.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
 @RoutePage()

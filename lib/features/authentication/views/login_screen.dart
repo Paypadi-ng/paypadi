@@ -12,7 +12,7 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/dates.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
-import 'package:paypadi/features/settings/controllers/settings_controller.dart';
+import 'package:paypadi/shared/controllers/settings_controller.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_avatar.dart';
 import 'package:paypadi/shared/widgets/app_keypad.dart';

@@ -5,44 +5,43 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/features/account_security/controllers/account_security_controller.dart';
-import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
+import 'package:paypadi/features/authentication/controllers/account_security_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_keypad.dart';
 import 'package:paypadi/shared/widgets/app_pin_indicator.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
-/// Shown when the confirmation doesn't match the password entered first.
-const passwordMismatchMessage =
-    "The passwords don't match. Enter the same password again.";
+/// Shown when the confirmation doesn't match the PIN entered first.
+const pinMismatchMessage = "The PINs don't match. Enter the same PIN again.";
 
 @RoutePage()
-class ConfirmPasswordScreen extends HookConsumerWidget {
-  const ConfirmPasswordScreen({
-    required this.password,
+class ConfirmTransactionPinScreen extends HookConsumerWidget {
+  const ConfirmTransactionPinScreen({
+    required this.pin,
     this.isUpdating = false,
-    this.currentPassword,
+    this.currentPin,
     super.key,
   });
 
-  final String password;
+  final String pin;
   final bool isUpdating;
 
-  /// The password being replaced, when [isUpdating]; the server checks it.
-  final String? currentPassword;
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final confirmPasswordController = useTextEditingController();
+    final confirmPinController = useTextEditingController();
 
-    ref.listen(authenticationControllerProvider, (previous, current) {
+    ref.listen(riderProfileProvider, (previous, current) {
       current.when(
         data: (d) {
-          confirmPasswordController.clear();
+          confirmPinController.clear();
           ref.dismissLoading();
         },
         error: (e, st) {
-          confirmPasswordController.clear();
+          confirmPinController.clear();
           ref.dismissLoading();
           ref.showExceptionMessage(e, st);
         },
@@ -56,11 +55,11 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
       ref.listen(accountSecurityProvider, (previous, current) {
         current.when(
           data: (d) {
-            confirmPasswordController.clear();
+            confirmPinController.clear();
             ref.dismissLoading();
           },
           error: (e, st) {
-            confirmPasswordController.clear();
+            confirmPinController.clear();
             ref.dismissLoading();
             ref.showExceptionMessage(e, st);
           },
@@ -75,39 +74,36 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
         children: [
           Values.v32.verticalSpace,
           Text(
-            'Confirm your Password',
+            'Confirm Transaction Pin',
             style: context.textTheme.headlineMedium,
           ),
           Values.v12.verticalSpace,
           Text(
-            'Set a secure password for your account',
+            'Enter the same 4-digit PIN again to confirm it.',
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w400,
             ),
           ),
           Values.v32.verticalSpace,
           AppPinIndicator(
-            pinLength: passwordPinLength,
-            controller: confirmPasswordController,
+            controller: confirmPinController,
           ),
           const Spacer(flex: 3),
           AppKeypad(
-            keyLength: passwordPinLength,
-            controller: confirmPasswordController,
-            onSubmit: (confirmedPassword) async {
-              // Checked for both new and changed passwords: without this the
+            controller: confirmPinController,
+            onSubmit: (confirmedPin) async {
+              // Checked for both new and changed PINs: without this the
               // keypad stayed full and nothing said why.
-              if (confirmedPassword != password) {
-                confirmPasswordController.clear();
-                ref.showErrorToast(passwordMismatchMessage);
+              if (confirmedPin != pin) {
+                confirmPinController.clear();
+                ref.showErrorToast(pinMismatchMessage);
                 return;
               }
               if (isUpdating) {
-                await changePassword(ref);
+                await changePin(ref);
               } else {
-                await createAccount(ref);
+                await setPin(ref);
               }
-              confirmPasswordController.clear();
             },
           ),
           const Spacer(),
@@ -116,16 +112,14 @@ class ConfirmPasswordScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> createAccount(WidgetRef ref) async {
-    ref.read(authenticationPayloadProvider)['password'] = password;
-    await ref.read(authenticationControllerProvider.notifier).register();
-  }
+  Future<void> setPin(WidgetRef ref) =>
+      ref.read(riderProfileProvider.notifier).setTransactionPin(pin, pin);
 
-  Future<void> changePassword(WidgetRef ref) async {
-    final current = currentPassword;
+  Future<void> changePin(WidgetRef ref) async {
+    final current = currentPin;
     if (current == null) return;
     await ref
         .read(accountSecurityProvider.notifier)
-        .changePassword(currentPassword: current, newPassword: password);
+        .changePin(currentPin: current, newPin: pin, confirmedPin: pin);
   }
 }

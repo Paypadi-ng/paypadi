@@ -8,8 +8,8 @@ import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/providers.dart';
-import 'package:paypadi/features/account_security/views/confirm_password_screen.dart';
-import 'package:paypadi/features/account_security/views/confirm_transaction_pin_screen.dart';
+import 'package:paypadi/features/authentication/views/confirm_password_screen.dart';
+import 'package:paypadi/features/authentication/views/confirm_transaction_pin_screen.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';

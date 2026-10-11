@@ -11,7 +11,7 @@ import 'package:paypadi/core/utils/jwt.dart';
 import 'package:paypadi/data/session/i_session_repository.dart';
 import 'package:paypadi/data/session/providers.dart';
 import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
-import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
