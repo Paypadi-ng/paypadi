@@ -7,11 +7,14 @@ part 'session_unlocked.g.dart';
 ///
 /// Held in memory only: every launch starts locked, even when a valid
 /// session is stored, so a protected route can't be opened without passing
-/// the unlock screen first. Logging out locks it again.
+/// the unlock screen first. Logging out locks it again, and so does
+/// leaving the app in the background for too long (see SessionController).
 @Riverpod(keepAlive: true)
 class SessionUnlocked extends _$SessionUnlocked {
   @override
   bool build() => false;
 
   void unlock() => state = true;
+
+  void lock() => state = false;
 }

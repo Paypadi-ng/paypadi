@@ -128,6 +128,10 @@ class CacheKeys {
   static const String biometrics = 'biometrics';
   static const String inAppColor = 'in_app_color';
 
+  /// Set at sign-in: the user is a driver who isn't approved and hasn't
+  /// given their vehicle details yet. Cleared once the details are saved.
+  static const String driverNeedsVehicleInfo = 'driver_needs_vehicle_info';
+
   static const String accessToken = 'session_access_token';
   static const String refreshToken = 'session_refresh_token';
   static const String refreshTokenExpiry =

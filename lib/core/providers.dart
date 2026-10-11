@@ -26,6 +26,9 @@ part 'providers.g.dart';
 /// whether the session is usable afterwards.
 typedef SessionRenewer = Future<bool> Function();
 
+/// Returns the current time.
+typedef Clock = DateTime Function();
+
 // =============================================================================
 // Core & Infrastructure Services
 // =============================================================================
@@ -72,6 +75,10 @@ FirebaseMessaging firebaseMessaging(Ref ref) {
 INotificationsService notificationsService(Ref ref) {
   return FirebaseNotificationsService(ref.watch(firebaseMessagingProvider));
 }
+
+/// The current time. Tests override it to move time forward.
+@Riverpod(keepAlive: true)
+Clock clock(Ref ref) => DateTime.now;
 
 // =============================================================================
 // Network

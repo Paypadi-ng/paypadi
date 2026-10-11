@@ -89,8 +89,12 @@ class DriverProfile extends _$DriverProfile {
     final payload = ref.read(profilePayloadProvider);
     final result = await _profileRepository.createDriverProfile(payload);
 
-    result.fold(
-      (success) {
+    await result.fold(
+      (success) async {
+        // The vehicle details are in, so the driver guard lets them through.
+        final cache = await ref.read(localCacheProvider.future);
+        await cache.save(key: CacheKeys.driverNeedsVehicleInfo, value: false);
+        if (!ref.mounted) return;
         state = const AsyncData(null);
         unawaited(ref.read(appRouterProvider).push(const LicensingRoute()));
       },

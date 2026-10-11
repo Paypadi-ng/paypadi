@@ -10,6 +10,7 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/jwt.dart';
 import 'package:paypadi/data/authentication/i_authentication_repository.dart';
+import 'package:paypadi/data/authentication/models/user_model.dart';
 import 'package:paypadi/data/authentication/providers.dart';
 import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
@@ -54,6 +55,7 @@ class AuthenticationController extends _$AuthenticationController {
           _saveToCache(CacheKeys.firstName, response.data.user.firstName),
           _saveToCache(CacheKeys.phoneNumber, phoneNumber),
           _forgetLegacyCredentials(),
+          _rememberDriverStatus(response.data.user),
         ]);
 
         // Asking for notification permission is best-effort and mustn't hold
@@ -215,6 +217,21 @@ class AuthenticationController extends _$AuthenticationController {
         forbiddenRequest: (_) => true,
         orElse: () => false,
       );
+
+  /// Records whether a driver still owes their vehicle details, for the
+  /// driver guard. Best effort: if it can't be saved, signing in still works
+  /// and the guard lets the driver through.
+  Future<void> _rememberDriverStatus(UserModel user) async {
+    try {
+      final cache = await ref.read(localCacheProvider.future);
+      await cache.save(
+        key: CacheKeys.driverNeedsVehicleInfo,
+        value: user.needsVehicleInfo,
+      );
+    } on Object catch (error, stack) {
+      debugLogger.error('Could not save the driver status', error, stack);
+    }
+  }
 
   /// Deletes the password and transaction PIN that older versions stored.
   Future<void> _forgetLegacyCredentials() async {

@@ -30,6 +30,13 @@ class SessionController extends _$SessionController
   // Token lifespan (60m) - Buffer (5m) = Timer waits 55 minutes.
   static const Duration _refreshBuffer = Duration(minutes: 5);
 
+  /// How long the app can sit in the background before the user has to
+  /// unlock it again.
+  static const Duration relockAfter = Duration(minutes: 5);
+
+  /// When the app last left the foreground; null while it's in front.
+  DateTime? _backgroundedAt;
+
   @override
   FutureOr<void> build() {
     _repository = ref.watch(sessionRepositoryProvider);
@@ -46,12 +53,30 @@ class SessionController extends _$SessionController
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _relockIfAwayTooLong();
       unawaited(_scheduleSmartRefresh());
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
       _cancelTimer();
+      // Keep the first of these: hidden comes before paused.
+      _backgroundedAt ??= ref.read(clockProvider)();
     }
+  }
+
+  /// Sends an unlocked user back to the unlock screen when the app has been
+  /// in the background for [relockAfter] or longer, so a phone left unlocked
+  /// doesn't leave the wallet open.
+  void _relockIfAwayTooLong() {
+    final backgroundedAt = _backgroundedAt;
+    _backgroundedAt = null;
+    if (backgroundedAt == null || !ref.read(sessionUnlockedProvider)) return;
+
+    final away = ref.read(clockProvider)().difference(backgroundedAt);
+    if (away < relockAfter) return;
+
+    ref.read(sessionUnlockedProvider.notifier).lock();
+    unawaited(ref.read(appRouterProvider).replaceAll([const LoginRoute()]));
   }
 
   void _cancelTimer() {

@@ -134,21 +134,16 @@ class DriverAccountGuard extends AutoRouteGuard {
     NavigationResolver resolver,
     StackRouter router,
   ) async {
-    // final localCache = await ref.read(localCacheProvider.future);
+    final cache = await ref.read(localCacheProvider.future);
+    final needsVehicleInfo =
+        await cache.get<bool>(CacheKeys.driverNeedsVehicleInfo) ?? false;
 
-    // final UserModel? user = await localCache.get(
-    //   CacheKeys.user,
-    //   (raw) => UserModel.fromJson(raw as Map<String, dynamic>),
-    // );
+    if (needsVehicleInfo) {
+      unawaited(router.replace(const VehicleInformationRoute()));
+      resolver.next(false);
+      return;
+    }
 
-    // if (user != null && user.isDriver == true && user.isApproved == false) {
-    //   // Force unapproved drivers to complete their vehicle information
-    //   unawaited(router.replace(const VehicleInformationRoute()));
-    //   resolver.next(false);
-    //   return;
-    // }
-
-    // User is either not a driver, or is an approved driver
     resolver.next();
   }
 }
