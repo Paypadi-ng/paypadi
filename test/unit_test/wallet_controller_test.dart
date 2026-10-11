@@ -12,14 +12,14 @@ import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.da
 
 import '../helpers/transfer_fakes.dart';
 
-const _wallet = WalletModel(
+final _wallet = WalletModel(
   id: 'w1',
   balance: '5000.00',
   currency: 'NGN',
   reservedBalance: '0.00',
   availableBalance: '5000.00',
-  createdAt: '2026-10-01T09:00:00Z',
-  updatedAt: '2026-10-01T09:00:00Z',
+  createdAt: DateTime.utc(2026, 10, 1, 9),
+  updatedAt: DateTime.utc(2026, 10, 1, 9),
 );
 
 class _FakeWalletRepository implements IWalletRepository {

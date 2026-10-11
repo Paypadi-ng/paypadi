@@ -142,6 +142,16 @@ void main() {
       expect(sessions.requests, hasLength(2));
     });
 
+    test('does nothing when there is no session, as during sign-up', () async {
+      await container.read(secureCacheProvider).clear();
+
+      expect(await session().renewSession(), isFalse);
+      await pumpEventQueue();
+
+      expect(sessions.requests, isEmpty);
+      expect(router.replacedStacks, isEmpty);
+    });
+
     test('signs the user out when the refresh token is rejected', () async {
       final renewal = session().renewSession();
       await pumpEventQueue();

@@ -26,6 +26,10 @@ class SettingsController extends _$SettingsController {
   Future<void> enableBiometrics({required bool biometrics}) async {
     final localCache = await ref.read(localCacheProvider.future);
     await localCache.save(key: CacheKeys.biometrics, value: biometrics);
+    // Turning biometrics off must not leave a PIN behind for later.
+    if (!biometrics) {
+      await ref.read(transactionPinVaultProvider).clear();
+    }
 
     state = AsyncData(state.value!.copyWith(biometricsIsEnabled: biometrics));
   }

@@ -22,6 +22,10 @@ class TransactionHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionHistory = ref.watch(historyControllerProvider);
+    final history = transactionHistory.value;
+    final transactions = transactionHistory.isLoading
+        ? kMockTransactionHistory
+        : history?.items ?? const <TransactionHistoryModel>[];
 
     return AppScaffold(
       onRefresh: () => Future(
@@ -38,39 +42,40 @@ class TransactionHistoryScreen extends ConsumerWidget {
             'Transactions',
             style: context.textTheme.titleMedium,
           ),
-          if (transactionHistory.value != null &&
-              transactionHistory.value!.isEmpty)
+          if (transactionHistory.value?.items.isEmpty ?? false)
             const AppZeroItem(
               topPaddingScaleFactor: .4,
               icon: Icons.receipt_long_outlined,
               message: 'No Recent Transaction',
             )
-          else
-            SizedBox(
-              height: context.screenHeight * .9,
-              child: ListView.builder(
-                padding: const EdgeInsets.only(top: Values.v16),
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: transactionHistory.isLoading
-                    ? kMockTransactionHistory.length
-                    : transactionHistory.value!.length,
-                itemBuilder: (context, index) {
-                  final data = transactionHistory.isLoading
-                      ? kMockTransactionHistory
-                      : transactionHistory.value!;
-
-                  return _TransactionTile(
-                    isLoading: transactionHistory.isLoading,
-                    transaction: data[index],
-                    onTap: () => ref
-                        .read(appRouterProvider)
-                        .push(
-                          ReceiptRoute(referenceId: data[index].reference),
-                        ),
-                  );
-                },
+          else ...[
+            // The page already scrolls, so lay the tiles out in it rather
+            // than in a fixed-height list that clipped everything past the
+            // first screenful.
+            Values.v16.verticalSpace,
+            for (final transaction in transactions)
+              _TransactionTile(
+                isLoading: transactionHistory.isLoading,
+                transaction: transaction,
+                onTap: () => ref
+                    .read(appRouterProvider)
+                    .push(ReceiptRoute(referenceId: transaction.reference)),
               ),
-            ),
+            if (history?.hasMore ?? false)
+              Center(
+                child: history?.isLoadingMore ?? false
+                    ? const Padding(
+                        padding: EdgeInsets.all(Values.v12),
+                        child: CircularProgressIndicator.adaptive(),
+                      )
+                    : TextButton(
+                        onPressed: () => ref
+                            .read(historyControllerProvider.notifier)
+                            .loadMore(),
+                        child: const Text('Show more'),
+                      ),
+              ),
+          ],
         ],
       ),
     );

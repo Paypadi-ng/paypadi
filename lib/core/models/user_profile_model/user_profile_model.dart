@@ -44,8 +44,8 @@ sealed class ProfileModel with _$ProfileModel {
     @JsonKey(name: 'id_document') String? idDocument,
     @JsonKey(name: 'id_document_type') String? idDocumentType,
     @JsonKey(name: 'id_document_number') String? idDocumentNumber,
-    @JsonKey(name: 'created_at') String? createdAt,
-    @JsonKey(name: 'updated_at') String? updatedAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _ProfileModel;
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -68,11 +68,11 @@ sealed class DriverProfileModel with _$DriverProfileModel {
     @JsonKey(name: 'vehicle_year') int? vehicleYear,
     @JsonKey(name: 'license_plate') String? licensePlate,
     @JsonKey(name: 'driver_license_number') String? licenseNumber,
-    @JsonKey(name: 'driver_license_expiry') String? licenseExpiryDate,
+    @JsonKey(name: 'driver_license_expiry') DateTime? licenseExpiryDate,
     @JsonKey(name: 'license_front') String? licenseFrontPicUrl,
     @JsonKey(name: 'license_back') String? licenseBackPicUrl,
     @JsonKey(name: 'vehicle_registration') String? vehicleRegistrationPicUrl,
-    @JsonKey(name: 'approved_at') String? approvedAt,
+    @JsonKey(name: 'approved_at') DateTime? approvedAt,
     @JsonKey(name: 'rejection_reason') String? reasonForRejection,
   }) = _DriverProfileModel;
 

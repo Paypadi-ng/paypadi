@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -120,12 +122,10 @@ class _TermsAndPrivacyRichText extends HookConsumerWidget {
     final privacyRecognizer = useMemoized(TapGestureRecognizer.new);
 
     useEffect(() {
-      termsRecognizer.onTap = () {
-        /* NOTE: open terms */
-      };
-      privacyRecognizer.onTap = () {
-        /* NOTE: open privacy policy */
-      };
+      termsRecognizer.onTap = () =>
+          ref.read(urlLauncherProvider).launchWebUrl(appTermsAndConditions);
+      privacyRecognizer.onTap = () =>
+          ref.read(urlLauncherProvider).launchWebUrl(appPrivacyPolicy);
       return () {
         termsRecognizer.dispose();
         privacyRecognizer.dispose();

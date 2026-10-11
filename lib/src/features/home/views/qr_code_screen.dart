@@ -34,9 +34,11 @@ class _QrCodeScreenState extends ConsumerState<QrCodeScreen> {
     super.initState();
     final user = ref.read(userProfileProvider);
     _qrCode = QrCode.fromData(
-      data:
-          '${user.value?.firstName} ${user.value?.lastName} '
-          '\n${user.value?.phoneNumber.substring(4)}',
+      data: paymentQrData(
+        firstName: user.value?.firstName,
+        lastName: user.value?.lastName,
+        phoneNumber: user.value?.phoneNumber,
+      ),
       errorCorrectLevel: QrErrorCorrectLevel.L,
     );
     _qrImage = QrImage(_qrCode);
@@ -245,9 +247,11 @@ class _GenerateQrCode extends HookConsumerWidget {
                 SizedBox.square(
                   dimension: Values.v120 * 2.5,
                   child: PrettyQrView.data(
-                    data:
-                        '${user?.firstName} ${user?.lastName} '
-                        '\n${user?.phoneNumber.substring(4)}',
+                    data: paymentQrData(
+                      firstName: user?.firstName,
+                      lastName: user?.lastName,
+                      phoneNumber: user?.phoneNumber,
+                    ),
                     decoration: PrettyQrDecoration(
                       image: PrettyQrDecorationImage(
                         image: AssetImage(AppAssets.images.appLogo.path),

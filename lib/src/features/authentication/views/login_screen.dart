@@ -30,8 +30,14 @@ class LoginScreen extends HookConsumerWidget {
 
     ref.listen(authenticationControllerProvider, (previous, current) {
       current.when(
-        data: (_) => ref.dismissLoading(),
-        error: (e, st) => ref.dismissLoading(),
+        data: (_) {
+          passwordController.clear();
+          ref.dismissLoading();
+        },
+        error: (e, st) {
+          passwordController.clear();
+          ref.dismissLoading();
+        },
         loading: () => ref.showLoading(),
       );
     });
@@ -39,9 +45,8 @@ class LoginScreen extends HookConsumerWidget {
     // useMemoized ensures we only trigger this read once when the widget mounts.
     final cacheFuture = useMemoized(
       () => Future.wait([
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.email),
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.firstName),
-        ref.read(secureCacheProvider).get<String?>(CacheKeys.phoneNumber),
+        ref.read(secureCacheProvider).get<String>(CacheKeys.firstName),
+        ref.read(secureCacheProvider).get<String>(CacheKeys.phoneNumber),
       ]),
     );
 
@@ -59,16 +64,15 @@ class LoginScreen extends HookConsumerWidget {
     // 3. Safely unpack the data
     final List<String?> cacheData = snapshot.data!;
 
-    final String firstName = cacheData[1] ?? 'User';
-    final String? email = cacheData[0];
-    final String? phoneNumber = cacheData[2];
+    final String firstName = cacheData[0] ?? 'User';
+    final String? phoneNumber = cacheData[1];
 
     return AppScaffold(
       showAppBar: false,
       padding: const EdgeInsets.only(top: Values.v24),
       child: Column(
         children: [
-          const AppAvatar(radius: Values.v84, imageUrl: kDemoProfilePic),
+          const AppAvatar(radius: Values.v84, imageUrl: appUserProfilePic),
           Values.v16.verticalSpace,
           Text(
             'Good ${getDayTime()}, $firstName',
@@ -100,15 +104,9 @@ class LoginScreen extends HookConsumerWidget {
           const Spacer(),
           Center(
             child: GestureDetector(
-              onTap: () {
-                if (email == null) return;
-
-                unawaited(
-                  ref
-                      .read(appRouterProvider)
-                      .push(ForgotPasswordRoute(email: email)),
-                );
-              },
+              onTap: () => unawaited(
+                ref.read(appRouterProvider).push(const ForgotPasswordRoute()),
+              ),
               child: Text(
                 'Forgot Password?',
                 style: context.textTheme.bodyMedium?.copyWith(

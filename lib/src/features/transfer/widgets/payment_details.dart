@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:paypadi/config/gen/fonts.gen.dart';
 import 'package:paypadi/core/utils/constants.dart'
     show Values, kZeroLetterSpacing, placeholder;
 import 'package:paypadi/core/utils/extensions.dart';
@@ -28,6 +29,7 @@ class PaymentDetails extends StatelessWidget {
               child: Text(
                 detail,
                 style: context.textTheme.bodySmall?.copyWith(
+                  fontFamily: FontFamily.manrope,
                   fontWeight: FontWeight.w400,
                   letterSpacing: kZeroLetterSpacing,
                 ),
@@ -42,6 +44,7 @@ class PaymentDetails extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.end,
                 style: context.textTheme.bodySmall?.copyWith(
+                  fontFamily: FontFamily.manrope,
                   letterSpacing: kZeroLetterSpacing,
                 ),
               ),

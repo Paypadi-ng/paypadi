@@ -4,7 +4,7 @@ description: "A new Flutter project."
 
 publish_to: "none"
 
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.11.5
@@ -36,7 +36,6 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   share_plus: ^13.3.0
   screenshot: ^3.0.0
-  flutter_to_pdf: ^0.4.1
   path_provider: ^2.1.6
   image_gallery_saver_plus: ^5.1.1
   toastification: ^3.0.3
@@ -52,7 +51,8 @@ dependencies:
   sentry_dio: ^9.21.0
   firebase_core: ^4.15.0
   firebase_messaging: ^16.3.0
-  
+  pdf: ^3.13.0
+
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   flutter_test:
@@ -76,16 +76,19 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/illustrations/
+    - fonts/static/
     - assets/colors.xml
 
   fonts:
     - family: DM Sans
       fonts:
-        - asset: fonts/DMSans-Variable.ttf
+        - asset: fonts/variable/DMSans-Variable.ttf
+        - asset: fonts/static/DMSans-Regular.ttf
 
     - family: Manrope
       fonts:
-        - asset: fonts/Manrope-Variable.ttf
+        - asset: fonts/variable/Manrope-Variable.ttf
+        - asset: fonts/static/Manrope-Regular.ttf
 
 flutter_gen:
   output: lib/config/gen/

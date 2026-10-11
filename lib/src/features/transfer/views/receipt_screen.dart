@@ -2,8 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_to_pdf/flutter_to_pdf.dart'
-    show ExportDelegate, ExportFrame;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/config/gen/colors.gen.dart' show AppColors;
@@ -31,15 +29,12 @@ class ReceiptScreen extends ConsumerStatefulWidget {
 }
 
 class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
-  final ScreenshotController _screenshotController = ScreenshotController();
-
-  final ExportDelegate exportDelegate = ExportDelegate(
-    ttfFonts: {'DMSans': 'fonts/DMSans-Variable.ttf'},
-  );
+  final _screenshotController = ScreenshotController();
 
   @override
   Widget build(BuildContext context) {
     final pixelRatio = context.devicePixelRatio;
+    final color = ref.watch(appPrimaryColorProvider);
     final receipt = ref.watch(receiptControllerProvider(widget.referenceId));
 
     return AppScaffold(
@@ -66,101 +61,99 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
           Values.v16.verticalSpace,
           Screenshot(
             controller: _screenshotController,
-            child: ExportFrame(
-              frameId: 'receipt',
-              exportDelegate: exportDelegate,
-              child: ReceiptCard(
-                child: Column(
-                  children: [
-                    _PaymentDetailsStatusIcon(status: receipt.value?.status),
-                    Values.v16.verticalSpace,
-                    Skeletonizer(
-                      enabled: receipt.isLoading,
-                      child: Text(
-                        receipt.isLoading
-                            ? placeholder
-                            : 'Payment ${capitalizeFirstChar(receipt.value?.status.name)}',
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: kZeroLetterSpacing,
-                        ),
+            child: ReceiptCard(
+              child: Column(
+                children: [
+                  _PaymentDetailsStatusIcon(status: receipt.value?.status),
+                  Values.v16.verticalSpace,
+                  Skeletonizer(
+                    enabled: receipt.isLoading,
+                    child: Text(
+                      receipt.isLoading
+                          ? placeholder
+                          : 'Payment ${capitalizeFirstChar(receipt.value?.status.name)}',
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: kZeroLetterSpacing,
                       ),
                     ),
-                    Values.v8.verticalSpace,
-                    Skeletonizer(
-                      enabled: receipt.isLoading,
-                      child: Text(
-                        receipt.isLoading
-                            ? placeholder
-                            : '₦ ${formatAmount(receipt.value?.amount)}',
-                        style: context.textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: kZeroLetterSpacing,
-                        ),
-                      ),
-                    ),
-                    Values.v32.verticalSpace,
-                    const Divider(
-                      indent: Values.v8,
-                      endIndent: Values.v8,
-                      color: AppColors.dividerColor,
-                    ),
-                    Values.v32.verticalSpace,
-                    PaymentDetails(
-                      detail: 'Ref Number',
-                      isLoading: receipt.isLoading,
-                      value: receipt.value?.reference,
-                    ),
-                    PaymentDetails(
-                      detail: 'Payment Time',
-                      isLoading: receipt.isLoading,
-                      value: receipt.isLoading
-                          ? placeholderShort
-                          : getTransactionDate(receipt.value?.createdAt),
-                    ),
-                    PaymentDetails(
-                      detail: 'Payment Method',
-                      isLoading: receipt.isLoading,
-                      value: receipt.isLoading
-                          ? placeholderShort
-                          : capitalizeFirstChar(receipt.value?.type.name),
-                    ),
-                    PaymentDetails(
-                      detail: 'Sender Name',
-                      isLoading: receipt.isLoading,
-                      value: receipt.value?.senderName,
-                    ),
-                    PaymentDetails(
-                      detail: 'Receiver Name',
-                      isLoading: receipt.isLoading,
-                      value: receipt.value?.recipientName,
-                    ),
-                    const DottedDivider(topPadding: Values.v2),
-                    PaymentDetails(
-                      detail: 'Amount',
-                      isLoading: receipt.isLoading,
-                      value: receipt.isLoading
-                          ? placeholderShort
+                  ),
+                  Values.v8.verticalSpace,
+                  Skeletonizer(
+                    enabled: receipt.isLoading,
+                    child: Text(
+                      receipt.isLoading
+                          ? placeholder
                           : '₦ ${formatAmount(receipt.value?.amount)}',
+                      style: context.textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: kZeroLetterSpacing,
+                      ),
                     ),
-                    PaymentDetails(
-                      detail: 'Transaction Fee',
-                      isLoading: receipt.isLoading,
-                      value: receipt.isLoading
-                          ? placeholderShort
-                          : '₦ ${formatAmount(receipt.value?.transactionFee)}',
-                    ),
-                  ],
-                ),
+                  ),
+                  Values.v32.verticalSpace,
+                  const Divider(
+                    indent: Values.v8,
+                    endIndent: Values.v8,
+                    color: AppColors.dividerColor,
+                  ),
+                  Values.v32.verticalSpace,
+                  PaymentDetails(
+                    detail: 'Ref Number',
+                    isLoading: receipt.isLoading,
+                    value: receipt.value?.reference,
+                  ),
+                  PaymentDetails(
+                    detail: 'Payment Time',
+                    isLoading: receipt.isLoading,
+                    value: receipt.isLoading
+                        ? placeholderShort
+                        : getTransactionDate(receipt.value?.createdAt),
+                  ),
+                  PaymentDetails(
+                    detail: 'Payment Method',
+                    isLoading: receipt.isLoading,
+                    value: receipt.isLoading
+                        ? placeholderShort
+                        : capitalizeFirstChar(receipt.value?.type.name),
+                  ),
+                  PaymentDetails(
+                    detail: 'Sender Name',
+                    isLoading: receipt.isLoading,
+                    value: receipt.value?.senderName,
+                  ),
+                  PaymentDetails(
+                    detail: 'Receiver Name',
+                    isLoading: receipt.isLoading,
+                    value: receipt.value?.recipientName,
+                  ),
+                  const DottedDivider(topPadding: Values.v2),
+                  PaymentDetails(
+                    detail: 'Amount',
+                    isLoading: receipt.isLoading,
+                    value: receipt.isLoading
+                        ? placeholderShort
+                        : '₦ ${formatAmount(receipt.value?.amount)}',
+                  ),
+                  PaymentDetails(
+                    detail: 'Transaction Fee',
+                    isLoading: receipt.isLoading,
+                    value: receipt.isLoading
+                        ? placeholderShort
+                        : '₦ ${formatAmount(receipt.value?.transactionFee)}',
+                  ),
+                ],
               ),
             ),
           ),
+
           const Spacer(flex: 3),
           OutlinedButton.icon(
-            onPressed: () async =>
-                ref.read(receiptServiceProvider).generateReceiptInPdf(),
+            onPressed: () async => ref
+                .read(receiptServiceProvider)
+                .generateReceiptInPdf(_screenshotController, pixelRatio),
             label: const Text('Get PDF Receipt'),
-            icon: AppAssets.icons.icDownload.svg(),
+            icon: AppAssets.icons.icDownload.svg(color: color),
           ),
           Values.v12.verticalSpace,
           FilledButton(
@@ -193,6 +186,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             AppColors.success.withValues(alpha: .12),
           TransactionStatus.failure => AppColors.failure.withValues(alpha: .12),
           TransactionStatus.pending => Colors.amber.withValues(alpha: .12),
+          TransactionStatus.unknown ||
           null => AppColors.disabled.withValues(alpha: .12),
         },
       ),
@@ -204,7 +198,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             TransactionStatus.completed => AppColors.success,
             TransactionStatus.failure => AppColors.failure,
             TransactionStatus.pending => Colors.amber,
-            null => AppColors.disabled,
+            TransactionStatus.unknown || null => AppColors.disabled,
           },
         ),
         child: Icon(
@@ -213,7 +207,7 @@ class _PaymentDetailsStatusIcon extends HookWidget {
             TransactionStatus.completed => Icons.check,
             TransactionStatus.failure => Icons.close,
             TransactionStatus.pending => Icons.pending,
-            null => Icons.question_mark,
+            TransactionStatus.unknown || null => Icons.question_mark,
           },
           color: AppColors.white,
         ),

@@ -16,7 +16,15 @@ import 'package:paypadi/src/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
 class CreateTransactionPinScreen extends HookConsumerWidget {
-  const CreateTransactionPinScreen({super.key});
+  const CreateTransactionPinScreen({
+    this.isUpdating = false,
+    this.currentPin,
+    super.key,
+  });
+  final bool isUpdating;
+
+  /// The PIN being replaced, when [isUpdating]; the server checks it.
+  final String? currentPin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +41,7 @@ class CreateTransactionPinScreen extends HookConsumerWidget {
           ),
           Values.v12.verticalSpace,
           Text(
-            'Set a secure password for your account',
+            'Choose a 4-digit PIN to approve your payments.',
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w400,
             ),
@@ -55,7 +63,15 @@ class CreateTransactionPinScreen extends HookConsumerWidget {
 
   void onSubmit(WidgetRef ref, String pin) {
     unawaited(
-      ref.read(appRouterProvider).push(ConfirmTransactionPinRoute(pin: pin)),
+      ref
+          .read(appRouterProvider)
+          .push(
+            ConfirmTransactionPinRoute(
+              pin: pin,
+              isUpdating: isUpdating,
+              currentPin: currentPin,
+            ),
+          ),
     );
   }
 }
