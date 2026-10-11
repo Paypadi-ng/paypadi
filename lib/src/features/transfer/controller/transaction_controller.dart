@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/models/account_lookup_model/account_lookup_model.dart';
 import 'package:paypadi/core/models/payment_model/payment_model.dart';

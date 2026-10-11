@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/config/gen/fonts.gen.dart';
 import 'package:paypadi/core/utils/constants.dart'
     show Values, kZeroLetterSpacing, placeholder;
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/gen/fonts.gen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class PaymentDetails extends StatelessWidget {

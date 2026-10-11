@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:paypadi/config/gen/colors.gen.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/gen/colors.gen.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({

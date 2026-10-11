@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/config/gen/colors.gen.dart';
+import 'package:paypadi/gen/colors.gen.dart';
 
 class ReceiptCard extends StatelessWidget {
   const ReceiptCard({required this.child, super.key});

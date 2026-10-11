@@ -84,7 +84,7 @@ runs:
 
     # Only the pub download cache. .dart_tool/ must NOT be cached: it holds
     # build_runner's asset graph, and a restored graph makes build_runner skip
-    # regenerating gitignored outputs (e.g. flutter_gen's lib/config/gen/*)
+    # regenerating gitignored outputs (e.g. flutter_gen's lib/gen/*)
     # that don't exist in a fresh checkout.
     - name: Cache pub packages
       if: inputs.cache == 'true'

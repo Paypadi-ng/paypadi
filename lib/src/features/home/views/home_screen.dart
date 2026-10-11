@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:paypadi/config/router/router.gr.dart';
+import 'package:paypadi/app/router/router.gr.dart';
 
 @RoutePage()
 class HomeScreen extends StatelessWidget {

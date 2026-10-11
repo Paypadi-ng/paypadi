@@ -91,7 +91,7 @@ flutter:
         - asset: fonts/static/Manrope-Regular.ttf
 
 flutter_gen:
-  output: lib/config/gen/
+  output: lib/gen/
 
   assets:
     outputs:

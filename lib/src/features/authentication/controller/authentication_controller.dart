@@ -1,14 +1,14 @@
 import 'dart:async';
 
+import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/session/session_controller.dart';
 import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/config/router/router.gr.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/repositories/authentication/i_authentication_repository.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'authentication_controller.g.dart';

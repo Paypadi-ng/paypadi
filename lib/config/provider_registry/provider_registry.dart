@@ -2,9 +2,10 @@ import 'dart:ui' show Color;
 
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:paypadi/config/env.dart';
-import 'package:paypadi/config/router/router.dart' show AppRouter;
-import 'package:paypadi/config/theme.dart' show AppTheme;
+import 'package:paypadi/app/env.dart';
+import 'package:paypadi/app/router/router.dart' show AppRouter;
+import 'package:paypadi/app/session/session_controller.dart';
+import 'package:paypadi/app/theme.dart' show AppTheme;
 import 'package:paypadi/core/clients/authentication/authentication_client.dart';
 import 'package:paypadi/core/clients/authentication/i_authentication_client.dart';
 import 'package:paypadi/core/clients/payout_account/i_payout_account_client.dart';
@@ -46,7 +47,6 @@ import 'package:paypadi/core/services/storage/transaction_pin_vault.dart';
 import 'package:paypadi/core/services/url_launcher_service.dart';
 import 'package:paypadi/core/utils/constants.dart' show availableColors;
 import 'package:paypadi/src/shared/controllers/app_color/app_color_controller.dart';
-import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferencesWithCache, SharedPreferencesWithCacheOptions;

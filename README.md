@@ -255,7 +255,7 @@ This project relies heavily on code generation. The output of the generators mus
 | `auto_route_generator` | AutoRoute router and route classes (`*.gr.dart`) |
 | `freezed` | Immutable model classes, `copyWith`, union types (`*.freezed.dart`) |
 | `json_serializable` | `fromJson` / `toJson` methods (`*.g.dart`) |
-| `flutter_gen_runner` | `AppAssets` and `AppColors` in `lib/config/gen/` |
+| `flutter_gen_runner` | `AppAssets` and `AppColors` in `lib/gen/` |
 
 ### Running code generation
 
@@ -271,7 +271,7 @@ dart run build_runner build --delete-conflicting-outputs
 dart run build_runner watch --delete-conflicting-outputs
 ```
 
-> Never edit generated files by hand (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `lib/config/gen/`). Your changes will be overwritten on the next build. If a generated file looks wrong, fix the source annotation and re-run the generator.
+> Never edit generated files by hand (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `lib/gen/`). Your changes will be overwritten on the next build. If a generated file looks wrong, fix the source annotation and re-run the generator.
 
 ---
 

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:paypadi/config/gen/assets.gen.dart';
 import 'package:paypadi/core/utils/enums.dart';
+import 'package:paypadi/gen/assets.gen.dart';
 
 String obfuscateEmail(String email) {
   final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');

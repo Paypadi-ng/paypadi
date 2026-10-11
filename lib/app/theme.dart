@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'package:paypadi/config/gen/colors.gen.dart' show AppColors;
-import 'package:paypadi/config/gen/fonts.gen.dart';
 import 'package:paypadi/core/utils/constants.dart';
+import 'package:paypadi/gen/colors.gen.dart' show AppColors;
+import 'package:paypadi/gen/fonts.gen.dart';
 
 class AppTheme {
   const AppTheme({required this.primary});

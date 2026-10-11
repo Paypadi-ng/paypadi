@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/config/gen/colors.gen.dart';
+import 'package:paypadi/gen/colors.gen.dart';
 
 class AppAvatar extends StatelessWidget {
   const AppAvatar({super.key, this.radius, this.imageUrl});
