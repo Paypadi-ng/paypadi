@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/session/session_unlocked.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
@@ -205,7 +206,10 @@ void main() {
       expect(await stored(container, CacheKeys.accessToken), 'login-access');
       expect(await stored(container, CacheKeys.legacyPassword), isNull);
       expect(await stored(container, CacheKeys.legacyTransactionPin), isNull);
-      expect(router.pushed.single, isA<DashboardRoute>());
+      // Home replaces the whole stack, and the app counts as unlocked.
+      expect(router.pushed, isEmpty);
+      expect(router.replacedStacks.single.single, isA<HomeRoute>());
+      expect(container.read(sessionUnlockedProvider), isTrue);
     });
 
     test('clears the stored email when the user has none', () async {
@@ -233,7 +237,10 @@ void main() {
       expect(auth.logins, 0);
       expect(await stored(container, CacheKeys.accessToken), 'renewed-access');
       expect(await stored(container, CacheKeys.legacyPassword), isNull);
-      expect(router.pushed.single, isA<DashboardRoute>());
+      // Home replaces the whole stack, and the app counts as unlocked.
+      expect(router.pushed, isEmpty);
+      expect(router.replacedStacks.single.single, isA<HomeRoute>());
+      expect(container.read(sessionUnlockedProvider), isTrue);
     });
 
     test('does nothing when the biometric check is declined', () async {
@@ -249,6 +256,8 @@ void main() {
 
       expect(session.refreshes, 0);
       expect(router.pushed, isEmpty);
+      expect(router.replacedStacks, isEmpty);
+      expect(container.read(sessionUnlockedProvider), isFalse);
     });
 
     test('asks for the password when the session has expired', () async {
@@ -261,6 +270,8 @@ void main() {
           .unlockWithBiometrics();
 
       expect(router.pushed, isEmpty);
+      expect(router.replacedStacks, isEmpty);
+      expect(container.read(sessionUnlockedProvider), isFalse);
       expect(toasts.errors, [sessionExpiredMessage]);
       expect(container.read(authenticationControllerProvider).isLoading, false);
     });

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/app/session/session_controller.dart';
+import 'package:paypadi/app/session/session_unlocked.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
@@ -74,7 +75,7 @@ class AuthenticationController extends _$AuthenticationController {
         ref.onDispose(tokenRefresh.cancel);
 
         state = const AsyncData(null);
-        unawaited(ref.read(appRouterProvider).push(const DashboardRoute()));
+        _enterApp();
       },
       (exception) {
         ref.showExceptionMessage(exception);
@@ -195,7 +196,14 @@ class AuthenticationController extends _$AuthenticationController {
     if (!ref.mounted) return;
 
     state = const AsyncData(null);
-    unawaited(ref.read(appRouterProvider).push(const DashboardRoute()));
+    _enterApp();
+  }
+
+  /// Marks the app unlocked and makes Home the whole stack, so Back can't
+  /// return to the sign-in or unlock screens.
+  void _enterApp() {
+    ref.read(sessionUnlockedProvider.notifier).unlock();
+    unawaited(ref.read(appRouterProvider).replaceAll([const HomeRoute()]));
   }
 
   /// No refresh token, or one the server rejected: biometrics can't unlock

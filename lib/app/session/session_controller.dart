@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/session/session_unlocked.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/providers.dart';
@@ -160,7 +161,9 @@ class SessionController extends _$SessionController
     ref
       ..invalidate(transferDraftControllerProvider)
       ..invalidate(authenticationPayloadProvider)
-      ..invalidate(profilePayloadProvider);
+      ..invalidate(profilePayloadProvider)
+      // Lock again: the next user must unlock before anything protected.
+      ..invalidate(sessionUnlockedProvider);
 
     final localCache = await ref.read(localCacheProvider.future);
     await Future.wait([

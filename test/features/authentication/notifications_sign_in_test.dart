@@ -159,7 +159,7 @@ void main() {
         .read(authenticationControllerProvider.notifier)
         .login('08031234567', '123456');
 
-    expect(router.pushed.single, isA<DashboardRoute>());
+    expect(router.replacedStacks.single.single, isA<HomeRoute>());
     expect(container.read(authenticationControllerProvider).isLoading, false);
     expect(notifications.tokens.hasListener, isTrue);
 

@@ -23,6 +23,7 @@ void main() {
     'app/providers.dart',
     'app/router/router.gr.dart',
     'app/session/session_controller.dart',
+    'app/session/session_unlocked.dart',
     'app/theme.dart',
   };
   final import = RegExp(

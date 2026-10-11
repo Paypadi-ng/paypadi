@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/app/session/session_controller.dart';
+import 'package:paypadi/app/session/session_unlocked.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
@@ -96,6 +97,14 @@ void main() {
 
       expect(await stored(CacheKeys.refreshToken), isNull);
       expect(router.replacedStacks.single.single, isA<OnboardingRoute>());
+    });
+
+    test('locks the app again, so the next user has to unlock', () async {
+      container.read(sessionUnlockedProvider.notifier).unlock();
+
+      await session().logout();
+
+      expect(container.read(sessionUnlockedProvider), isFalse);
     });
 
     test('forgets everything typed during the session', () async {
