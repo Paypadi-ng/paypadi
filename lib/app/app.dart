@@ -6,8 +6,8 @@ import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.dart' show AppRouter;
 import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
-import 'package:paypadi/src/shared/controllers/app_loading/app_loading_controller.dart';
-import 'package:paypadi/src/shared/widgets/loading_indicator.dart';
+import 'package:paypadi/shared/controllers/app_loading_controller.dart';
+import 'package:paypadi/shared/widgets/loading_indicator.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:toastification/toastification.dart';
 

@@ -11,8 +11,8 @@ import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:paypadi/data/profile/providers.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

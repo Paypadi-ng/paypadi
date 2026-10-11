@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/data/authentication/i_authentication_client.dart';
-
+import 'package:paypadi/data/authentication/models/auth_responses.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'authentication_client.g.dart';

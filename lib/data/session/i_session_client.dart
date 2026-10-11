@@ -1,4 +1,5 @@
 import 'package:paypadi/core/api/response/api_response.dart';
+import 'package:paypadi/data/session/models/session_response.dart';
 
 abstract interface class ISessionClient {
   Future<ApiResponse<void>> getToken({

@@ -3,6 +3,7 @@ import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/session/i_session_client.dart';
 import 'package:paypadi/data/session/i_session_repository.dart';
+import 'package:paypadi/data/session/models/session_response.dart';
 
 class SessionRepository implements ISessionRepository {
   const SessionRepository({required ISessionClient client}) : _client = client;

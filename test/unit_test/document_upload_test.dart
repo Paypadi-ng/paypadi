@@ -11,7 +11,7 @@ import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:paypadi/data/profile/providers.dart';
-import 'package:paypadi/src/features/authentication/controller/file_upload_controller.dart';
+import 'package:paypadi/features/authentication/controllers/file_upload_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

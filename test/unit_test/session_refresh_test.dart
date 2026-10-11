@@ -14,6 +14,7 @@ import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/session/i_session_repository.dart';
+import 'package:paypadi/data/session/models/session_response.dart';
 import 'package:paypadi/data/session/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -8,9 +8,9 @@ import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/providers.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/views/password/confirm_password_screen.dart';
-import 'package:paypadi/src/shared/views/transaction_pin/confirm_transaction_pin_screen.dart';
+import 'package:paypadi/features/account_security/views/confirm_password_screen.dart';
+import 'package:paypadi/features/account_security/views/confirm_transaction_pin_screen.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

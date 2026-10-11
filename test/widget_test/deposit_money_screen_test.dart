@@ -9,7 +9,7 @@ import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/wallet/i_wallet_repository.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
-import 'package:paypadi/src/features/home/views/deposit_money_screen.dart';
+import 'package:paypadi/features/home/views/deposit_money_screen.dart';
 
 import '../helpers/transfer_fakes.dart';
 

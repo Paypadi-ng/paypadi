@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/helpers.dart';
+import 'package:paypadi/data/authentication/models/auth_responses.dart';
 import 'package:paypadi/data/payout_account/models/account_payout_model.dart';
 import 'package:paypadi/data/profile/models/user_profile_model.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';

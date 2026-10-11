@@ -16,12 +16,13 @@ import 'package:paypadi/core/services/notifications/notifications_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/authentication/i_authentication_repository.dart';
+import 'package:paypadi/data/authentication/models/auth_responses.dart';
 import 'package:paypadi/data/authentication/models/user_model.dart';
 import 'package:paypadi/data/authentication/providers.dart';
-import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
-import 'package:paypadi/src/features/authentication/views/sign_in_screen.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/views/password/forgot_password_screen.dart';
+import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
+import 'package:paypadi/features/authentication/views/forgot_password_screen.dart';
+import 'package:paypadi/features/authentication/views/sign_in_screen.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

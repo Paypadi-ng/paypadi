@@ -1,5 +1,5 @@
-import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
+import 'package:paypadi/data/session/models/session_response.dart';
 
 abstract interface class ISessionRepository {
   FutureApiResultOf<SessionResponse> refreshTokens(

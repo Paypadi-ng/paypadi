@@ -7,8 +7,8 @@ import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/services/device/file_picker_service.dart';
 import 'package:paypadi/core/services/device/image_picker_service.dart';
 import 'package:paypadi/core/utils/enums.dart';
-import 'package:paypadi/src/features/authentication/controller/file_upload_controller.dart';
-import 'package:paypadi/src/features/settings/controller/profile_picture_controller.dart';
+import 'package:paypadi/features/authentication/controllers/file_upload_controller.dart';
+import 'package:paypadi/features/settings/controllers/profile_picture_controller.dart';
 
 /// Hands back the queued results in order; `null` means the user cancelled.
 class _QueuedFilePicker extends FilePickerService {

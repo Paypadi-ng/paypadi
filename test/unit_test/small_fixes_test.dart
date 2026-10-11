@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/data/payout_account/payout_account_client.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
-import 'package:paypadi/src/features/home/views/deposit_money_screen.dart';
+import 'package:paypadi/features/home/views/deposit_money_screen.dart';
 
 /// Records each request path instead of sending it.
 class _CapturingAdapter implements HttpClientAdapter {

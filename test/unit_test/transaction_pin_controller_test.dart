@@ -9,8 +9,8 @@ import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/providers.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

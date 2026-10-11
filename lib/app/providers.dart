@@ -5,7 +5,7 @@ import 'package:paypadi/app/session/session_controller.dart';
 import 'package:paypadi/app/theme.dart' show AppTheme;
 import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart' show availableColors;
-import 'package:paypadi/src/shared/controllers/app_color/app_color_controller.dart';
+import 'package:paypadi/shared/controllers/app_color_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'providers.g.dart';

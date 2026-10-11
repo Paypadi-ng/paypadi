@@ -10,9 +10,9 @@ import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/data/session/i_session_repository.dart';
 import 'package:paypadi/data/session/providers.dart';
-import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
-import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
+import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_controller.g.dart';

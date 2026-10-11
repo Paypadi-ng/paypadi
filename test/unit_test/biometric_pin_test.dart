@@ -9,10 +9,10 @@ import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/providers.dart';
 import 'package:paypadi/data/transaction/providers.dart';
-import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
-import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/features/transfer/controllers/transaction_controller.dart';
+import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

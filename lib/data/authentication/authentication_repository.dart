@@ -3,6 +3,7 @@ import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/authentication/i_authentication_client.dart';
 import 'package:paypadi/data/authentication/i_authentication_repository.dart';
+import 'package:paypadi/data/authentication/models/auth_responses.dart';
 
 class AuthenticationRepository implements IAuthenticationRepository {
   const AuthenticationRepository({required IAuthenticationClient client})

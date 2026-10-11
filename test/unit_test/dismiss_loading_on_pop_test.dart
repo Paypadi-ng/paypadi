@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/src/shared/widgets/loading_indicator.dart';
+import 'package:paypadi/shared/widgets/loading_indicator.dart';
 
 void main() {
   testWidgets('dismisses the loading overlay when the user goes back', (

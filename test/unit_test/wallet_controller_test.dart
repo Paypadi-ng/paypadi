@@ -7,8 +7,8 @@ import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
 import 'package:paypadi/data/wallet/i_wallet_repository.dart';
 import 'package:paypadi/data/wallet/models/wallet_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
-import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
+import 'package:paypadi/features/home/controllers/wallet_controller.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

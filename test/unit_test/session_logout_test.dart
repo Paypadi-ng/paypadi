@@ -14,10 +14,11 @@ import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/session/i_session_repository.dart';
+import 'package:paypadi/data/session/models/session_response.dart';
 import 'package:paypadi/data/session/providers.dart';
-import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
-import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
+import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/transfer_fakes.dart';

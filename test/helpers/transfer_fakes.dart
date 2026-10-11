@@ -12,7 +12,7 @@ import 'package:paypadi/data/transaction/i_transaction_repository.dart';
 import 'package:paypadi/data/transaction/models/account_lookup_model.dart';
 import 'package:paypadi/data/transaction/models/payment_model.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 final kTransaction = TransactionModel(
   amount: 1500,

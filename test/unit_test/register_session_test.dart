@@ -14,8 +14,9 @@ import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/authentication/i_authentication_repository.dart';
+import 'package:paypadi/data/authentication/models/auth_responses.dart';
 import 'package:paypadi/data/authentication/providers.dart';
-import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
+import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
 
 const _accessExp = 1767225600;
 const _refreshExp = 1767312000;

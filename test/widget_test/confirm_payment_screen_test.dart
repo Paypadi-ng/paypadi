@@ -5,9 +5,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/data/transaction/providers.dart';
-import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
-import 'package:paypadi/src/features/transfer/views/confirm_payment.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
+import 'package:paypadi/features/transfer/controllers/transfer_draft.dart';
+import 'package:paypadi/features/transfer/views/confirm_payment.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

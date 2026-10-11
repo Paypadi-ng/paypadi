@@ -16,9 +16,9 @@ import 'package:paypadi/data/transaction/providers.dart';
 import 'package:paypadi/data/wallet/i_wallet_repository.dart';
 import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
 import 'package:paypadi/data/wallet/providers.dart';
-import 'package:paypadi/src/features/home/controller/bank_account_controller.dart';
-import 'package:paypadi/src/features/transfer/controller/receipt_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/features/home/controllers/bank_account_controller.dart';
+import 'package:paypadi/features/transfer/controllers/receipt_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 
