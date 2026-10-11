@@ -97,6 +97,30 @@ void main() {
     );
   });
 
+  testWidgets('outlined buttons stay readable on the dark background (4.5:1)', (
+    tester,
+  ) async {
+    late ThemeData theme;
+    await pumpThemed(
+      tester,
+      ThemeMode.dark,
+      Builder(
+        builder: (context) {
+          theme = Theme.of(context);
+          return const SizedBox();
+        },
+      ),
+    );
+
+    final label = theme.outlinedButtonTheme.style!.foregroundColor!.resolve(
+      {},
+    )!;
+    expect(
+      contrast(label, AppPalette.dark.background),
+      greaterThanOrEqualTo(4.5),
+    );
+  });
+
   group('the dark palette stays readable', () {
     const dark = AppPalette.dark;
 

@@ -211,6 +211,11 @@ class AppTheme {
     // Light keeps Material's defaults wherever the original design did, so
     // only the dark theme sets dividers, sheets, dialogs and search colours.
     final isDark = brightness == Brightness.dark;
+    // Teal text and outlines are too dim on near-black, so the dark theme
+    // draws them in a lighter tint of the user's accent.
+    final accent = isDark
+        ? Color.lerp(primary, palette.onPrimary, .3)!
+        : primary;
     final colorScheme = !isDark
         ? ColorScheme.light(primary: primary)
         : ColorScheme.dark(
@@ -264,9 +269,9 @@ class AppTheme {
               letterSpacing: Values.zero,
             ),
           ),
-          side: WidgetStatePropertyAll(BorderSide(color: primary)),
+          side: WidgetStatePropertyAll(BorderSide(color: accent)),
           fixedSize: WidgetStatePropertyAll(kButtonSize),
-          foregroundColor: WidgetStatePropertyAll(primary),
+          foregroundColor: WidgetStatePropertyAll(accent),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(Values.v12.r),
@@ -292,7 +297,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(Values.v12.r),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: primary),
+          borderSide: BorderSide(color: accent),
           borderRadius: BorderRadius.circular(Values.v12.r),
         ),
         enabledBorder: OutlineInputBorder(
