@@ -1,10 +1,12 @@
+import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/data/payout_account/i_payout_account_repository.dart';
 import 'package:paypadi/data/payout_account/models/account_payout_model.dart';
 import 'package:paypadi/data/payout_account/models/bank_model.dart';
+import 'package:paypadi/data/payout_account/providers.dart';
 import 'package:paypadi/data/wallet/i_wallet_repository.dart';
+import 'package:paypadi/data/wallet/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'bank_account_controller.g.dart';

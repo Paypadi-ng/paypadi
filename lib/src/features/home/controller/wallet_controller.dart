@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/data/transaction/models/account_lookup_model.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';
 import 'package:paypadi/data/wallet/models/wallet_model.dart';
+import 'package:paypadi/data/wallet/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'wallet_controller.g.dart';

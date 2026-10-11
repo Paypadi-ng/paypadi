@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/helpers.dart' show jwtExpiry;
 import 'package:paypadi/data/session/i_session_repository.dart';
+import 'package:paypadi/data/session/providers.dart';
 import 'package:paypadi/src/features/authentication/controller/authentication_controller.dart';
 import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';

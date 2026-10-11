@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 
 class AuthenticationGuard extends AutoRouteGuard {

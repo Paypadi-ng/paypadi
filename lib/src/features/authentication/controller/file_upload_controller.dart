@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
+import 'package:paypadi/data/profile/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'file_upload_controller.g.dart';

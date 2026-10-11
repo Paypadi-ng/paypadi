@@ -2,14 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/services/file_picker_service.dart';
+import 'package:paypadi/core/providers.dart';
+import 'package:paypadi/core/services/device/file_picker_service.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
 import 'package:paypadi/data/profile/i_profile_repository.dart';
 import 'package:paypadi/data/profile/models/user_profile_model.dart';
+import 'package:paypadi/data/profile/providers.dart';
 import 'package:paypadi/src/features/authentication/controller/file_upload_controller.dart';
 
 import '../helpers/transfer_fakes.dart';

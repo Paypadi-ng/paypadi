@@ -1,5 +1,5 @@
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_version_controller.g.dart';

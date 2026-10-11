@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/src/shared/controllers/app_loading/app_loading_controller.dart';

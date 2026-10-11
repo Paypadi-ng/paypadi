@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

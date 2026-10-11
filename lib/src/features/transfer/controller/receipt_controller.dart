@@ -1,7 +1,7 @@
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/retry_policy.dart';
 import 'package:paypadi/data/transaction/i_transaction_repository.dart';
 import 'package:paypadi/data/transaction/models/transaction_model.dart';
+import 'package:paypadi/data/transaction/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'receipt_controller.g.dart';

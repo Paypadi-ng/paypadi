@@ -4,9 +4,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:paypadi/app/providers.dart' show appRouterProvider;
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart'
-    show appRouterProvider, localCacheProvider;
+import 'package:paypadi/core/providers.dart' show localCacheProvider;
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/gen/assets.gen.dart';

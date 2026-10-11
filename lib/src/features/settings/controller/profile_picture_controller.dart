@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
-import 'package:paypadi/core/services/image_picker_service.dart';
+import 'package:paypadi/core/providers.dart';
+import 'package:paypadi/core/services/device/image_picker_service.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

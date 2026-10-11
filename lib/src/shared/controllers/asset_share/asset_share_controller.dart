@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 

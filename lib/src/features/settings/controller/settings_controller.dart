@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

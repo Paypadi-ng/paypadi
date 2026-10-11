@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/data/transaction/providers.dart';
 import 'package:paypadi/src/features/transfer/controller/transaction_controller.dart';
 import 'package:paypadi/src/features/transfer/controller/transfer_draft.dart';
 import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
