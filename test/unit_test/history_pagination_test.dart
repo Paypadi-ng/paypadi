@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
-import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
-import 'package:paypadi/src/features/home/controller/wallet_controller.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
+import 'package:paypadi/data/transaction/models/transaction_model.dart';
+import 'package:paypadi/data/wallet/i_wallet_repository.dart';
+import 'package:paypadi/data/wallet/providers.dart';
+import 'package:paypadi/features/home/controllers/wallet_controller.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

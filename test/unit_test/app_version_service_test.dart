@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/services/app_version_service.dart';
+import 'package:paypadi/core/services/device/app_version_service.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 
 class _RecordingMonitoring implements MonitoringService {

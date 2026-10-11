@@ -1,14 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
-import 'package:paypadi/config/router/router.gr.dart';
+import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/router/router.gr.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
-import 'package:paypadi/core/repositories/profile/i_profile_repository.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
-import 'package:paypadi/src/shared/controllers/app_toast/app_toast_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/data/profile/i_profile_repository.dart';
+import 'package:paypadi/data/profile/providers.dart';
+import 'package:paypadi/shared/controllers/app_toast_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 

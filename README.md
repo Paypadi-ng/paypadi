@@ -41,7 +41,7 @@ Follow these steps to get a working copy of the project on your local machine.
 
 Ensure the following are installed before proceeding:
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) — version `3.x.x` or higher (Dart SDK `^3.9.0` required)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) — `3.44.2` or newer. CI builds with the exact version in `.fvmrc`; with [FVM](https://fvm.app) installed, `fvm use` picks it up. On a newer Flutter, `flutter pub get` may update SDK-pinned packages in `pubspec.lock` — don't commit those changes, because CI installs with `--enforce-lockfile`.
 - [Android Studio](https://developer.android.com/studio) or [Xcode](https://developer.apple.com/xcode/) (for iOS builds)
 - A configured emulator or physical device
 
@@ -86,67 +86,63 @@ All checks should pass before continuing. Resolve any reported issues first.
 
 ## Project Structure
 
-The project combines a **layered architecture** at the core with a **feature-based structure** for UI modules. The `core/` layer owns all data and business logic; the `src/` layer owns all presentation. These two layers must remain strictly separate — presentation code never reaches into `core/` directly, and `core/` has no knowledge of UI.
+`lib/` is split into layers. Each layer may import itself and the layers below it, never the ones above: **core ← data ← shared ← features ← app**. Inside `data/` and `features/`, code is grouped by domain, so everything about the wallet (or the transfer flow) sits in one folder. `test/unit_test/architecture_test.dart` fails the build if an import goes the wrong way.
 
 ```
 lib/
-├── config/                        # App-wide configuration
-│   ├── gen/                       # Generated files — do not edit manually
-│   │                              # (AppAssets, AppColors produced by flutter_gen)
-│   ├── provider_registry/         # Riverpod provider registration & overrides
-│   └── router/                    # AutoRoute route definitions and navigation guards
+├── main.dart, main_{dev,staging,prod}.dart   # Entry points (one per flavor)
+├── firebase_options*.dart                    # FlutterFire config per flavor
 │
-├── core/                          # Business logic and data layer
-│   ├── api/                       # Dio HTTP client setup
-│   │   ├── exceptions/            # Typed API exception classes
-│   │   └── response/              # Standard API response wrappers
-│   ├── datasource/                # Raw data access — one folder per domain
-│   │   ├── authentication_ds/
-│   │   ├── jwt_ds/                # JWT storage, refresh, and token management
-│   │   ├── payout_account_ds/
-│   │   ├── profile_ds/
-│   │   ├── wallet_action_ds/
-│   │   └── wallet_ds/
-│   ├── models/                    # Freezed domain models (immutable data classes)
-│   │   ├── account_payout_model/
-│   │   ├── bank_account_model/
-│   │   ├── bank_model/
-│   │   ├── beneficiary_model/
-│   │   ├── driver_model/
-│   │   ├── transaction_model/
-│   │   ├── user_model/
-│   │   └── wallet_model/
-│   ├── repositories/              # Repository interfaces + implementations
-│   ├── services/                  # Higher-level business services
-│   └── utils/                     # Shared utilities and helpers
+├── app/                     # The app shell: may import anything below
+│   ├── app.dart             # Root widget (MaterialApp.router)
+│   ├── providers.dart       # Router and theme providers, plus appProviderOverrides
+│   ├── theme.dart
+│   ├── router/              # AutoRoute config (router.dart) and guards (guards.dart)
+│   └── session/             # SessionController: token refresh, logout across features
 │
-└── src/
-    ├── features/                  # Self-contained feature modules
-    │   ├── authentication/
-    │   │   ├── domain/            # Feature-specific use cases & logic
-    │   │   └── presentation/
-    │   │       ├── controller/    # Riverpod controllers for this feature
-    │   │       ├── views/         # Screens and pages
-    │   │       └── widgets/       # Widgets scoped to this feature only
-    │   ├── home/
-    │   ├── settings/
-    │   └── transfer/
-    └── shared/                    # Cross-feature UI components
-        ├── controllers/           # Shared Riverpod controllers
-        ├── views/
-        │   ├── password/          # Reusable password entry flow
-        │   └── transaction_pin/   # Reusable PIN entry flow
-        └── widgets/               # Globally reusable UI components
+├── gen/                     # flutter_gen output (AppAssets, AppColors) — generated, do not edit
+│
+├── core/                    # Infrastructure with no knowledge of the app's domains
+│   ├── providers.dart       # Dio, ApiService, caches, PIN vault, monitoring, device services
+│   ├── env.dart             # Flavor and --dart-define values
+│   ├── api/                 # ApiService (Dio + interceptors), Result, retry policy,
+│   │                        # typed exceptions/, generic response envelopes in response/
+│   ├── services/            # storage/, monitoring/, notifications/, device/
+│   └── utils/               # Constants, enums, helpers, validators, extensions
+│
+├── data/                    # Backend access, one folder per API domain
+│   ├── authentication/      # Each domain has:
+│   ├── session/             #   <domain>_client.dart + i_<domain>_client.dart     (HTTP calls)
+│   ├── profile/             #   <domain>_repository.dart + i_<domain>_repository.dart (Result mapping)
+│   ├── wallet/              #   models/        freezed models for that domain
+│   ├── transaction/         #   providers.dart the client and repository providers
+│   └── payout_account/
+│
+├── shared/                  # App-wide UI and state; never imports features/
+│   ├── controllers/         # Loading, toasts, colour, app version, user profile, bank list
+│   ├── extensions/          # ref.showLoading(), ref.showExceptionMessage(), …
+│   ├── placeholder_data.dart  # Rows shown while lists load (skeletons)
+│   └── widgets/             # Reusable widgets (AppScaffold, AppKeypad, …)
+│
+└── features/                # One folder per user-facing flow
+    ├── authentication/      # Each feature has:
+    ├── account_security/    #   controllers/  Riverpod controllers
+    ├── home/                #   views/        screens (@RoutePage)
+    ├── onboarding/          #   widgets/      widgets used only by this feature
+    ├── settings/
+    └── transfer/
 ```
+
+`shared/` and `features/` may also use the app's navigation, theme and session (`app/providers.dart`, `app/router/router.gr.dart`, `app/theme.dart`, `app/session/`). Every screen needs them, and AutoRoute's generated router imports every page, so that link upwards is allowed on purpose.
 
 ### Where to Start
 
-If you are new to the codebase, work through these layers in order:
+If you are new to the codebase, work through these in order:
 
-1. **`config/router/`** — understand how screens are connected and how AutoRoute navigation guards are applied.
-2. **`src/features/authentication/`** — trace the full flow from view → controller → repository → datasource for a concrete example.
-3. **`core/api/`** — understand how Dio is configured, how errors are typed via `exceptions/`, and how all responses are normalised before reaching the rest of the app.
-4. **`src/shared/`** — familiarise yourself with shared views and widgets before building new UI, to avoid duplicating existing components.
+1. **`app/router/`** — how screens are connected and where the navigation guards apply.
+2. **`features/authentication/`** — follow sign-in from a view to its controller, then into `data/authentication/` (repository → client).
+3. **`core/api/`** — how Dio is configured, how errors become typed exceptions, and how every call returns a `Result`.
+4. **`shared/`** — the shared widgets and controllers, before you build new UI, so you don't duplicate them.
 
 ---
 
@@ -158,10 +154,10 @@ The application uses **Riverpod v3** (`hooks_riverpod`, `riverpod_annotation`, `
 
 Key conventions:
 
-- Business logic lives in providers (`controller/`), not in widgets or screens.
+- Business logic lives in providers (`controllers/`), not in widgets or screens.
 - Screens should only read state and call controller methods — no logic in `build()`.
 - Use `AsyncNotifierProvider` for any operation involving a network call or async work.
-- All providers are registered in `config/provider_registry/`. Register new providers there.
+- Infrastructure providers live in `core/providers.dart`, each data domain's client and repository providers in `data/<domain>/providers.dart`, and router/theme providers in `app/providers.dart`. Feature controllers sit next to the feature.
 - **`riverpod_lint`** is active — run `flutter analyze` and resolve all lint warnings before committing.
 
 ### Data Flow
@@ -169,28 +165,28 @@ Key conventions:
 Data moves strictly in one direction:
 
 ```
-View  →  Controller (Riverpod)  →  Repository  →  Datasource  →  Dio (API)
+View  →  Controller (Riverpod)  →  Repository  →  Client  →  Dio (API)
 ```
 
 - **Views** consume providers via `ConsumerWidget` / `HookConsumerWidget` and dispatch events.
-- **Controllers** call repositories, transform results, and expose `AsyncValue` state to the UI.
-- **Repositories** (`core/repositories/`) define the contract for data operations. Always depend on the repository interface, not the datasource directly, so implementations can be swapped out in tests.
-- **Datasources** (`core/datasource/`) contain Retrofit-annotated API clients and local storage calls.
-- **API layer** (`core/api/`) configures Dio with interceptors and wraps all responses and errors in typed classes before they leave the layer.
+- **Controllers** (`features/<feature>/controllers/`) call repositories, transform results, and expose `AsyncValue` state to the UI.
+- **Repositories** (`data/<domain>/<domain>_repository.dart`) wrap client calls in a `Result`. Always depend on the repository interface (`i_<domain>_repository.dart`), so tests can swap in a fake.
+- **Clients** (`data/<domain>/<domain>_client.dart`) are Retrofit-annotated API clients.
+- **API layer** (`core/api/`) configures Dio with interceptors and turns responses and errors into typed classes before they leave the layer.
 
 ### Navigation
 
-Routing is handled by **AutoRoute v10** (`auto_route`, `auto_route_generator`). All route definitions live in `config/router/` and are code-generated — do not use `Navigator.push()` directly in screens.
+Routing is handled by **AutoRoute v10** (`auto_route`, `auto_route_generator`). All route definitions live in `app/router/` and are code-generated — do not use `Navigator.push()` directly in screens.
 
 Before adding a new screen:
 
-1. Define the route in `config/router/`.
+1. Define the route in `app/router/router.dart`.
 2. Run code generation to register it.
-3. Apply any necessary route guards (auth check, PIN verification) at the router level, not inside the screen itself.
+3. Apply any necessary route guards (auth check, PIN verification) at the router level (`app/router/guards.dart`), not inside the screen itself.
 
 ### JWT & Session Management
 
-Token handling is fully isolated in `core/datasource/jwt_ds/`. This datasource handles storing, reading, and refreshing JWT tokens via `flutter_secure_storage`. Do not read or write tokens from controllers or views — always go through the repository layer.
+Tokens are stored with `flutter_secure_storage` (`core/services/storage/secure_cache_service.dart`). Refresh calls go through `data/session/`, and `app/session/session_controller.dart` schedules refreshes, renews the session once when a request gets a 401 (wired into `ApiService` through `appProviderOverrides`), and signs the user out when renewal fails. Do not read or write tokens from controllers or views.
 
 ### Logging
 
@@ -255,7 +251,7 @@ This project relies heavily on code generation. The output of the generators mus
 | `auto_route_generator` | AutoRoute router and route classes (`*.gr.dart`) |
 | `freezed` | Immutable model classes, `copyWith`, union types (`*.freezed.dart`) |
 | `json_serializable` | `fromJson` / `toJson` methods (`*.g.dart`) |
-| `flutter_gen_runner` | `AppAssets` and `AppColors` in `lib/config/gen/` |
+| `flutter_gen_runner` | `AppAssets` and `AppColors` in `lib/gen/` |
 
 ### Running code generation
 
@@ -271,7 +267,7 @@ dart run build_runner build --delete-conflicting-outputs
 dart run build_runner watch --delete-conflicting-outputs
 ```
 
-> Never edit generated files by hand (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `lib/config/gen/`). Your changes will be overwritten on the next build. If a generated file looks wrong, fix the source annotation and re-run the generator.
+> Never edit generated files by hand (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `lib/gen/`). Your changes will be overwritten on the next build. If a generated file looks wrong, fix the source annotation and re-run the generator.
 
 ---
 
@@ -372,12 +368,12 @@ flutter test
 
 ```pseudocode
 test/
-├── unit/           # Tests for repositories, services, and utilities
-├── widget/         # Widget rendering and interaction tests
-└── integration/    # End-to-end flows (if applicable)
+├── helpers/        # Shared fakes (repositories, router)
+├── unit_test/      # Controllers, repositories, services, utilities, and the architecture test
+└── widget_test/    # Widget rendering and interaction tests
 ```
 
-When writing tests, mock at the **repository boundary** — inject mock repositories via Riverpod provider overrides. Do not mock datasources or Dio directly.
+When writing tests, mock at the **repository boundary** — inject mock repositories via Riverpod provider overrides. Do not mock clients or Dio directly.
 
 When adding new features, aim to cover the happy path, error states (`AsyncError`), and loading states (`AsyncLoading`) before submitting a pull request.
 

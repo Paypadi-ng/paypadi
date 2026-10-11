@@ -51,7 +51,7 @@ app.*.map.json
 *.*.dart
 
 # Generated files directory
-lib/config/gen
+lib/gen
 
 # App Secrets
 .env.*

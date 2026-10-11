@@ -73,7 +73,7 @@ These are enforced by `analysis_options.yaml` — violations will block CI or pr
 - No `BuildContext` after `await` — `use_build_context_synchronously: true`.
 - Always pass `key` to widget constructors — `use_key_in_widget_constructors: true`.
 - Prefer `const` constructors, `ColoredBox` over `Container(color:)`, `SizedBox` over `Container` for whitespace.
-- Use `AppAssets` and `AppColors` from `lib/config/gen/` — never hardcode asset paths or color hex values directly.
+- Use `AppAssets` and `AppColors` from `lib/gen/` — never hardcode asset paths or color hex values directly.
 - Never call `print()` — use `Talker` for all logging.
 
 ### Navigation

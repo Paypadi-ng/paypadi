@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
-import 'package:paypadi/core/services/image_picker_service.dart';
+import 'package:paypadi/core/services/device/image_picker_service.dart';
 
 /// Returns [result] from every pick.
 class _FakeImagePicker extends ImagePicker {

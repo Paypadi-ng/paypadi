@@ -17,7 +17,6 @@
 # /lib/features/transfer/       @some-dev @laolu-dev
 
 # ---- Foundational code: DI, networking, storage, security -------------------
-/lib/config/                    @laolu-dev
 /lib/core/                      @laolu-dev
 /lib/app/                       @laolu-dev
 /lib/data/                      @laolu-dev

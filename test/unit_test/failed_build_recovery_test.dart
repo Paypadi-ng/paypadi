@@ -1,22 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
 import 'package:paypadi/core/api/exceptions/client_exception.dart';
 import 'package:paypadi/core/api/exceptions/server_exception.dart';
 import 'package:paypadi/core/api/response/api_response.dart';
 import 'package:paypadi/core/api/result.dart';
 import 'package:paypadi/core/api/retry_policy.dart';
-import 'package:paypadi/core/models/transaction_model/transaction_model.dart';
-import 'package:paypadi/core/models/user_bank_account_model/user_bank_account_model.dart';
-import 'package:paypadi/core/models/user_profile_model/user_profile_model.dart';
-import 'package:paypadi/core/repositories/profile/i_profile_repository.dart';
-import 'package:paypadi/core/repositories/transaction/i_transaction_repository.dart';
-import 'package:paypadi/core/repositories/wallet/i_wallet_repository.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/typedefs.dart';
-import 'package:paypadi/src/features/home/controller/bank_account_controller.dart';
-import 'package:paypadi/src/features/transfer/controller/receipt_controller.dart';
-import 'package:paypadi/src/shared/controllers/user_profile/user_profile_controller.dart';
+import 'package:paypadi/data/profile/i_profile_repository.dart';
+import 'package:paypadi/data/profile/models/user_profile_model.dart';
+import 'package:paypadi/data/profile/providers.dart';
+import 'package:paypadi/data/transaction/i_transaction_repository.dart';
+import 'package:paypadi/data/transaction/models/transaction_model.dart';
+import 'package:paypadi/data/transaction/providers.dart';
+import 'package:paypadi/data/wallet/i_wallet_repository.dart';
+import 'package:paypadi/data/wallet/models/user_bank_account_model.dart';
+import 'package:paypadi/data/wallet/providers.dart';
+import 'package:paypadi/features/home/controllers/deposit_account_controller.dart';
+import 'package:paypadi/features/transfer/controllers/receipt_controller.dart';
+import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 
 import '../helpers/transfer_fakes.dart';
 
@@ -130,21 +132,24 @@ void main() {
         overrides: [walletRepositoryProvider.overrideWithValue(wallet)],
       );
       addTearDown(container.dispose);
-      container.listen(bankAccountControllerProvider, (_, _) {});
+      container.listen(depositAccountControllerProvider, (_, _) {});
 
       await expectLater(
-        container.read(bankAccountControllerProvider.future),
+        container.read(depositAccountControllerProvider.future),
         throwsA(_noVirtualAccount),
       );
       // Not retried: the 400 is what the screen shows, not a loading state.
-      expect(container.read(bankAccountControllerProvider).isLoading, isFalse);
+      expect(
+        container.read(depositAccountControllerProvider).isLoading,
+        isFalse,
+      );
       expect(wallet.calls, 1);
 
       // Rebuilding used to throw LateInitializationError, replacing the real
       // error and never loading the account.
-      container.invalidate(bankAccountControllerProvider);
+      container.invalidate(depositAccountControllerProvider);
       expect(
-        await container.read(bankAccountControllerProvider.future),
+        await container.read(depositAccountControllerProvider.future),
         _account,
       );
     });

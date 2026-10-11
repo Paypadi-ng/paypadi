@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypadi/core/services/api_service.dart';
+import 'package:paypadi/core/api/api_service.dart';
 import 'package:paypadi/core/services/storage/cache_service.dart';
 
 /// Holds whichever access token the session currently has.

@@ -6,16 +6,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypadi/config/env.dart';
-import 'package:paypadi/config/provider_registry/provider_registry.dart';
+import 'package:paypadi/app/app.dart';
+import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/session/session_controller.dart';
 import 'package:paypadi/core/api/exceptions/app_exception.dart';
+import 'package:paypadi/core/env.dart';
+import 'package:paypadi/core/providers.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_config.dart';
 import 'package:paypadi/core/services/monitoring/monitoring_service.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/helpers.dart';
-import 'package:paypadi/src/paypadi.dart';
-import 'package:paypadi/src/shared/controllers/session/session_controller.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger_observer.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger_settings.dart';
@@ -76,6 +77,7 @@ Future<void> initializeApp({
 
 Future<void> _runApp({required bool isMonitored}) async {
   final providerContainer = ProviderContainer(
+    overrides: appProviderOverrides,
     observers: [
       if (kDebugMode)
         TalkerRiverpodObserver(
