@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -55,6 +56,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late _PendingSessionRepository sessions;
+  var now = DateTime.utc(2026, 10, 11, 12);
   late RecordingRouter router;
   late ProviderContainer container;
 
@@ -78,6 +80,7 @@ void main() {
           (ref) async => _FakePrefs(),
         ),
         appRouterProvider.overrideWith((ref) => RecordingRouter(ref: ref)),
+        clockProvider.overrideWithValue(() => now),
       ],
     );
     addTearDown(container.dispose);
@@ -174,6 +177,52 @@ void main() {
       expect(await renewal, isFalse);
       await pumpEventQueue();
       expect(router.replacedStacks.single.single, isA<OnboardingRoute>());
+    });
+  });
+  group('locking again after time away', () {
+    Future<void> leaveFor(Duration away) async {
+      await container.read(sessionControllerProvider.future);
+      session().didChangeAppLifecycleState(AppLifecycleState.hidden);
+      session().didChangeAppLifecycleState(AppLifecycleState.paused);
+      now = now.add(away);
+      session().didChangeAppLifecycleState(AppLifecycleState.resumed);
+    }
+
+    setUp(() => container.read(sessionUnlockedProvider.notifier).unlock());
+
+    test('sends the user back to unlock after five minutes in the '
+        'background', () async {
+      await leaveFor(SessionController.relockAfter);
+
+      expect(container.read(sessionUnlockedProvider), isFalse);
+      expect(router.replacedStacks.single.single, isA<LoginRoute>());
+    });
+
+    test('leaves a quick trip to another app alone', () async {
+      await leaveFor(const Duration(minutes: 4, seconds: 59));
+
+      expect(container.read(sessionUnlockedProvider), isTrue);
+      expect(router.replacedStacks, isEmpty);
+    });
+
+    test('counts from when the app first left the foreground', () async {
+      await container.read(sessionControllerProvider.future);
+      session().didChangeAppLifecycleState(AppLifecycleState.hidden);
+      now = now.add(const Duration(minutes: 4));
+      session().didChangeAppLifecycleState(AppLifecycleState.paused);
+      now = now.add(const Duration(minutes: 2));
+      session().didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+      expect(container.read(sessionUnlockedProvider), isFalse);
+    });
+
+    test('does nothing for a user who has not unlocked, e.g. on the sign-in '
+        'screens', () async {
+      container.read(sessionUnlockedProvider.notifier).lock();
+
+      await leaveFor(const Duration(hours: 1));
+
+      expect(router.replacedStacks, isEmpty);
     });
   });
 }

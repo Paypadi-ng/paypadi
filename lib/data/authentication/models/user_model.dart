@@ -5,6 +5,8 @@ part 'user_model.g.dart';
 
 @freezed
 sealed class UserModel with _$UserModel {
+  const UserModel._();
+
   const factory UserModel({
     required String id,
     required String role,
@@ -25,4 +27,10 @@ sealed class UserModel with _$UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
+
+  /// A driver who isn't approved yet and hasn't given their vehicle details:
+  /// they have to finish those before using the app. Drivers whose details
+  /// are in and awaiting approval aren't held back.
+  bool get needsVehicleInfo =>
+      isDriver == true && isApproved != true && licensePlate == null;
 }

@@ -14,6 +14,7 @@ import 'package:paypadi/features/transfer/controllers/transaction_controller.dar
 import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
+import 'package:paypadi/shared/widgets/app_network_image.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/shared/widgets/app_textformfield.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -178,19 +179,14 @@ class _BankAccountInformation extends StatelessWidget {
       child: Row(
         spacing: Values.v20,
         children: [
-          if (recipient?.profilePicUrl != null)
+          if (recipient?.profilePicUrl case final photoUrl?)
             Skeletonizer(
               enabled: isLoading,
-              child: Container(
-                width: Values.v64,
-                height: Values.v64,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Values.v24),
-                  image: DecorationImage(
-                    image: NetworkImage(recipient!.profilePicUrl!),
-                    fit: BoxFit.fill,
-                  ),
-                ),
+              child: AppNetworkImage(
+                url: photoUrl,
+                size: Values.v64,
+                borderRadius: BorderRadius.circular(Values.v24),
+                fit: BoxFit.fill,
               ),
             )
           else
