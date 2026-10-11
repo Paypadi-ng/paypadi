@@ -41,7 +41,7 @@ runs:
         cache: ${{ inputs.cache == 'true' && 'gradle' || '' }}
 
     # Flutter is installed straight from the official repo at the exact
-    # version pinned in pubspec.yaml (environment.flutter). This avoids
+    # version in .fvmrc (pubspec.yaml only sets a minimum). This avoids
     # third-party setup actions, which may call unpinned actions internally
     # and are rejected by the repo's SHA-pinning policy.
     - name: Resolve Flutter version
@@ -49,9 +49,9 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        VERSION=$(awk '/^environment:/{e=1; next} /^[^ #]/{e=0} e && /^  flutter:/{print $2}' pubspec.yaml | tr -d "\"'")
+        VERSION=$(jq -r '.flutter // empty' .fvmrc 2>/dev/null)
         if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "::error::pubspec.yaml must pin environment.flutter to an exact version (got '$VERSION')"
+          echo "::error::.fvmrc must set \"flutter\" to an exact version (got '$VERSION')"
           exit 1
         fi
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
