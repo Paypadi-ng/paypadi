@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart' show Values;
-import 'package:paypadi/gen/colors.gen.dart' show AppColors;
 
 class DottedDivider extends StatelessWidget {
   const DottedDivider({super.key, this.topPadding});
@@ -17,7 +17,7 @@ class DottedDivider extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         child: CustomPaint(
-          painter: _DottedLinePainter(),
+          painter: _DottedLinePainter(color: context.palette.dividerColor),
           size: const Size(double.infinity, 1),
         ),
       ),
@@ -26,10 +26,13 @@ class DottedDivider extends StatelessWidget {
 }
 
 class _DottedLinePainter extends CustomPainter {
+  _DottedLinePainter({required this.color});
+  final Color color;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.dividerColor
+      ..color = color
       ..strokeWidth = 1;
 
     const double dashWidth = 6;
@@ -47,5 +50,6 @@ class _DottedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_DottedLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

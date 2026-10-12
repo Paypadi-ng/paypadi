@@ -6,12 +6,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/formatters.dart';
 import 'package:paypadi/gen/assets.gen.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
 import 'package:paypadi/shared/widgets/app_card.dart';
@@ -53,7 +53,7 @@ class _RiderWallet extends HookConsumerWidget {
                     'Available Balance',
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w400,
-                      color: AppColors.walletCardTextColor,
+                      color: context.palette.walletCardTextColor,
                     ),
                   ),
                   InkWell(
@@ -64,7 +64,7 @@ class _RiderWallet extends HookConsumerWidget {
                         hideBalance.value
                             ? CupertinoIcons.eye_slash
                             : CupertinoIcons.eye,
-                        color: AppColors.walletCardIconColor,
+                        color: context.palette.walletCardIconColor,
                       ),
                     ),
                   ),
@@ -123,7 +123,7 @@ class _DriverWallet extends HookConsumerWidget {
                 'Available Balance',
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w400,
-                  color: AppColors.walletCardTextColor,
+                  color: context.palette.walletCardTextColor,
                 ),
               ),
               InkWell(
@@ -134,7 +134,7 @@ class _DriverWallet extends HookConsumerWidget {
                     hideBalance.value
                         ? CupertinoIcons.eye_slash
                         : CupertinoIcons.eye,
-                    color: AppColors.walletCardIconColor,
+                    color: context.palette.walletCardIconColor,
                   ),
                 ),
               ),
@@ -155,10 +155,10 @@ class _DriverWallet extends HookConsumerWidget {
               Expanded(
                 child: FilledButton.icon(
                   label: const Text('Add Money'),
-                  icon: const Icon(Icons.add, color: AppColors.white),
+                  icon: Icon(Icons.add, color: context.palette.onPrimary),
                   style: FilledButton.styleFrom(
                     fixedSize: kButtonSmallSize,
-                    foregroundColor: AppColors.white,
+                    foregroundColor: context.palette.onPrimary,
                     backgroundColor: ref.watch(appPrimaryColorProvider),
                     textStyle: context.textTheme.bodyMedium?.copyWith(
                       letterSpacing: -0.08,

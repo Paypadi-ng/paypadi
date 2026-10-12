@@ -10,6 +10,7 @@ import 'package:paypadi/core/providers.dart' show localCacheProvider;
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/gen/assets.gen.dart';
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
@@ -28,8 +29,8 @@ class BiometricAuthenticationScreen extends ConsumerWidget {
             width: Values.v84,
             height: Values.v84,
             child: Platform.isIOS
-                ? AppAssets.icons.icFaceId.svg()
-                : AppAssets.icons.icFingerprint.svg(),
+                ? AppAssets.icons.icFaceId.themed(context)
+                : AppAssets.icons.icFingerprint.themed(context),
           ),
           Values.v24.verticalSpace,
           Text(

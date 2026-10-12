@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/formatters.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 
 class AmountDisplay extends HookWidget {
   const AmountDisplay({required this.controller, super.key});
@@ -21,8 +21,8 @@ class AmountDisplay extends HookWidget {
         Container(
           padding: const EdgeInsets.symmetric(vertical: Values.v12),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border.all(color: AppColors.amountDisplayBorderColor),
+            color: context.palette.surface,
+            border: Border.all(color: context.palette.amountDisplayBorderColor),
             borderRadius: BorderRadius.circular(Values.v8.r),
           ),
           child: Center(
@@ -42,9 +42,9 @@ class AmountDisplay extends HookWidget {
                   margin: const EdgeInsets.only(right: Values.v10),
                   padding: const EdgeInsets.all(Values.v10),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: context.palette.surface,
                     border: Border.all(
-                      color: AppColors.amountDisplayBorderColor,
+                      color: context.palette.amountDisplayBorderColor,
                     ),
                     borderRadius: BorderRadius.circular(Values.v12.r),
                   ),

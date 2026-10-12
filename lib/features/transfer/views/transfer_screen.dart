@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
@@ -15,7 +16,6 @@ import 'package:paypadi/data/transaction/models/beneficiary_model.dart';
 import 'package:paypadi/data/transaction/providers.dart';
 import 'package:paypadi/features/transfer/controllers/beneficiaries_controller.dart';
 import 'package:paypadi/features/transfer/widgets/transfer_widget.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/placeholder_data.dart';
@@ -174,17 +174,17 @@ class _BeneficiaryTile extends ConsumerWidget {
       onDismissed: (direction) => deleteBeneficiary(ref),
       background: Container(
         padding: const EdgeInsets.symmetric(horizontal: Values.v8),
-        color: Colors.redAccent,
+        color: context.palette.failure,
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.delete_outline,
-              color: AppColors.white,
+              color: context.palette.onPrimary,
             ),
             Text(
               'Delete',
               style: context.textTheme.bodyMedium?.copyWith(
-                color: AppColors.white,
+                color: context.palette.onPrimary,
               ),
             ),
           ],

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/gen/colors.gen.dart' show AppColors;
 import 'package:paypadi/shared/controllers/app_color_controller.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
@@ -47,9 +47,9 @@ class ChangeThemeScreen extends HookConsumerWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.scaffoldBackground,
+              color: context.palette.scaffoldBackground,
               borderRadius: BorderRadius.circular(Values.v12),
-              border: Border.all(color: AppColors.themeBorderColor),
+              border: Border.all(color: context.palette.themeBorderColor),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/app_loading_controller.dart';
 
 class AppLoadingOverlay extends ConsumerWidget {
@@ -39,7 +39,7 @@ class _LoadingBarrier extends ConsumerWidget {
 
     return AbsorbPointer(
       child: ColoredBox(
-        color: AppColors.black.withValues(alpha: .3),
+        color: context.palette.boxShadow.withValues(alpha: .3),
         child: Center(
           child: LoadingAnimationWidget.threeArchedCircle(
             color: primaryColor,

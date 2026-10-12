@@ -6,12 +6,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/enums.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
 import 'package:paypadi/gen/assets.gen.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
@@ -78,13 +78,13 @@ class _RoleWidget extends StatelessWidget {
         ),
         margin: const EdgeInsets.only(bottom: Values.v16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.palette.surface,
           borderRadius: BorderRadius.circular(Values.v12.r),
           boxShadow: [
             BoxShadow(
               blurRadius: Values.v4,
               offset: const Offset(Values.zero, Values.v1),
-              color: AppColors.black.withValues(alpha: .25),
+              color: context.palette.boxShadow.withValues(alpha: .25),
             ),
           ],
         ),

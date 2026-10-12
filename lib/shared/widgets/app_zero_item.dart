@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 
 class AppZeroItem extends StatelessWidget {
   const AppZeroItem({
@@ -28,12 +28,12 @@ class AppZeroItem extends StatelessWidget {
             Icon(
               icon,
               size: Values.v32,
-              color: AppColors.grey600,
+              color: context.palette.grey600,
             ),
             Text(
               message,
               style: context.textTheme.titleLarge?.copyWith(
-                color: AppColors.grey600,
+                color: context.palette.grey600,
               ),
             ),
           ],

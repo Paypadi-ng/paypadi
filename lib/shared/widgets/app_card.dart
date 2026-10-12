@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -22,13 +22,13 @@ class AppCard extends StatelessWidget {
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: cardColor ?? AppColors.white,
+        color: cardColor ?? context.palette.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             blurRadius: 2,
             offset: const Offset(0, 0.05),
-            color: AppColors.black.withValues(alpha: .25),
+            color: context.palette.boxShadow.withValues(alpha: .25),
           ),
         ],
       ),

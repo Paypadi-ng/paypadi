@@ -5,10 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/features/onboarding/controllers/onboarding_controller.dart';
-import 'package:paypadi/gen/colors.gen.dart' show AppColors;
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
@@ -73,7 +73,7 @@ class OnboardingScreen extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(Values.v24.r),
                   color: currentPage == index
                       ? primaryColor
-                      : AppColors.unselectedIndicator,
+                      : context.palette.unselectedIndicator,
                 ),
               ),
             ),

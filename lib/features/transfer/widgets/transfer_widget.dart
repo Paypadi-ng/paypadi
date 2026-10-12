@@ -3,9 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:paypadi/shared/widgets/app_textformfield.dart';
 import 'package:paypadi/shared/widgets/banks_list.dart';
@@ -91,7 +91,7 @@ class _SelectTransferType extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.disabled,
+        color: context.palette.disabled,
         borderRadius: BorderRadius.circular(Values.v36),
       ),
       child: Row(
@@ -113,8 +113,8 @@ class _SelectTransferType extends ConsumerWidget {
                 'To Paypadi',
                 style: context.textTheme.bodyLarge?.copyWith(
                   color: !isWithdrawing.value
-                      ? AppColors.white
-                      : AppColors.black,
+                      ? context.palette.onPrimary
+                      : context.palette.onSurface,
                 ),
               ),
             ),
@@ -135,8 +135,8 @@ class _SelectTransferType extends ConsumerWidget {
                 'To Other Banks',
                 style: context.textTheme.bodyLarge?.copyWith(
                   color: isWithdrawing.value
-                      ? AppColors.white
-                      : AppColors.black,
+                      ? context.palette.onPrimary
+                      : context.palette.onSurface,
                 ),
               ),
             ),

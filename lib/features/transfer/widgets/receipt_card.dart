@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paypadi/gen/colors.gen.dart';
+import 'package:paypadi/app/theme.dart';
 
 class ReceiptCard extends StatelessWidget {
   const ReceiptCard({required this.child, super.key});
@@ -10,7 +10,7 @@ class ReceiptCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(24),
       ),
       child: child,

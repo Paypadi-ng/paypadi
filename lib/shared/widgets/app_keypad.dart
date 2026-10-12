@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart' show appPrimaryColorProvider;
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/gen/assets.gen.dart';
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 
 class AppKeypad extends ConsumerWidget {
   const AppKeypad({
@@ -78,7 +80,10 @@ class AppKeypad extends ConsumerWidget {
       splashColor: ref.watch(appPrimaryColorProvider).withValues(alpha: .1),
       child: Center(
         child: switch (key) {
-          'x' => AppAssets.icons.icBackspace.svg(),
+          'x' => AppAssets.icons.icBackspace.themed(
+            context,
+            color: context.palette.grey500,
+          ),
           '.' =>
             showBiometric
                 ? const Icon(Icons.fingerprint, size: Values.v36)

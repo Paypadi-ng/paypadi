@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/features/settings/widgets/setting_tile.dart';
 import 'package:paypadi/gen/assets.gen.dart';
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 
 @RoutePage()
@@ -21,7 +22,7 @@ class NotificationsScreen extends HookConsumerWidget {
         children: [
           SettingTile.switchTile(
             name: 'Push Notification',
-            icon: AppAssets.icons.icPushNotification.svg(),
+            icon: AppAssets.icons.icPushNotification.themed(context),
             switchValue: enablePush.value,
             onChanged: (value) {
               enablePush.value = value;
@@ -29,7 +30,7 @@ class NotificationsScreen extends HookConsumerWidget {
           ),
           SettingTile.switchTile(
             name: 'Email Notification',
-            icon: AppAssets.icons.icEmailNotification.svg(),
+            icon: AppAssets.icons.icEmailNotification.themed(context),
             switchValue: enableEmail.value,
             onChanged: (value) {
               enableEmail.value = value;

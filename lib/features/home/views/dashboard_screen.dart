@@ -16,6 +16,7 @@ import 'package:paypadi/gen/assets.gen.dart';
 import 'package:paypadi/shared/controllers/transfer_draft.dart';
 import 'package:paypadi/shared/controllers/user_profile_controller.dart';
 import 'package:paypadi/shared/controllers/wallet_controller.dart';
+import 'package:paypadi/shared/extensions/themed_svg.dart';
 import 'package:paypadi/shared/widgets/app_keypad.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/shared/widgets/custom_appbar.dart';
@@ -73,7 +74,7 @@ class DashboardScreen extends HookConsumerWidget {
               GestureDetector(
                 onTap: () =>
                     ref.read(appRouterProvider).push(const QrCodeRoute()),
-                child: AppAssets.icons.icQrCode.svg(),
+                child: AppAssets.icons.icQrCode.themed(context),
               ),
             ],
           ),

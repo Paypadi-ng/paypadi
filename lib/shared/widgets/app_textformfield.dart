@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerWidget, WidgetRef;
 import 'package:paypadi/app/providers.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart';
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/gen/assets.gen.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/gen/fonts.gen.dart';
 
 class AppTextformfield extends StatelessWidget {
@@ -89,7 +89,7 @@ class PhoneTextField extends ConsumerWidget {
                 vertical: Values.v14,
               ),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.unfocusedTextField),
+                border: Border.all(color: context.palette.unfocusedTextField),
                 borderRadius: BorderRadius.circular(Values.v18),
               ),
               child: Row(
@@ -99,7 +99,7 @@ class PhoneTextField extends ConsumerWidget {
                   Text(
                     '+234',
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.hintText,
+                      color: context.palette.hintText,
                     ),
                   ),
                 ],
@@ -122,16 +122,16 @@ class PhoneTextField extends ConsumerWidget {
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(Values.v18),
-                    borderSide: const BorderSide(color: AppColors.failure),
+                    borderSide: BorderSide(color: context.palette.failure),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(Values.v18),
-                    borderSide: const BorderSide(color: AppColors.failure),
+                    borderSide: BorderSide(color: context.palette.failure),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(Values.v18),
-                    borderSide: const BorderSide(
-                      color: AppColors.unfocusedTextField,
+                    borderSide: BorderSide(
+                      color: context.palette.unfocusedTextField,
                     ),
                   ),
                 ),

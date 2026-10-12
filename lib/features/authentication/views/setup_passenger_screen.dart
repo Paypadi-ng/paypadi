@@ -7,11 +7,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paypadi/app/providers.dart';
 import 'package:paypadi/app/router/router.gr.dart';
+import 'package:paypadi/app/theme.dart';
 import 'package:paypadi/core/utils/constants.dart' show Values;
 import 'package:paypadi/core/utils/extensions.dart';
 import 'package:paypadi/core/utils/validators.dart';
 import 'package:paypadi/features/authentication/controllers/authentication_controller.dart';
-import 'package:paypadi/gen/colors.gen.dart';
 import 'package:paypadi/shared/extensions/ref_feedback.dart';
 import 'package:paypadi/shared/widgets/app_scaffold.dart';
 import 'package:paypadi/shared/widgets/app_textformfield.dart';
@@ -43,7 +43,7 @@ class SetupPassengerScreen extends HookConsumerWidget {
             Text(
               'Kindly provide the details below to help give you the best experience.',
               style: context.textTheme.bodyLarge?.copyWith(
-                color: AppColors.grey600,
+                color: context.palette.grey600,
                 fontWeight: FontWeight.w400,
               ),
             ),
