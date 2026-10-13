@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   flutter_hooks: ^0.21.2
   hooks_riverpod: ^3.0.3
   riverpod_annotation: ^4.0.0
