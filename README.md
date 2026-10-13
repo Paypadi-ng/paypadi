@@ -41,7 +41,7 @@ Follow these steps to get a working copy of the project on your local machine.
 
 Ensure the following are installed before proceeding:
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) — `3.44.2` or newer. CI builds with the exact version in `.fvmrc`; with [FVM](https://fvm.app) installed, `fvm use` picks it up. On a newer Flutter, `flutter pub get` may update SDK-pinned packages in `pubspec.lock` — don't commit those changes, because CI installs with `--enforce-lockfile`.
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) — `3.47.5` or newer. CI builds with the exact version in `.fvmrc`; with [FVM](https://fvm.app) installed, `fvm use` picks it up. On a newer Flutter, `flutter pub get` may update SDK-pinned packages in `pubspec.lock` — don't commit those changes, because CI installs with `--enforce-lockfile`.
 - [Android Studio](https://developer.android.com/studio) or [Xcode](https://developer.apple.com/xcode/) (for iOS builds)
 - A configured emulator or physical device
 
