@@ -34,7 +34,7 @@ runs:
   steps:
     - name: Setup Java
       if: inputs.setup-java == 'true'
-      uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
       with:
         distribution: temurin
         java-version: ${{ inputs.java-version }}
@@ -97,7 +97,7 @@ runs:
 
     - name: Setup Ruby + Bundler
       if: inputs.setup-ruby == 'true'
-      uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+      uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
       with:
         ruby-version: ${{ inputs.ruby-version }}
         bundler-cache: ${{ inputs.cache == 'true' }}
