@@ -1,6 +1,8 @@
 # Paypadi
 
-> A concise, engaging tagline or one-sentence description of the application.
+> A Flutter wallet app for paying drivers: send money by phone number or QR code, fund the wallet, and keep a transaction history.
+
+**Status:** archived on 2026-11-16 while the backend is unavailable. Start with [`docs/HANDOFF.md`](docs/HANDOFF.md) for what's unfinished and how to resume.
 
 ---
 
@@ -384,17 +386,24 @@ When adding new features, aim to cover the happy path, error states (`AsyncError
 
 ## Deployment
 
-*Describe the release process — how builds are produced for staging vs. production, how to trigger the CI/CD pipeline, and where builds are distributed (TestFlight, Firebase App Distribution, Google Play internal track).*
+Releases are built and shipped by GitHub Actions. You don't build store releases by hand.
+
+| Trigger | Result |
+|---|---|
+| Pull request into `dev` | Checks and an unsigned build; a signed preview to Firebase App Distribution after approval |
+| Push to `dev` | Signed dev build to Firebase App Distribution |
+| Push to `staging` | Staging build to the Play internal track and TestFlight |
+| Push to `main` | Signed prod release candidate, kept as an artifact |
+| `v*` tag on `main` | Play production (10% staged rollout) and App Store review |
+
+Signing, secrets per environment, and the setup still outstanding for iOS and Google Play are in
+[`docs/RELEASE_SETUP.md`](docs/RELEASE_SETUP.md). Project status, unfinished work and the
+decisions behind it are in [`docs/HANDOFF.md`](docs/HANDOFF.md).
+
+To build locally, pass the flavor, its entry point and its `.env` file:
 
 ```bash
-# Build a release APK
-flutter build apk --release
-
-# Build a release App Bundle (preferred for Play Store)
-flutter build appbundle --release
-
-# Build for iOS
-flutter build ipa --release
+flutter build apk --flavor dev -t lib/main_dev.dart --dart-define-from-file .env.dev
 ```
 
 If launcher icons or the splash screen have changed, regenerate them before producing a release build:
